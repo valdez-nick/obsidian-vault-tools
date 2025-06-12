@@ -1,0 +1,59 @@
+[package]
+name = "librarian-web"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance web scraping and content extraction for Obsidian Librarian"
+
+[dependencies]
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+# HTTP client and web scraping
+reqwest = { workspace = true }
+scraper = { workspace = true }
+url = { workspace = true }
+
+# Content extraction and processing
+html2text = "0.6"
+readability = "0.3"
+ammonia = "3.3"
+
+# Rate limiting and throttling
+governor = "0.6"
+leaky-bucket = "1.0"
+
+# Async utilities
+futures = "0.3"
+futures-util = "0.3"
+async-stream = "0.3"
+
+# Text processing
+regex = { workspace = true }
+unicode-normalization = "0.1"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+mime = "0.3"
+
+# Content detection
+chardet = "0.2"
+
+[dev-dependencies]
+criterion = { workspace = true }
+proptest = { workspace = true }
+mockito = "1.2"
+tokio-test = "0.4"
+
+[features]
+default = ["rate-limiting"]
+rate-limiting = []
+
+[[bench]]
+name = "web_scraping"
+harness = false

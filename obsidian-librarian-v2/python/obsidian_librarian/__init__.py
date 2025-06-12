@@ -20,11 +20,26 @@ try:
         VaultEvent as RustVaultEvent,
         WatcherConfig as RustWatcherConfig,
     )
+    RUST_BINDINGS_AVAILABLE = True
 except ImportError as e:
-    raise ImportError(
-        "Failed to import Rust core components. "
-        "Please ensure the package was built correctly with maturin."
-    ) from e
+    # For development/testing without Rust bindings
+    import warnings
+    warnings.warn(
+        "Rust core components not available. "
+        "Some functionality will be limited. "
+        "Build with maturin for full functionality.",
+        ImportWarning
+    )
+    RUST_BINDINGS_AVAILABLE = False
+    
+    # Create dummy classes for development
+    class RustVault: pass
+    class RustVaultConfig: pass
+    class RustNote: pass
+    class RustVaultStats: pass
+    class RustFileOps: pass
+    class RustVaultEvent: pass
+    class RustWatcherConfig: pass
 
 # Import Python components
 from .models import Note, NoteMetadata, Task, WikiLink
