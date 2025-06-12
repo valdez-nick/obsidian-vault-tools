@@ -1,0 +1,41 @@
+# Include important files
+include LICENSE
+include README.md
+include CHANGELOG.md
+include pyproject.toml
+include Cargo.toml
+
+# Include Rust source files
+recursive-include src *.rs
+include Cargo.lock
+
+# Include Python source
+recursive-include obsidian_librarian *.py *.pyi py.typed
+
+# Include data files
+recursive-include obsidian_librarian/data *
+
+# Include tests
+recursive-include tests *.py
+include conftest.py
+include pytest.ini
+
+# Include documentation
+recursive-include docs *.md *.rst
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.swp
+global-exclude .DS_Store
+global-exclude __pycache__
+prune .git
+prune .github
+prune target
+prune .pytest_cache
+prune .mypy_cache
+prune .coverage
+prune htmlcov
+prune dist
+prune build
+prune *.egg-info

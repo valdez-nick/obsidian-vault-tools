@@ -1,0 +1,93 @@
+# Obsidian Librarian Configuration
+# Example configuration with common settings
+
+vault:
+  path: "."
+  exclude_dirs:
+    - .obsidian
+    - .trash
+    - node_modules
+  exclude_patterns:
+    - "*.tmp"
+    - "~*"
+    - ".DS_Store"
+
+organization:
+  auto_organize: true
+  strategy: content  # Options: content, tags, date, links
+  preserve_structure: true
+  min_similarity_threshold: 0.75
+
+duplicates:
+  threshold: 0.85
+  auto_merge: false
+  check_on_startup: true
+  ignore_patterns:
+    - "Daily Notes/*"
+    - "Templates/*"
+
+research:
+  library_path: "Research Library"
+  max_concurrent_requests: 5
+  rate_limit_per_second: 10
+  cache_duration_hours: 24
+  default_sources:
+    - arxiv.org
+    - github.com
+    - scholar.google.com
+  organize_by_date: true
+  auto_summarize: true
+  max_results_default: 20
+
+templates:
+  enabled: true
+  template_dir: "Templates"
+  auto_apply: true
+  rules:
+    - pattern: "Daily Notes/*.md"
+      template: "daily"
+      auto_detect: false
+    - pattern: "Projects/*.md"
+      template: "project"
+      auto_detect: true
+      detection_keywords:
+        - "project"
+        - "timeline"
+        - "objectives"
+    - pattern: "Research Library/**/*.md"
+      template: "research"
+      auto_detect: false
+
+git:
+  auto_backup: true
+  change_threshold: 10
+  commit_message_template: "Obsidian Librarian: {action} - {timestamp}"
+  include_stats: true
+  branch: "main"
+
+ai:
+  provider: "openai"  # Options: openai, anthropic, local
+  model: "gpt-4"
+  temperature: 0.7
+  max_tokens: 2000
+  cache_embeddings: true
+  embedding_model: "text-embedding-ada-002"
+
+performance:
+  cache_size: 1000
+  index_on_startup: true
+  watch_for_changes: true
+  debounce_ms: 500
+  max_file_size_mb: 10
+
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  file: ".obsidian-librarian/librarian.log"
+  rotate_size_mb: 10
+  keep_days: 7
+
+ui:
+  theme: "auto"  # Options: light, dark, auto
+  show_progress_bars: true
+  confirm_destructive_actions: true
+  notification_level: "important"  # Options: all, important, errors
