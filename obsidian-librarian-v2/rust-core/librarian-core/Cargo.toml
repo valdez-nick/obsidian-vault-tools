@@ -1,0 +1,43 @@
+[package]
+name = "librarian-core"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance file operations and markdown parsing for Obsidian Librarian"
+
+[dependencies]
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+walkdir = { workspace = true }
+notify = { workspace = true }
+memmap2 = { workspace = true }
+regex = { workspace = true }
+pulldown-cmark = { workspace = true }
+
+# Date/time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# YAML frontmatter parsing
+serde_yaml = "0.9"
+
+# Fast hashing
+seahash = "4.1"
+blake3 = "1.5"
+hex = "0.4"
+
+[dev-dependencies]
+criterion = { workspace = true }
+proptest = { workspace = true }
+tempfile = "3.8"
+
+[[bench]]
+name = "file_operations"
+harness = false
+
+[[bench]]
+name = "markdown_parsing"
+harness = false

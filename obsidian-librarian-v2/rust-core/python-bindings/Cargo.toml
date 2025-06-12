@@ -1,0 +1,22 @@
+[package]
+name = "python-bindings"
+version = "0.1.0"
+edition = "2021"
+description = "Python bindings for Obsidian Librarian Rust core"
+
+[lib]
+name = "librarian_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+librarian-core = { path = "../librarian-core" }
+pyo3 = { workspace = true }
+pyo3-asyncio = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+pytest = "0.5"

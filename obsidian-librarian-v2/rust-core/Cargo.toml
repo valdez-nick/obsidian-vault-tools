@@ -1,0 +1,56 @@
+[workspace]
+members = [
+    "librarian-core",
+    "librarian-search", 
+    "librarian-web",
+    "python-bindings"
+]
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# File operations
+walkdir = "2.4"
+notify = "6.1"
+memmap2 = "0.9"
+
+# Text processing
+regex = "1.10"
+pulldown-cmark = "0.9"
+
+# HTTP and web scraping
+reqwest = { version = "0.11", features = ["json", "stream"] }
+scraper = "0.18"
+url = "2.4"
+
+# Vector operations
+ndarray = "0.15"
+faiss = { version = "0.11", optional = true }
+
+# Python bindings
+pyo3 = { version = "0.20", features = ["extension-module"] }
+pyo3-asyncio = { version = "0.20", features = ["tokio-runtime"] }
+
+# Testing and benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
