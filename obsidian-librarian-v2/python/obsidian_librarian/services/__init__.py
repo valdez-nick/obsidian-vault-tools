@@ -22,11 +22,18 @@ except ImportError:
 # Import directory organization services if available
 try:
     from .auto_organizer import (
+        AutoOrganizer,
         ContentClassifier,
         DirectoryRouter,
         OrganizationLearner,
         RuleEngine,
         FileWatcher,
+        ClassificationResult,
+        OrganizationRule,
+        UserFeedback,
+        ContentFeatures,
+        ClassificationConfidence,
+        OrganizationAction,
     )
     DIRECTORY_SERVICES_AVAILABLE = True
 except ImportError:
@@ -51,9 +58,16 @@ if TAG_SERVICES_AVAILABLE:
 
 if DIRECTORY_SERVICES_AVAILABLE:
     __all__.extend([
+        "AutoOrganizer",
         "ContentClassifier",
         "DirectoryRouter",
         "OrganizationLearner",
         "RuleEngine",
         "FileWatcher",
+        "ClassificationResult",
+        "OrganizationRule",
+        "UserFeedback",
+        "ContentFeatures",
+        "ClassificationConfidence",
+        "OrganizationAction",
     ])
