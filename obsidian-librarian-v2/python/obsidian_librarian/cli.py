@@ -430,6 +430,16 @@ def interactive(config: LibrarianConfig):
     console.print("  • curate - Curate content")
     console.print("  • templates - Apply templates")
     console.print("  • status - Show vault status")
+    console.print("  • tags - Comprehensive tag management")
+
+
+# Add the tag commands as a subcommand group
+try:
+    from .cli.commands.tag_commands import tag_commands
+    cli.add_command(tag_commands)
+except ImportError:
+    # If tag commands are not available, that's okay
+    pass
 
 
 if __name__ == '__main__':
