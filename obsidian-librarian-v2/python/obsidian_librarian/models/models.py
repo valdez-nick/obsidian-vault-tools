@@ -4,7 +4,7 @@ Data models for Obsidian Librarian.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
+from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -335,6 +335,157 @@ class LibrarianStats:
     # Timestamps
     started_at: datetime = field(default_factory=datetime.utcnow)
     last_activity: datetime = field(default_factory=datetime.utcnow)
+
+
+# Tag Management Models
+
+@dataclass
+class TagInfo:
+    """Information about a specific tag."""
+    name: str
+    normalized_name: str
+    usage_count: int
+    first_seen: datetime
+    last_used: datetime
+    notes: Set[str] = field(default_factory=set)
+    
+    # Hierarchy information
+    parent_tags: List[str] = field(default_factory=list)
+    child_tags: List[str] = field(default_factory=list)
+    hierarchy_level: int = 0
+    
+    # Analysis results
+    similar_tags: List[Tuple[str, float]] = field(default_factory=list)
+    semantic_clusters: List[str] = field(default_factory=list)
+    
+    @property
+    def is_hierarchical(self) -> bool:
+        """Check if tag is part of a hierarchy."""
+        return bool(self.parent_tags or self.child_tags)
+    
+    @property
+    def hierarchy_path(self) -> str:
+        """Get full hierarchy path for the tag."""
+        if not self.parent_tags:
+            return self.name
+        return f"{'/'.join(self.parent_tags)}/{self.name}"
+
+
+@dataclass
+class TagSuggestion:
+    """A suggested tag for a note."""
+    tag: str
+    confidence: float
+    reason: str
+    source: str  # "semantic", "content", "pattern", "ai"
+    context: Optional[str] = None
+
+
+@dataclass
+class TagSimilarity:
+    """Similarity between two tags."""
+    tag_a: str
+    tag_b: str
+    similarity_score: float
+    similarity_type: str  # "fuzzy", "semantic", "exact"
+    confidence: float = 1.0
+
+
+@dataclass
+class TagCluster:
+    """A cluster of related tags."""
+    cluster_id: str
+    tags: List[str]
+    cluster_type: str  # "similar", "semantic", "hierarchical"
+    confidence: float
+    representative_tag: Optional[str] = None
+    suggested_merge: bool = False
+
+
+@dataclass
+class TagHierarchy:
+    """Represents a tag hierarchy structure."""
+    root_tag: str
+    children: Dict[str, 'TagHierarchy'] = field(default_factory=dict)
+    level: int = 0
+    usage_count: int = 0
+    notes: Set[str] = field(default_factory=set)
+    
+    def add_child(self, tag: str, hierarchy: 'TagHierarchy'):
+        """Add a child hierarchy."""
+        hierarchy.level = self.level + 1
+        self.children[tag] = hierarchy
+    
+    def get_all_tags(self) -> List[str]:
+        """Get all tags in this hierarchy."""
+        tags = [self.root_tag]
+        for child in self.children.values():
+            tags.extend(child.get_all_tags())
+        return tags
+
+
+@dataclass
+class TagOperation:
+    """Represents a tag operation to be performed."""
+    operation_type: str  # "add", "remove", "rename", "merge"
+    note_id: str
+    old_tag: Optional[str] = None
+    new_tag: Optional[str] = None
+    reason: Optional[str] = None
+
+
+@dataclass
+class TagAnalysisResult:
+    """Result of comprehensive tag analysis."""
+    total_tags: int
+    unique_tags: int
+    orphaned_tags: List[str]
+    duplicate_candidates: List[TagCluster]
+    hierarchy_suggestions: List[TagHierarchy]
+    usage_statistics: Dict[str, Any]
+    quality_issues: List[str]
+    optimization_suggestions: List[str]
+    analysis_timestamp: datetime = field(default_factory=datetime.utcnow)
+
+
+@dataclass
+class TagManagerConfig:
+    """Configuration for tag management operations."""
+    # Similarity thresholds
+    fuzzy_similarity_threshold: float = 0.8
+    semantic_similarity_threshold: float = 0.7
+    exact_match_threshold: float = 0.95
+    
+    # String similarity settings
+    enable_fuzzy_matching: bool = True
+    case_insensitive: bool = True
+    normalize_special_chars: bool = True
+    
+    # Semantic analysis
+    enable_semantic_analysis: bool = True
+    embedding_model: Optional[str] = None
+    semantic_cache_ttl: int = 86400  # 24 hours
+    
+    # Hierarchy analysis
+    max_hierarchy_depth: int = 5
+    min_usage_threshold: int = 2
+    hierarchy_confidence_threshold: float = 0.6
+    
+    # Auto-tagging
+    auto_tag_confidence_threshold: float = 0.7
+    max_auto_tags_per_note: int = 10
+    enable_ai_suggestions: bool = True
+    
+    # Performance settings
+    batch_size: int = 100
+    max_concurrent_operations: int = 10
+    enable_caching: bool = True
+    
+    # Content analysis for tagging
+    min_content_length: int = 50
+    tag_extraction_methods: List[str] = field(default_factory=lambda: [
+        "frontmatter", "inline", "content_based"
+    ])
 
 
 # Type aliases for clarity
