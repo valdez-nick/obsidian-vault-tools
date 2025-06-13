@@ -1,5 +1,5 @@
 """CLI components for Obsidian Librarian."""
 
-from ..cli import cli
+from .main import app
 
-__all__ = ["cli"]
+__all__ = ["app"]

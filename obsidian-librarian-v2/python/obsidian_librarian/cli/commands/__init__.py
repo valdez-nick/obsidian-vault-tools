@@ -1,0 +1,1 @@
+"""CLI commands for Obsidian Librarian."""
