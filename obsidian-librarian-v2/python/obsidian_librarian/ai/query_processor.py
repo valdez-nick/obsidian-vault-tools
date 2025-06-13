@@ -33,6 +33,15 @@ class QueryIntent(str, Enum):
     UNKNOWN = "unknown"
 
 
+class QueryType(str, Enum):
+    """Types of queries for compatibility."""
+    TECHNICAL = "technical"
+    ACADEMIC = "academic"
+    CODE = "code"
+    GENERAL = "general"
+    NEWS = "news"
+
+
 @dataclass
 class QueryEntity:
     """Extracted entity from query."""
@@ -50,6 +59,35 @@ class QueryResult:
     search_terms: List[str]
     confidence: float
     semantic_query: Optional[str] = None
+    
+    # Compatibility fields for existing code
+    original_text: str = ""
+    keywords: List[str] = None
+    query_type: QueryType = QueryType.GENERAL
+    
+    def __post_init__(self):
+        if self.keywords is None:
+            self.keywords = self.search_terms
+        
+        # Auto-detect query type based on intent and keywords
+        if self.query_type == QueryType.GENERAL:
+            if self.intent == QueryIntent.RESEARCH:
+                tech_keywords = ['code', 'api', 'library', 'framework', 'programming']
+                academic_keywords = ['research', 'paper', 'study', 'analysis', 'algorithm']
+                
+                tech_count = sum(1 for kw in tech_keywords if any(kw in term for term in self.search_terms))
+                academic_count = sum(1 for kw in academic_keywords if any(kw in term for term in self.search_terms))
+                
+                if tech_count > academic_count:
+                    self.query_type = QueryType.TECHNICAL
+                elif academic_count > 0:
+                    self.query_type = QueryType.ACADEMIC
+                else:
+                    self.query_type = QueryType.GENERAL
+
+
+# Compatibility alias
+ProcessedQuery = QueryResult
 
 
 class QueryProcessor:

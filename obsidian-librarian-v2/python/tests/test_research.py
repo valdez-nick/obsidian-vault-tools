@@ -12,7 +12,7 @@ import aiohttp
 from obsidian_librarian.services.research import (
     ResearchService, ResearchConfig, ResearchSession, ResearchResult
 )
-from obsidian_librarian.ai.query_processor import ProcessedQuery, QueryType, QueryIntent
+from obsidian_librarian.ai.query_processor import QueryResult, QueryIntent, QueryType, ProcessedQuery
 from obsidian_librarian.models import Note
 
 

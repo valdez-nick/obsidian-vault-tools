@@ -21,7 +21,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import UUID
 
-from .ai.query_processor import ProcessedQuery, QueryType, QueryIntent
+from .ai.query_processor import QueryResult, QueryIntent, QueryType, ProcessedQuery
 from .models import ResearchResult
 
 logger = structlog.get_logger(__name__)
