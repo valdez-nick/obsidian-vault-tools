@@ -1,5 +1,8 @@
 """
-Content summarization for intelligent text processing and note creation.
+AI-powered content summarization for intelligent text processing and note creation.
+
+Provides advanced summarization using multiple AI providers with fallbacks
+and quality assessment metrics.
 """
 
 import asyncio
@@ -10,9 +13,8 @@ from enum import Enum
 import math
 
 import structlog
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+
+from .language_models import LanguageModelService, ChatRequest, ChatMessage
 
 logger = structlog.get_logger(__name__)
 
@@ -96,16 +98,19 @@ class SummaryResult:
 
 class ContentSummarizer:
     """
-    Intelligent content summarizer using extractive and abstractive techniques.
+    AI-powered content summarizer using both extractive and abstractive techniques.
     
     Provides:
     - Multi-type summarization (extractive, abstractive, structured)
+    - AI-powered abstractive summarization with fallbacks
     - Content-aware processing for different document types
     - Quality assessment and optimization
     - Configurable output formats
     """
     
-    def __init__(self):
+    def __init__(self, language_service: Optional[LanguageModelService] = None):
+        self.language_service = language_service
+        
         # Text processing patterns
         self._patterns = self._compile_patterns()
         
@@ -117,6 +122,9 @@ class ContentSummarizer:
         
         # Summary cache
         self._summary_cache: Dict[str, SummaryResult] = {}
+        
+        # Lock for thread safety
+        self._lock = asyncio.Lock()
     
     def _compile_patterns(self) -> Dict[str, re.Pattern]:
         """Compile regex patterns for text processing."""
@@ -256,12 +264,18 @@ class ContentSummarizer:
         structure = self._extract_structure(processed_text)
         
         # Generate summary based on type
-        if config.summary_type == SummaryType.EXTRACTIVE:
+        if config.summary_type == SummaryType.ABSTRACTIVE and self.language_service:
+            summary = await self._abstractive_summarize(processed_text, config, content_type)
+        elif config.summary_type == SummaryType.EXTRACTIVE:
             summary = await self._extractive_summarize(processed_text, config, structure)
         elif config.summary_type == SummaryType.BULLET_POINTS:
             summary = await self._bullet_point_summarize(processed_text, config, structure)
         elif config.summary_type == SummaryType.STRUCTURED:
             summary = await self._structured_summarize(processed_text, config, structure)
+        elif config.summary_type == SummaryType.BRIEF and self.language_service:
+            summary = await self._brief_summarize(processed_text, config, content_type)
+        elif config.summary_type == SummaryType.DETAILED and self.language_service:
+            summary = await self._detailed_summarize(processed_text, config, content_type)
         else:
             # Default to extractive
             summary = await self._extractive_summarize(processed_text, config, structure)
@@ -397,6 +411,156 @@ class ContentSummarizer:
         
         return structure
     
+    async def _abstractive_summarize(
+        self,
+        text: str,
+        config: SummaryConfig,
+        content_type: ContentType,
+    ) -> str:
+        """Generate abstractive summary using AI."""
+        try:
+            # Prepare prompt based on content type and config
+            prompt = self._build_abstractive_prompt(text, config, content_type)
+            
+            request = ChatRequest(
+                messages=[ChatMessage(role="user", content=prompt)],
+                temperature=0.3,  # Lower temperature for consistent summaries
+                max_tokens=min(config.max_length * 2, 1000),  # Allow for word expansion
+            )
+            
+            response = await self.language_service.chat_completion(request)
+            summary = response.text.strip()
+            
+            # Post-process the summary
+            summary = self._post_process_summary(summary, config)
+            
+            return summary
+            
+        except Exception as e:
+            logger.warning("AI summarization failed, falling back to extractive", error=str(e))
+            # Fallback to extractive summarization
+            structure = self._extract_structure(text)
+            return await self._extractive_summarize(text, config, structure)
+    
+    async def _brief_summarize(
+        self,
+        text: str,
+        config: SummaryConfig,
+        content_type: ContentType,
+    ) -> str:
+        """Generate a brief summary using AI."""
+        try:
+            prompt = f"""Provide a very brief 1-2 sentence summary of this content:
+
+{text[:2000]}...
+
+Summary:"""
+            
+            request = ChatRequest(
+                messages=[ChatMessage(role="user", content=prompt)],
+                temperature=0.2,
+                max_tokens=100,
+            )
+            
+            response = await self.language_service.chat_completion(request)
+            return response.text.strip()
+            
+        except Exception as e:
+            logger.warning("Brief AI summarization failed", error=str(e))
+            # Simple fallback
+            sentences = self._patterns['sentence_split'].split(text)
+            return sentences[0] if sentences else text[:200]
+    
+    async def _detailed_summarize(
+        self,
+        text: str,
+        config: SummaryConfig,
+        content_type: ContentType,
+    ) -> str:
+        """Generate a detailed summary using AI."""
+        try:
+            prompt = f"""Provide a comprehensive summary of this {content_type.value} that covers:
+1. Main topic and purpose
+2. Key points and arguments
+3. Important details and examples
+4. Conclusions or outcomes
+
+Content:
+{text[:3000]}...
+
+Detailed Summary:"""
+            
+            request = ChatRequest(
+                messages=[ChatMessage(role="user", content=prompt)],
+                temperature=0.4,
+                max_tokens=min(config.max_length * 3, 1500),
+            )
+            
+            response = await self.language_service.chat_completion(request)
+            return self._post_process_summary(response.text.strip(), config)
+            
+        except Exception as e:
+            logger.warning("Detailed AI summarization failed", error=str(e))
+            # Fallback to structured summary
+            structure = self._extract_structure(text)
+            return await self._structured_summarize(text, config, structure)
+    
+    def _build_abstractive_prompt(
+        self, 
+        text: str, 
+        config: SummaryConfig, 
+        content_type: ContentType
+    ) -> str:
+        """Build prompt for abstractive summarization."""
+        # Trim text if too long
+        max_input_length = 3000  # Leave room for prompt
+        content = text[:max_input_length]
+        if len(text) > max_input_length:
+            content += "..."
+        
+        content_instructions = {
+            ContentType.RESEARCH_PAPER: "Focus on methodology, findings, and implications.",
+            ContentType.DOCUMENTATION: "Highlight key features, usage patterns, and important details.",
+            ContentType.TUTORIAL: "Summarize the learning objectives and main steps.",
+            ContentType.NEWS: "Cover who, what, when, where, and why.",
+            ContentType.ARTICLE: "Capture the main argument and supporting points.",
+        }
+        
+        instruction = content_instructions.get(content_type, "Provide a clear, concise summary.")
+        
+        structure_note = ""
+        if config.preserve_structure:
+            structure_note = " Maintain the logical flow and structure of the original."
+        
+        prompt = f"""Summarize the following {content_type.value} in approximately {config.max_length // 5} words. {instruction}{structure_note}
+
+Content:
+{content}
+
+Summary:"""
+        
+        return prompt
+    
+    def _post_process_summary(self, summary: str, config: SummaryConfig) -> str:
+        """Post-process AI-generated summary."""
+        # Remove common AI artifacts
+        summary = re.sub(r'^(Summary:|Here\'s a summary:|This .* discusses:?)\s*', '', summary, flags=re.IGNORECASE)
+        summary = re.sub(r'^(The text|The article|This content)\s+', '', summary, flags=re.IGNORECASE)
+        
+        # Ensure proper formatting
+        if config.use_markdown:
+            # Ensure proper sentence structure
+            summary = re.sub(r'([.!?])\s*([a-z])', r'\1 \2', summary)
+        
+        # Trim to max length if needed
+        if len(summary) > config.max_length:
+            words = summary.split()
+            summary = ' '.join(words[:config.max_length//5])
+            if not summary.endswith(('.', '!', '?')):
+                summary += '...'
+        
+        return summary.strip()
+    
     async def _extractive_summarize(
         self,
         text: str,
@@ -511,24 +675,36 @@ class ContentSummarizer:
         return '\n'.join(summary_parts)
     
     def _score_sentences(self, sentences: List[str], structure: Dict[str, Any]) -> List[float]:
-        """Score sentences for importance."""
+        """Score sentences for importance using heuristic methods."""
         if not sentences:
             return []
         
         scores = []
         
-        # TF-IDF based scoring
-        vectorizer = TfidfVectorizer(stop_words='english', max_features=100)
+        # Calculate word frequencies for TF scoring
+        all_words = []
+        for sentence in sentences:
+            words = [word.lower() for word in re.findall(r'\b\w+\b', sentence) 
+                    if word.lower() not in self._stop_words and len(word) > 2]
+            all_words.extend(words)
         
-        try:
-            tfidf_matrix = vectorizer.fit_transform(sentences)
-            sentence_scores = np.array(tfidf_matrix.sum(axis=1)).flatten()
-        except:
-            # Fallback to simple scoring
-            sentence_scores = [1.0] * len(sentences)
+        word_freq = {}
+        for word in all_words:
+            word_freq[word] = word_freq.get(word, 0) + 1
+        
+        max_freq = max(word_freq.values()) if word_freq else 1
         
         for i, sentence in enumerate(sentences):
-            score = sentence_scores[i] if i < len(sentence_scores) else 0.0
+            # Base score from word frequency
+            words = [word.lower() for word in re.findall(r'\b\w+\b', sentence) 
+                    if word.lower() not in self._stop_words and len(word) > 2]
+            
+            if words:
+                tf_score = sum(word_freq.get(word, 0) for word in words) / (len(words) * max_freq)
+            else:
+                tf_score = 0.1
+            
+            score = tf_score
             
             # Position bonus (first and last sentences often important)
             if i == 0 or i == len(sentences) - 1:
@@ -538,6 +714,8 @@ class ContentSummarizer:
             word_count = len(sentence.split())
             if word_count < 5 or word_count > 40:
                 score *= 0.8
+            elif 10 <= word_count <= 25:
+                score *= 1.1  # Bonus for good length
             
             # Emphasis bonus
             if any(emp in sentence for emp in structure['emphasized_text']):
@@ -551,7 +729,17 @@ class ContentSummarizer:
             if re.search(r'\d+%|\d+\.\d+|\$\d+', sentence):
                 score *= 1.1
             
-            scores.append(score)
+            # Heading proximity bonus (sentences near headings are often important)
+            for heading in structure['headings']:
+                if heading.lower() in sentence.lower():
+                    score *= 1.2
+                    break
+            
+            # Question bonus (questions often highlight key points)
+            if sentence.strip().endswith('?'):
+                score *= 1.1
+            
+            scores.append(max(score, 0.01))  # Ensure minimum score
         
         return scores
     
@@ -678,22 +866,76 @@ class ContentSummarizer:
         else:
             return 0.9
     
-    async def get_summary_statistics(self) -> Dict[str, Any]:
-        """Get statistics about summarization performance."""
-        if not self._summary_cache:
-            return {'cache_size': 0}
+    async def summarize_batch(
+        self,
+        texts: List[str],
+        config: Optional[SummaryConfig] = None,
+        content_types: Optional[List[ContentType]] = None,
+    ) -> List[SummaryResult]:
+        """Efficiently summarize multiple texts."""
+        config = config or SummaryConfig()
         
-        cached_results = list(self._summary_cache.values())
+        if content_types and len(content_types) != len(texts):
+            content_types = None
         
-        return {
-            'cache_size': len(self._summary_cache),
-            'average_compression_ratio': sum(r.compression_ratio for r in cached_results) / len(cached_results),
-            'average_coherence': sum(r.coherence_score for r in cached_results) / len(cached_results),
-            'average_coverage': sum(r.coverage_score for r in cached_results) / len(cached_results),
-            'average_relevance': sum(r.relevance_score for r in cached_results) / len(cached_results),
-        }
+        # Process in parallel with limited concurrency
+        semaphore = asyncio.Semaphore(5)  # Limit concurrent summarizations
+        
+        async def _summarize_single(i: int, text: str) -> SummaryResult:
+            async with semaphore:
+                content_type = content_types[i] if content_types else None
+                return await self.summarize_detailed(text, config, content_type)
+        
+        tasks = [_summarize_single(i, text) for i, text in enumerate(texts)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Filter out exceptions
+        valid_results = [r for r in results if isinstance(r, SummaryResult)]
+        
+        logger.info("Batch summarization completed", 
+                   total=len(texts), 
+                   successful=len(valid_results))
+        
+        return valid_results
     
-    def clear_cache(self) -> None:
+    async def get_summary_statistics(self) -> Dict[str, Any]:
+        """Get comprehensive statistics about summarization performance."""
+        async with self._lock:
+            if not self._summary_cache:
+                return {
+                    'cache_size': 0,
+                    'has_language_service': self.language_service is not None,
+                    'supported_types': [t.value for t in SummaryType],
+                }
+            
+            cached_results = list(self._summary_cache.values())
+            
+            # Summary type distribution
+            type_distribution = {}
+            for result in cached_results:
+                summary_type = result.summary_type.value
+                type_distribution[summary_type] = type_distribution.get(summary_type, 0) + 1
+            
+            # Quality metrics
+            quality_stats = {
+                'average_compression_ratio': sum(r.compression_ratio for r in cached_results) / len(cached_results),
+                'average_coherence': sum(r.coherence_score for r in cached_results) / len(cached_results),
+                'average_coverage': sum(r.coverage_score for r in cached_results) / len(cached_results),
+                'average_relevance': sum(r.relevance_score for r in cached_results) / len(cached_results),
+                'average_reading_time': sum(r.reading_time_minutes for r in cached_results) / len(cached_results),
+            }
+            
+            return {
+                'cache_size': len(self._summary_cache),
+                'has_language_service': self.language_service is not None,
+                'supported_types': [t.value for t in SummaryType],
+                'type_distribution': type_distribution,
+                'quality_metrics': quality_stats,
+                'total_summaries_generated': len(cached_results),
+            }
+    
+    async def clear_cache(self) -> None:
         """Clear the summary cache."""
-        self._summary_cache.clear()
-        logger.info("Summary cache cleared")
+        async with self._lock:
+            self._summary_cache.clear()
+            logger.info("Summary cache cleared")
