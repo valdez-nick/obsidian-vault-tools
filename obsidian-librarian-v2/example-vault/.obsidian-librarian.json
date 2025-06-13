@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0",
+  "initialized_at": "2025-06-12T21:18:44.683974",
+  "vault_name": "example-vault",
+  "settings": {
+    "auto_backup": true,
+    "backup_frequency": "daily",
+    "enable_ai_features": true,
+    "default_template_dir": "Templates",
+    "research_output_dir": "Research Library"
+  }
+}

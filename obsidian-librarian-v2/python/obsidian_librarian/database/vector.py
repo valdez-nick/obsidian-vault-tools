@@ -13,9 +13,18 @@ from uuid import uuid4
 
 import numpy as np
 import structlog
-from qdrant_client import QdrantClient
-from qdrant_client.http import models
-from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
+
+try:
+    from qdrant_client import QdrantClient
+    from qdrant_client.http import models
+    from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
+    QDRANT_AVAILABLE = True
+except ImportError:
+    QDRANT_AVAILABLE = False
+    QdrantClient = None
+    models = None
+    ResponseHandlingException = Exception
+    UnexpectedResponse = Exception
 
 from .base import VectorDatabase, DatabaseConfig, ConnectionError, QueryError
 
@@ -26,6 +35,11 @@ class VectorDB(VectorDatabase):
     """Qdrant-based vector database for semantic search and similarity."""
     
     def __init__(self, config: DatabaseConfig):
+        if not QDRANT_AVAILABLE:
+            raise ImportError(
+                "Qdrant is required for vector database. Install with: pip install qdrant-client>=1.6.0"
+            )
+        
         self.config = config
         self.client: Optional[QdrantClient] = None
         self.collection_name = config.vector_collection

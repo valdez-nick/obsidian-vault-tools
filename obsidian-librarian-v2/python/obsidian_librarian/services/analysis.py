@@ -13,8 +13,16 @@ from collections import defaultdict
 import re
 
 import structlog
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    TfidfVectorizer = None
+    cosine_similarity = None
+
 import numpy as np
 
 from ..models import Note, AnalysisResult, DuplicateCluster, ContentSimilarity
@@ -196,6 +204,10 @@ class AnalysisService:
         Returns:
             List of duplicate clusters
         """
+        if not SKLEARN_AVAILABLE:
+            logger.warning("sklearn not available, duplicate detection disabled")
+            return []
+            
         threshold = threshold or self.config.near_duplicate_threshold
         note_ids = note_ids or await self.vault.get_all_note_ids()
         
@@ -263,6 +275,10 @@ class AnalysisService:
         Returns:
             List of similar notes with similarity scores
         """
+        if not SKLEARN_AVAILABLE:
+            logger.warning("sklearn not available, similarity search disabled")
+            return []
+            
         threshold = threshold or self.config.similar_content_threshold
         
         # Get all note IDs
@@ -594,6 +610,10 @@ class AnalysisService:
     
     async def _build_feature_matrix(self, note_ids: List[str]) -> None:
         """Build TF-IDF feature matrix for similarity calculations."""
+        if not SKLEARN_AVAILABLE:
+            logger.warning("sklearn not available, similarity analysis will be limited")
+            return
+            
         if self.vectorizer is not None and set(note_ids) == set(self._note_ids):
             return  # Already built for these notes
         

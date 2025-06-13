@@ -12,7 +12,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import duckdb
+try:
+    import duckdb
+    DUCKDB_AVAILABLE = True
+except ImportError:
+    DUCKDB_AVAILABLE = False
+    duckdb = None
+
 import structlog
 
 from .base import AnalyticsDatabase, DatabaseConfig, ConnectionError, QueryError
@@ -24,6 +30,11 @@ class AnalyticsDB(AnalyticsDatabase):
     """DuckDB-based analytics database for vault metrics."""
     
     def __init__(self, config: DatabaseConfig):
+        if not DUCKDB_AVAILABLE:
+            raise ImportError(
+                "DuckDB is required for analytics database. Install with: pip install duckdb>=0.9.0"
+            )
+        
         self.config = config
         self.db_path = config.analytics_path
         self.connection: Optional[duckdb.DuckDBPyConnection] = None

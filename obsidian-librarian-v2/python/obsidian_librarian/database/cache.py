@@ -13,7 +13,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import aioredis
+try:
+    import aioredis
+    AIOREDIS_AVAILABLE = True
+except ImportError:
+    AIOREDIS_AVAILABLE = False
+    aioredis = None
+
 import structlog
 
 from .base import CacheDatabase, DatabaseConfig, ConnectionError, QueryError
@@ -46,6 +52,10 @@ class CacheDB(CacheDatabase):
     
     async def _init_redis(self) -> bool:
         """Initialize Redis connection."""
+        if not AIOREDIS_AVAILABLE:
+            logger.warning("aioredis not available, falling back to SQLite")
+            return False
+            
         try:
             self.redis = aioredis.from_url(
                 self.config.cache_url,

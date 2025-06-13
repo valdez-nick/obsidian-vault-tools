@@ -154,26 +154,38 @@ class DatabaseManager:
         logger.info("Initializing database manager")
         
         try:
-            # Initialize analytics database
-            from .analytics import AnalyticsDB
-            self.analytics = AnalyticsDB(self.config)
-            await self.analytics.initialize()
-            logger.info("Analytics database initialized")
+            # Initialize analytics database (optional - graceful degradation)
+            try:
+                from .analytics import AnalyticsDB
+                self.analytics = AnalyticsDB(self.config)
+                await self.analytics.initialize()
+                logger.info("Analytics database initialized")
+            except ImportError as e:
+                logger.warning("Analytics database not available", error=str(e))
+                self.analytics = None
             
-            # Initialize vector database
-            from .vector import VectorDB
-            self.vector = VectorDB(self.config)
-            await self.vector.initialize()
-            logger.info("Vector database initialized")
+            # Initialize vector database (optional - graceful degradation)
+            try:
+                from .vector import VectorDB
+                self.vector = VectorDB(self.config)
+                await self.vector.initialize()
+                logger.info("Vector database initialized")
+            except ImportError as e:
+                logger.warning("Vector database not available", error=str(e))
+                self.vector = None
             
-            # Initialize cache database
-            from .cache import CacheDB
-            self.cache = CacheDB(self.config)
-            await self.cache.initialize()
-            logger.info("Cache database initialized")
+            # Initialize cache database (optional - graceful degradation)  
+            try:
+                from .cache import CacheDB
+                self.cache = CacheDB(self.config)
+                await self.cache.initialize()
+                logger.info("Cache database initialized")
+            except ImportError as e:
+                logger.warning("Cache database not available", error=str(e))
+                self.cache = None
             
             self._initialized = True
-            logger.info("All databases initialized successfully")
+            logger.info("Database manager initialized successfully")
             
         except Exception as e:
             logger.error("Failed to initialize databases", error=str(e))

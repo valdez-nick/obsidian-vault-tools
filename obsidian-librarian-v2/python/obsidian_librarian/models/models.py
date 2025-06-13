@@ -180,6 +180,15 @@ class VaultConfig:
     enable_auto_backup: bool = True
     enable_link_resolution: bool = True
     
+    # Git settings
+    enable_git_integration: bool = True
+    git_auto_backup_threshold: int = 10
+    git_auto_backup_interval: int = 3600
+    git_backup_branch_prefix: str = "backup"
+    git_experiment_branch_prefix: str = "experiment"
+    git_commit_template: str = "Obsidian Librarian: {action} - {timestamp}"
+    git_branch: str = "main"
+    
     # Parsing
     parse_frontmatter: bool = True
     parse_tasks: bool = True

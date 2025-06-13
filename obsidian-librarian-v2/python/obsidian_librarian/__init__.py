@@ -43,7 +43,7 @@ except ImportError as e:
 
 # Import Python components
 from .models import Note, NoteMetadata, Task, WikiLink
-from .services import ResearchService, AnalysisService, TemplateService
+from .services import ResearchService, AnalysisService, TemplateService, GitService
 from .vault import Vault
 
 __all__ = [
@@ -63,6 +63,7 @@ __all__ = [
     "ResearchService",
     "AnalysisService", 
     "TemplateService",
+    "GitService",
     
     # Rust bindings (prefixed for clarity)
     "RustVault",

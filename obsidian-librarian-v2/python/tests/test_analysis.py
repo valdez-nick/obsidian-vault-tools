@@ -3,7 +3,7 @@ Unit tests for analysis service.
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
 
 import numpy as np
@@ -200,7 +200,7 @@ async def test_analyze_note(mock_vault, analysis_config, sample_notes):
     mock_vault.get_note.return_value = note
     
     # Mock similar notes
-    with pytest.mock.patch.object(service, 'find_similar_notes', new_callable=AsyncMock) as mock_similar:
+    with patch.object(service, 'find_similar_notes', new_callable=AsyncMock) as mock_similar:
         mock_similar.return_value = [
             ContentSimilarity(
                 note_a="note1",
@@ -232,7 +232,7 @@ async def test_find_duplicates(mock_vault, analysis_config, sample_notes):
     mock_vault.get_note.side_effect = get_note_side_effect
     
     # Mock feature matrix building
-    with pytest.mock.patch.object(service, '_build_feature_matrix', new_callable=AsyncMock):
+    with patch.object(service, '_build_feature_matrix', new_callable=AsyncMock):
         # Create mock similarity matrix showing notes 1 and 2 are similar
         service._note_ids = ["note1", "note2", "note3"]
         service._feature_matrix = np.array([
@@ -265,7 +265,7 @@ async def test_batch_analyze(mock_vault, analysis_config, sample_notes):
     mock_vault.get_note.side_effect = get_note_side_effect
     
     # Mock similar notes to avoid complex calculations
-    with pytest.mock.patch.object(service, 'find_similar_notes', new_callable=AsyncMock) as mock_similar:
+    with patch.object(service, 'find_similar_notes', new_callable=AsyncMock) as mock_similar:
         mock_similar.return_value = []
         
         results = []

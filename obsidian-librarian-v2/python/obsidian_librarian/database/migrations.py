@@ -123,7 +123,8 @@ class MigrationManager:
     async def create_migration_table(self) -> None:
         """Create the migrations tracking table."""
         if not self.db_manager.analytics:
-            raise MigrationError("Analytics database not available")
+            logger.warning("Analytics database not available, skipping migration table creation")
+            return
         
         await self.db_manager.analytics._execute_query("""
             CREATE TABLE IF NOT EXISTS migrations (
@@ -136,7 +137,8 @@ class MigrationManager:
     async def record_migration(self, migration: Migration) -> None:
         """Record a completed migration."""
         if not self.db_manager.analytics:
-            raise MigrationError("Analytics database not available")
+            logger.warning("Analytics database not available, skipping migration recording")
+            return
         
         await self.db_manager.analytics._execute_query("""
             INSERT OR REPLACE INTO migrations (version, description, applied_at)

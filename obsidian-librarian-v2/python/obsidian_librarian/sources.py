@@ -6,6 +6,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Any, AsyncGenerator
@@ -17,8 +18,7 @@ import uuid
 import structlog
 import aiohttp
 from sqlalchemy import create_engine, Column, String, DateTime, Float, Integer, Text, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.dialects.postgresql import UUID
 
 from .ai.query_processor import QueryResult, QueryIntent, QueryType, ProcessedQuery

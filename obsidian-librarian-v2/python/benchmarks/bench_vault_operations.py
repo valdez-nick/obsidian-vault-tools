@@ -285,9 +285,10 @@ This is a sample note for benchmarking purposes.
     
     async def run(self):
         """Run all benchmarks."""
-        print(f"\n{'='*60}")
+        separator = "=" * 60
+        print(f"\n{separator}")
         print(f"Vault Performance Benchmark - {self.num_notes} notes")
-        print(f"{'='*60}")
+        print(separator)
         
         await self.setup()
         
@@ -298,7 +299,8 @@ This is a sample note for benchmarking purposes.
         await self.benchmark_concurrent_operations()
         await self.benchmark_stats_operations()
         
-        print(f"\n{'='*60}")
+        separator = "=" * 60
+        print(f"\n{separator}")
         print("Benchmark complete!")
         
         # Cleanup

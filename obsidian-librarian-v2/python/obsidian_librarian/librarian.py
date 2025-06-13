@@ -133,10 +133,9 @@ class ObsidianLibrarian:
         session.vault = Vault(vault_path, vault_config)
         await session.vault.initialize()
         
-        # Initialize services with database integration
+        # Initialize services
         session.research_service = ResearchService(
             vault=session.vault,
-            database_manager=session.database_manager,
             config=ResearchConfig(
                 max_concurrent_requests=self.config.max_concurrent_requests,
                 enable_content_extraction=self.config.enable_content_extraction,
@@ -145,7 +144,6 @@ class ObsidianLibrarian:
         
         session.analysis_service = AnalysisService(
             vault=session.vault,
-            database_manager=session.database_manager,
             config=AnalysisConfig(
                 enable_quality_scoring=self.config.enable_quality_scoring,
                 batch_size=self.config.analysis_batch_size,
@@ -154,7 +152,6 @@ class ObsidianLibrarian:
         
         session.template_service = TemplateService(
             vault=session.vault,
-            database_manager=session.database_manager,
             config=TemplateConfig(
                 auto_apply=self.config.auto_apply_templates,
                 template_dirs=[vault_path / "Templates"],
@@ -583,7 +580,7 @@ class ObsidianLibrarian:
         await self.source_manager.close()
         
         # Clear caches
-        self.content_summarizer.clear_cache()
+        await self.content_summarizer.clear_cache()
         
         logger.info("Obsidian Librarian closed")
     
