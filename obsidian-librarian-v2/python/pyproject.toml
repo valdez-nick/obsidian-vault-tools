@@ -128,7 +128,7 @@ Documentation = "https://obsidian-librarian.readthedocs.io"
 "Bug Tracker" = "https://github.com/obsidian-librarian/obsidian-librarian/issues"
 
 [project.scripts]
-obsidian-librarian = "obsidian_librarian.cli.main:app"
+obsidian-librarian = "obsidian_librarian.__main__:app"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
