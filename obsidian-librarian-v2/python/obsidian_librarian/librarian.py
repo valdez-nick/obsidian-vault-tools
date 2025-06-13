@@ -19,6 +19,8 @@ from .sources import SourceManager
 from .ai.query_processor import QueryProcessor
 from .ai.content_summarizer import ContentSummarizer
 from .models import LibrarianConfig, LibrarianStats
+from .database import DatabaseManager, DatabaseConfig
+from .database.migrations import setup_databases
 
 logger = structlog.get_logger(__name__)
 
@@ -35,6 +37,7 @@ class LibrarianSession:
     research_service: Optional[ResearchService] = None
     analysis_service: Optional[AnalysisService] = None
     template_service: Optional[TemplateService] = None
+    database_manager: Optional[DatabaseManager] = None
     
     # State
     active_tasks: List[str] = field(default_factory=list)
@@ -113,6 +116,15 @@ class ObsidianLibrarian:
             vault_path=vault_path,
         )
         
+        # Initialize database layer
+        db_config = DatabaseConfig(
+            analytics_path=vault_path / ".obsidian-librarian" / "analytics.db",
+            vector_local_path=vault_path / ".obsidian-librarian" / "vector_db",
+            cache_local_path=vault_path / ".obsidian-librarian" / "cache.db",
+            cache_local_fallback=True,
+        )
+        session.database_manager = await setup_databases(db_config)
+        
         # Initialize vault
         vault_config = VaultConfig(
             enable_file_watching=self.config.enable_file_watching,
@@ -121,9 +133,10 @@ class ObsidianLibrarian:
         session.vault = Vault(vault_path, vault_config)
         await session.vault.initialize()
         
-        # Initialize services
+        # Initialize services with database integration
         session.research_service = ResearchService(
             vault=session.vault,
+            database_manager=session.database_manager,
             config=ResearchConfig(
                 max_concurrent_requests=self.config.max_concurrent_requests,
                 enable_content_extraction=self.config.enable_content_extraction,
@@ -132,6 +145,7 @@ class ObsidianLibrarian:
         
         session.analysis_service = AnalysisService(
             vault=session.vault,
+            database_manager=session.database_manager,
             config=AnalysisConfig(
                 enable_quality_scoring=self.config.enable_quality_scoring,
                 batch_size=self.config.analysis_batch_size,
@@ -140,6 +154,7 @@ class ObsidianLibrarian:
         
         session.template_service = TemplateService(
             vault=session.vault,
+            database_manager=session.database_manager,
             config=TemplateConfig(
                 auto_apply=self.config.auto_apply_templates,
                 template_dirs=[vault_path / "Templates"],
@@ -164,6 +179,10 @@ class ObsidianLibrarian:
         # Close vault
         if session.vault:
             await session.vault.close()
+        
+        # Close database manager
+        if session.database_manager:
+            await session.database_manager.close()
         
         # Remove session
         del self.sessions[session_id]
