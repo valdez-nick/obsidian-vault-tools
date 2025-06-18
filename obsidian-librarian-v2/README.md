@@ -280,29 +280,48 @@ make lint
 
 ## 🚀 Getting Started
 
-### 1. Initialize your vault
+### Option 1: Interactive Menu Interface (Recommended)
+For users who prefer a user-friendly, menu-driven experience:
+```bash
+# Enhanced vault manager with ASCII art integration
+cd /path/to/obsidian-vault-tools
+./obsidian_manager_enhanced
+```
+
+This provides:
+- 🎮 Menu navigation (no commands to memorize!)
+- 🎨 ASCII art integration
+- 📊 Visual vault analysis
+- 🏷️ Interactive tag management
+- 💾 Backup tools
+- 🚀 Automatic v2 detection and integration
+
+### Option 2: Command Line Interface
+For power users and automation:
+
+#### 1. Initialize your vault
 ```bash
 obsidian-librarian init /path/to/vault
 ```
 
-### 2. See what needs fixing
+#### 2. See what needs fixing
 ```bash
 obsidian-librarian stats --detailed
 ```
 
-### 3. Clean up tags
+#### 3. Clean up tags
 ```bash
 obsidian-librarian tags analyze
 obsidian-librarian tags cleanup --preview
 ```
 
-### 4. Organize your files
+#### 4. Organize your files
 ```bash
 obsidian-librarian organize --strategy content --dry-run
 obsidian-librarian organize --strategy content
 ```
 
-### 5. Enable auto-organization
+#### 5. Enable auto-organization
 ```bash
 obsidian-librarian config set organization.auto_organize true
 ```
