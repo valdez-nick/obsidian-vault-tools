@@ -1,77 +1,97 @@
-# Contributing to Obsidian Librarian
+# Contributing to Obsidian Librarian v2
 
-Thank you for your interest in contributing to Obsidian Librarian! We welcome contributions from the community.
+Welcome! We're excited that you want to contribute to Obsidian Librarian v2. This guide will help you get started with development and contribution workflows.
 
-## Table of Contents
-
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Making Changes](#making-changes)
-- [Testing](#testing)
-- [Submitting Changes](#submitting-changes)
-- [Style Guidelines](#style-guidelines)
-- [Community](#community)
-
-## Code of Conduct
-
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
-
-## Getting Started
-
-1. Fork the repository on GitHub
-2. Clone your fork locally
-3. Create a new branch for your feature or bugfix
-4. Make your changes
-5. Submit a pull request
-
-## Development Setup
+## 🚀 Quick Start
 
 ### Prerequisites
-
-- Python 3.8+
-- Rust 1.70+
+- Python 3.9+
+- Rust 1.70+ (optional but recommended)
 - Git
-- Make (optional but recommended)
+- An Obsidian vault for testing
 
-### Setup Steps
+### Development Setup
 
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/obsidian-librarian.git
-   cd obsidian-librarian
+   git clone https://github.com/valdez-nick/obsidian-librarian-v2
+   cd obsidian-librarian-v2
    ```
 
-2. Create a virtual environment:
+2. **Set up development environment**:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   make dev  # Installs all dependencies and sets up pre-commit hooks
    ```
 
-3. Install development dependencies:
+3. **Verify installation**:
    ```bash
-   make dev
-   # Or manually:
-   pip install maturin
-   cd python && maturin develop --release
-   pip install -e .[dev]
+   make test  # Run all tests
+   make lint  # Run linting and formatting checks
    ```
 
-4. Install pre-commit hooks:
-   ```bash
-   pre-commit install
-   ```
+### Development Commands
 
-## Making Changes
+```bash
+# Build everything (Rust + Python)
+make build
 
-### Branch Naming
+# Run all tests
+make test
 
-- Feature branches: `feature/description`
-- Bugfix branches: `fix/description`
-- Documentation: `docs/description`
-- Performance: `perf/description`
+# Development setup
+make dev
 
-### Commit Messages
+# Code formatting
+make format
+
+# Linting
+make lint
+
+# Full pipeline
+make all
+```
+
+## 🏗️ Architecture Overview
+
+### Hybrid Python-Rust Design
+- **Rust core** (`rust-core/`) handles performance-critical operations
+- **Python layer** (`python/`) provides AI/ML integration and service orchestration
+- **Graceful degradation** when Rust bindings are unavailable
+
+### Key Components
+- **CLI Layer** (`python/obsidian_librarian/cli/`) - User interface and command handling
+- **Services** (`python/obsidian_librarian/services/`) - Core business logic
+- **Models** (`python/obsidian_librarian/models/`) - Data structures and schemas
+- **Database Layer** (`python/obsidian_librarian/database/`) - Multi-database abstraction
+- **AI Pipeline** (`python/obsidian_librarian/ai/`) - LLM and embedding services
+
+## 🔧 Development Workflow
+
+### 1. Create a Feature Branch
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### 2. Development Guidelines
+
+#### Python Code Style
+- Use **Black** for formatting: `black obsidian_librarian tests`
+- Use **isort** for import sorting: `isort obsidian_librarian tests`
+- Follow **PEP 8** and use **mypy** for type checking
+- Add docstrings for all public functions and classes
+
+#### Rust Code Style
+- Use `cargo fmt` for formatting
+- Use `cargo clippy` for linting
+- Follow Rust naming conventions
+
+#### Testing Requirements
+- **Unit tests** for all new functions and classes
+- **Integration tests** for service interactions
+- **E2E tests** for complete workflows
+- Target **80%+ code coverage**
+
+### 3. Commit Messages
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
@@ -95,69 +115,152 @@ Types:
 
 Examples:
 ```
-feat(research): add support for custom research sources
-fix(vault): handle special characters in note paths
-docs(api): update vault API documentation
+feat(tags): add AI-powered tag suggestions
+fix(cli): resolve Click to Typer conversion issues
+docs(api): update service API documentation
 ```
 
-## Testing
+## 🧪 Testing Strategy
+
+### Test Categories
+- **Unit Tests** (`tests/unit/`) - Test individual components
+- **Integration Tests** (`tests/integration/`) - Test service interactions
+- **E2E Tests** (`tests/e2e/`) - Test complete workflows
 
 ### Running Tests
 
 ```bash
-# Run all tests
+# Python tests
+cd python
+python -m pytest
+
+# Rust tests
+cd rust-core
+cargo test
+
+# All tests
 make test
 
-# Run Python tests only
-cd python && pytest
+# Specific test categories
+python -m pytest tests/unit/
+python -m pytest tests/integration/
+python -m pytest tests/e2e/
 
-# Run Rust tests only
-cd rust-core && cargo test
-
-# Run specific test file
-pytest tests/test_vault.py
-
-# Run with coverage
-pytest --cov=obsidian_librarian
+# With coverage
+python -m pytest --cov=obsidian_librarian
 ```
 
 ### Writing Tests
 
-- Write tests for all new functionality
-- Maintain or improve code coverage
-- Use descriptive test names
-- Include both positive and negative test cases
-
-Example test:
+Example test structure:
 ```python
 import pytest
-from obsidian_librarian import Vault
+from obsidian_librarian.services.tag_manager import TagManagerService
 
 @pytest.mark.asyncio
-async def test_vault_initialization():
-    """Test that vault initializes correctly."""
-    vault = Vault("/path/to/vault")
-    await vault.initialize()
+async def test_tag_analysis():
+    """Test tag analysis functionality."""
+    service = TagManagerService(vault_path=test_vault_path)
+    result = await service.analyze_tags()
     
-    assert vault.path.exists()
-    stats = await vault.get_stats()
-    assert stats.total_notes >= 0
+    assert result.total_tags > 0
+    assert len(result.duplicate_clusters) >= 0
 ```
 
-## Submitting Changes
+### Test Data
+- Use `example-vault/` for test data
+- Create minimal test vaults in `tests/fixtures/`
+- Mock external dependencies (APIs, databases)
 
-### Pull Request Process
+## 📝 Adding New Features
 
-1. Update documentation for any new features
-2. Add tests for new functionality
-3. Ensure all tests pass
-4. Update CHANGELOG.md with your changes
-5. Submit a pull request with a clear description
+### 1. CLI Commands
+Add new commands in `python/obsidian_librarian/cli/`:
 
-### Pull Request Template
+```python
+import typer
+from typing import Optional
+
+app = typer.Typer()
+
+@app.command()
+def my_command(
+    vault_path: Path = typer.Argument(..., help="Path to Obsidian vault"),
+    option: bool = typer.Option(False, "--option", help="Example option")
+) -> None:
+    """Description of your command."""
+    # Implementation here
+```
+
+### 2. Services
+Create services in `python/obsidian_librarian/services/`:
+
+```python
+from typing import List, Optional
+from ..models.models import YourModel
+
+class YourService:
+    """Service for handling specific functionality."""
+    
+    async def __init__(self, vault_path: Path):
+        self.vault_path = vault_path
+    
+    async def your_method(self) -> List[YourModel]:
+        """Method description."""
+        # Implementation here
+```
+
+### 3. Models
+Add data models in `python/obsidian_librarian/models/models.py`:
+
+```python
+from dataclasses import dataclass
+from typing import Optional
+
+@dataclass
+class YourModel:
+    """Description of your model."""
+    field1: str
+    field2: Optional[int] = None
+```
+
+## 🤖 Multi-Agent Development
+
+For complex features, we use parallel development with git worktrees:
+
+### 1. Create Worktree
+```bash
+git worktree add -b feature-branch worktrees/feature-name
+cd worktrees/feature-name
+```
+
+### 2. Develop in Parallel
+Each agent/developer works in their own worktree, allowing:
+- Parallel feature development
+- Independent testing
+- Isolated dependencies
+
+### 3. Integration
+```bash
+# Switch back to main repo
+cd ../../
+git merge feature-branch
+```
+
+## 🔄 Pull Request Process
+
+### 1. Before Submitting
+- [ ] All tests pass: `make test`
+- [ ] Code is formatted: `make format`
+- [ ] No linting errors: `make lint`
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated (if applicable)
+
+### 2. PR Template
+When creating a PR, include:
 
 ```markdown
-## Description
+## Summary
 Brief description of changes
 
 ## Type of Change
@@ -167,106 +270,65 @@ Brief description of changes
 - [ ] Documentation update
 
 ## Testing
-- [ ] Tests pass locally
-- [ ] New tests added
-- [ ] Documentation updated
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing completed
 
 ## Checklist
-- [ ] Code follows style guidelines
+- [ ] Code follows project style guidelines
 - [ ] Self-review completed
-- [ ] Comments added for complex code
+- [ ] Documentation updated
+- [ ] No breaking changes (or clearly documented)
 ```
 
-## Style Guidelines
+### 3. Review Process
+- All PRs require at least one review
+- Automated tests must pass
+- Code coverage should not decrease significantly
 
-### Python Style
+## 🐛 Reporting Issues
 
-We use Black for formatting and follow PEP 8:
+### Bug Reports
+Include:
+- Python version
+- Rust version (if applicable)
+- Operating system
+- Steps to reproduce
+- Expected vs actual behavior
+- Error logs (if any)
 
-```bash
-# Format code
-black obsidian_librarian/
+### Feature Requests
+Include:
+- Use case description
+- Proposed solution
+- Alternative solutions considered
+- Additional context
 
-# Check style
-flake8 obsidian_librarian/
+## 🏷️ Release Process
 
-# Type checking
-mypy obsidian_librarian/
-```
+### Versioning
+We use [Semantic Versioning](https://semver.org/):
+- **MAJOR**: Breaking changes
+- **MINOR**: New features (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
 
-### Rust Style
+### Release Workflow
+1. Update `CHANGELOG.md`
+2. Create release PR
+3. Tag release: `git tag v0.x.y`
+4. GitHub Actions builds and publishes to PyPI
 
-We use rustfmt and clippy:
+## 🆘 Getting Help
 
-```bash
-# Format code
-cargo fmt
+- **Documentation**: Check README.md and docstrings first
+- **Issues**: Search existing issues before creating new ones
+- **Discussions**: Use GitHub Discussions for questions
+- **Code**: Review existing code for patterns and examples
 
-# Lint code
-cargo clippy -- -D warnings
-```
+## 📄 License
 
-### Documentation
+By contributing, you agree that your contributions will be licensed under the MIT License.
 
-- Use clear, concise language
-- Include code examples
-- Update docstrings for API changes
-- Keep README.md up to date
+---
 
-## Architecture Guidelines
-
-### Python Code
-
-- Use type hints everywhere
-- Prefer async/await for I/O operations
-- Keep functions focused and small
-- Use descriptive variable names
-
-### Rust Code
-
-- Minimize unsafe code
-- Document public APIs
-- Use Result<T, E> for error handling
-- Write unit tests for all modules
-
-## Performance Considerations
-
-- Profile before optimizing
-- Consider memory usage for large vaults
-- Use appropriate data structures
-- Benchmark significant changes
-
-## Community
-
-### Getting Help
-
-- GitHub Discussions: Ask questions and share ideas
-- Discord: Real-time chat with contributors
-- Issues: Report bugs or request features
-
-### Code Reviews
-
-All submissions require review before merging. We look for:
-
-- Correctness
-- Test coverage
-- Documentation
-- Performance impact
-- Code style
-
-## Release Process
-
-1. Update version numbers
-2. Update CHANGELOG.md
-3. Create release PR
-4. Tag release after merge
-5. Publish to PyPI and crates.io
-
-## Recognition
-
-Contributors are recognized in:
-- CHANGELOG.md
-- GitHub contributors page
-- Release notes
-
-Thank you for contributing to Obsidian Librarian! 🎉
+Thank you for contributing to Obsidian Librarian v2! 🚀

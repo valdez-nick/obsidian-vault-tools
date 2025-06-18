@@ -1,258 +1,188 @@
-# Obsidian Librarian v2 - Advanced Features Implementation Tasks
+# Obsidian Librarian v2 - Current Development Tasks
 
-## Overview
-Implementation plan for two major features:
-1. **Intelligent Tag Management System** - Analyze, clean up, and optimize tag structures
-2. **Intelligent Directory Organization System** - Auto-organize notes into appropriate directories
+## 🎯 Current Sprint: v0.1.0 Release Preparation
 
-## 🤖 Agent Status (FINAL)
-- **tag-models-v2**: ✅ **COMPLETED** - Implemented TagAnalysis, TagSimilarity, TagHierarchy, TagOperation models (commit: 2970c9a)
-- **tag-core-v2**: ✅ **COMPLETED** - Built tag_manager.py with all core classes (commit: dbe1116)
-- **dir-models-v2**: ✅ **COMPLETED** - Created DirectoryRule, ClassificationResult, OrganizationPlan, MoveOperation models (commit: 5ca45bd)
-- **dir-core-v2**: ✅ **COMPLETED** - Implemented auto_organizer.py with ContentClassifier, DirectoryRouter, etc. (commit: 6884388)
-- **tag-cli-v2**: ✅ **COMPLETED** - Built comprehensive CLI commands for tag management (commit: f0174ad)
+### High Priority Tasks
 
-## 📋 Work Trees
-- `worktrees/tag-models` → Branch: tag-models
-- `worktrees/tag-core-service` → Branch: tag-core-service
-- `worktrees/directory-models` → Branch: directory-models
-- `worktrees/directory-core-service` → Branch: directory-core-service
-- `worktrees/tag-cli-commands` → Branch: tag-cli-commands
+#### 🔧 **1. CLI Architecture Fix** (In Progress)
+**Status**: 🔄 Active Development  
+**Priority**: CRITICAL  
+**Assigned**: Next Sprint
 
----
+- [ ] Convert `tag_commands.py` from Click to Typer
+- [ ] Fix main CLI entry point to properly integrate all commands  
+- [ ] Ensure all subcommands work: init, stats, tags, organize, research, analyze
+- [ ] Add proper error handling and help text
+- [ ] Test CLI with example commands
 
-## Feature 1: Intelligent Tag Management System
+**Success Criteria**:
+- `obsidian-librarian --help` shows all commands
+- All subcommands execute without import errors
+- Rich terminal output works correctly
 
-### Phase 1: Tag Analysis Engine (Week 1)
+#### 🗄️ **2. Database Layer Refactoring** (Pending)
+**Status**: 📋 Planned  
+**Priority**: HIGH  
+**Assigned**: Next Sprint
 
-#### 🏷️ Core Tag Management Service
-- [🤖 CLAIMED - Agent: tag-core] **Create `services/tag_manager.py`**
-  - [🤖 CLAIMED] `TagAnalyzer` class for scanning vault tags
-  - [🤖 CLAIMED] `TagSimilarityDetector` for finding redundant tags
-  - [🤖 CLAIMED] `TagHierarchyBuilder` for suggesting nested structures
-  - [🤖 CLAIMED] `AutoTagger` for AI-powered tag suggestions
-  - [🤖 CLAIMED] `TagOperations` for bulk rename/merge operations
+- [ ] Implement DatabaseManager with fallback strategy
+- [ ] Ensure SQLite fallback for all operations
+- [ ] Add graceful degradation for DuckDB, Qdrant, Redis
+- [ ] Add configuration for database preferences
+- [ ] Write tests for fallback scenarios
 
-#### 📊 Tag Analysis Algorithms
-- [🤖 CLAIMED - Agent: tag-core] **String Similarity Detection**
-  - [🤖 CLAIMED] Implement fuzzy matching for similar tags
-  - [🤖 CLAIMED] Case-insensitive comparison (`Python` vs `python`)
-  - [🤖 CLAIMED] Pattern matching (`ML`, `machine-learning`, `MachineLearning`)
-  
-- [🤖 CLAIMED - Agent: tag-core] **Semantic Similarity Analysis**
-  - [🤖 CLAIMED] Use embeddings to find conceptually similar tags
-  - [🤖 CLAIMED] Detect synonyms and related concepts
-  - [🤖 CLAIMED] Build tag relationship graph
+**Success Criteria**:
+- System works with zero optional dependencies
+- Performance warnings shown when using fallbacks
+- All database operations have SQLite implementation
 
-- [🤖 CLAIMED - Agent: tag-core] **Usage Pattern Analysis**
-  - [🤖 CLAIMED] Track tag co-occurrence patterns
-  - [🤖 CLAIMED] Identify frequently used tag combinations
-  - [🤖 CLAIMED] Suggest hierarchical relationships
+#### 🦀 **3. Rust Integration Testing** (Pending)
+**Status**: 📋 Planned  
+**Priority**: HIGH  
+**Assigned**: Next Sprint
 
-#### 🎯 Content-Based Auto-Tagging
-- [🤖 CLAIMED - Agent: tag-core] **Content Analysis Engine**
-  - [🤖 CLAIMED] Extract keywords and entities from note content
-  - [🤖 CLAIMED] Analyze existing tags to learn tagging patterns
-  - [🤖 CLAIMED] Use AI models for topic classification
-  - [🤖 CLAIMED] Suggest missing tags for untagged notes
+- [ ] Fix PyO3 bindings in rust-core/python-bindings
+- [ ] Test maturin develop workflow  
+- [ ] Implement Python fallbacks for all Rust operations
+- [ ] Add performance benchmarks comparing Rust vs Python
+- [ ] Document Rust building process
 
-#### 📋 CLI Commands Implementation
-- [🤖 CLAIMED - Agent: tag-cli] **Create `cli/tag_commands.py`**
-  - [🤖 CLAIMED] `tags analyze` - Comprehensive tag analysis
-  - [🤖 CLAIMED] `tags duplicates` - Find similar/redundant tags
-  - [🤖 CLAIMED] `tags suggest` - AI-powered tag suggestions
-  - [🤖 CLAIMED] `tags auto-tag` - Auto-tag untagged notes
-  - [🤖 CLAIMED] `tags merge` - Merge/rename tags safely
-  - [🤖 CLAIMED] `tags cleanup` - Interactive cleanup workflow
-  - [🤖 CLAIMED] `tags hierarchy` - Suggest tag hierarchies
+**Success Criteria**:
+- `maturin develop` builds successfully
+- Python fallbacks work when Rust unavailable
+- Clear performance metrics documented
 
-#### 🔧 Data Models
-- [🤖 CLAIMED - Agent: tag-models] **Extend models in `models/models.py`**
-  - [🤖 CLAIMED] `TagAnalysis` dataclass
-  - [🤖 CLAIMED] `TagSimilarity` dataclass
-  - [🤖 CLAIMED] `TagHierarchy` dataclass
-  - [🤖 CLAIMED] `TagOperation` dataclass for bulk operations
+#### 🤖 **4. Local AI Implementation** (Pending)
+**Status**: 📋 Planned  
+**Priority**: MEDIUM  
+**Assigned**: Next Sprint
+
+- [ ] Implement Ollama integration for local models
+- [ ] Add provider abstraction for AI services
+- [ ] Implement fallback chain: Local -> OpenAI -> Anthropic
+- [ ] Add configuration for AI providers
+- [ ] Test tag suggestions with local model
+
+**Success Criteria**:
+- Local model works out of the box with Ollama
+- Clear instructions for installing local models
+- API providers work when configured
 
 ---
 
-## Feature 2: Intelligent Directory Organization System
+## 🎯 Medium Priority Tasks
 
-### Phase 2: Auto-Organization Engine (Week 2)
+#### 🧪 **5. Comprehensive Test Suite** (Pending)
+**Status**: 📋 Planned  
+**Priority**: MEDIUM  
+**Estimated**: 8 hours
 
-#### 📁 Core Organization Service
-- [🤖 CLAIMED - Agent: dir-core] **Create `services/auto_organizer.py`**
-  - [🤖 CLAIMED] `ContentClassifier` for analyzing note content
-  - [🤖 CLAIMED] `DirectoryRouter` for smart file placement
-  - [🤖 CLAIMED] `OrganizationLearner` for pattern recognition
-  - [🤖 CLAIMED] `RuleEngine` for user-defined rules
-  - [🤖 CLAIMED] `FileWatcher` for real-time organization
+- [ ] Unit tests for tag management service
+- [ ] Unit tests for directory organization
+- [ ] Integration tests for CLI commands
+- [ ] End-to-end tests with example vault
+- [ ] Performance benchmarks
 
-#### 🧠 Classification Engine
-- [🤖 CLAIMED - Agent: dir-core] **Multi-Modal Content Analysis**
-  - [🤖 CLAIMED] Text content analysis (topics, keywords, entities)
-  - [🤖 CLAIMED] Metadata analysis (tags, frontmatter, titles)
-  - [🤖 CLAIMED] Link analysis (connections to other notes)
-  - [🤖 CLAIMED] Template pattern detection
-  - [🤖 CLAIMED] Date/time pattern recognition
+**Success Criteria**:
+- 80%+ code coverage
+- All critical paths tested
+- Benchmarks documented
 
-- [🤖 CLAIMED - Agent: dir-core] **Smart Routing Algorithm**
-  - [🤖 CLAIMED] Rule-based routing with pattern matching
-  - [🤖 CLAIMED] AI-powered content classification
-  - [🤖 CLAIMED] Hybrid approach combining rules + AI
-  - [🤖 CLAIMED] Conflict resolution for ambiguous cases
-  - [🤖 CLAIMED] User feedback learning system
+#### 📚 **6. Example Vault & Demos** (Pending)
+**Status**: 📋 Planned  
+**Priority**: MEDIUM  
+**Estimated**: 4 hours
 
-#### 📋 Directory Organization Rules
-- [ ] **Configuration System**
-  - [ ] Extend `config.yaml` with organization rules
-  - [ ] Support for pattern-based routing
-  - [ ] Configurable directory structures
-  - [ ] Exception handling (Daily Notes ignore rule)
-  - [ ] Custom user-defined rules
+- [ ] Create example vault with 100+ notes
+- [ ] Add messy tags for cleanup demo
+- [ ] Add disorganized files for organization demo
+- [ ] Create before/after snapshots
+- [ ] Record demo videos/GIFs
 
-- [ ] **Default Rule Templates**
-  - [ ] Project notes → `Projects/`
-  - [ ] Research papers → `Research Library/YYYY/MM/DD/`
-  - [ ] Meeting notes → `Meetings/YYYY/MM/`
-  - [ ] Knowledge articles → `Knowledge Base/topic/`
-  - [ ] Templates → `Templates/` (never move)
-  - [ ] Daily notes → `Daily Notes/` (never move)
+**Success Criteria**:
+- Compelling demos showing real problems being solved
+- Clear before/after comparisons
+- Videos under 2 minutes each
 
-#### 🎛️ CLI Commands Implementation
-- [ ] **Enhance existing `organize` command**
-  - [ ] Add `--auto-organize` flag
-  - [ ] Add `--learn-patterns` flag
-  - [ ] Add `--watch` mode for real-time monitoring
-  
-- [ ] **Create `cli/organize_commands.py`**
-  - [ ] `organize analyze` - Analyze current structure
-  - [ ] `organize auto` - Auto-organize misplaced notes
-  - [ ] `organize setup` - Interactive rule setup
-  - [ ] `organize watch` - Daemon mode for new notes
-  - [ ] `organize restructure` - Reorganize entire vault
-  - [ ] `organize rules` - Manage organization rules
+#### 🔄 **7. CI/CD Pipeline** (Pending)
+**Status**: 📋 Planned  
+**Priority**: MEDIUM  
+**Estimated**: 4 hours
 
-#### 🔧 Data Models
-- [🤖 CLAIMED - Agent: dir-models] **Add models for organization**
-  - [🤖 CLAIMED] `DirectoryRule` dataclass
-  - [🤖 CLAIMED] `ClassificationResult` dataclass  
-  - [🤖 CLAIMED] `OrganizationPlan` dataclass
-  - [🤖 CLAIMED] `MoveOperation` dataclass
+- [ ] Set up GitHub Actions for testing
+- [ ] Add Python linting and formatting checks
+- [ ] Add Rust compilation checks
+- [ ] Configure automatic PyPI deployment
+- [ ] Add release automation
+
+**Success Criteria**:
+- All tests run on PR
+- Automatic deployment on tag
+- Build artifacts available
 
 ---
 
-## Phase 3: Integration & Polish (Week 3)
+## 📚 Documentation Tasks
 
-### 🎯 Curate Command Integration
-- [ ] **Enhance `curate` command**
-  - [ ] Add `--tags` flag for tag cleanup
-  - [ ] Add `--organize` flag for directory organization
-  - [ ] Integrated workflow: tags → structure → quality
-  - [ ] Progress reporting for all operations
+#### 📖 **8. User Documentation** (In Progress)
+**Status**: 🔄 Active (This Session)  
+**Priority**: MEDIUM
 
-### ⚙️ Configuration System
-- [ ] **Extend configuration files**
-  - [ ] Tag management preferences
-  - [ ] Organization rules and patterns
-  - [ ] AI model settings for classification
-  - [ ] User learning preferences
-
-### 📊 Analytics & Reporting
-- [ ] **Organization Metrics**
-  - [ ] Track tag cleanup statistics
-  - [ ] Monitor organization improvements
-  - [ ] Report on vault health scores
-  - [ ] Usage pattern analytics
-
-### 🧪 Testing & Quality
-- [ ] **Comprehensive Test Suite**
-  - [ ] Unit tests for tag analysis algorithms
-  - [ ] Integration tests for organization workflows
-  - [ ] End-to-end tests with sample vault
-  - [ ] Performance tests for large vaults
-
-### 📚 Documentation
-- [ ] **User Guides**
-  - [ ] Tag management best practices
-  - [ ] Directory organization strategies
-  - [ ] Configuration examples
-  - [ ] Troubleshooting guide
+- [x] Consolidate README.md with user guide content
+- [x] Create comprehensive CHANGELOG.md
+- [ ] Update CONTRIBUTING.md with development guidelines
+- [ ] Write installation troubleshooting guide
+- [ ] Create CLI command reference
 
 ---
 
-## Example CLI Usage
+## ✅ Completed Features
 
-### Tag Management
-```bash
-# Analyze current tag structure
-obsidian-librarian tags analyze /vault/path
-# Output: Found 127 tags, 23 potential duplicates, suggest 5 hierarchies
+### 🏷️ **Tag Management System** (v0.2.0)
+- ✅ `TagAnalyzer`, `TagSimilarityDetector`, `TagHierarchyBuilder` 
+- ✅ Complete CLI commands (`tags analyze`, `duplicates`, `suggest`, etc.)
+- ✅ Tag models: `TagAnalysis`, `TagSimilarity`, `TagHierarchy`, `TagOperation`
 
-# Find and fix redundant tags
-obsidian-librarian tags duplicates /vault/path --merge-similar
-# Interactive: "Merge 'Python', 'python', 'PYTHON' → 'python'? (y/n)"
+### 📁 **Directory Organization System** (v0.2.0)
+- ✅ `ContentClassifier`, `DirectoryRouter`, `OrganizationLearner`
+- ✅ Auto-organization with AI-powered content classification
+- ✅ Organization models: `DirectoryRule`, `ClassificationResult`, `OrganizationPlan`
 
-# Auto-tag untagged notes
-obsidian-librarian tags auto-tag /vault/path --dry-run
-# Output: Would add tags to 45 notes based on content analysis
-
-# Interactive tag cleanup
-obsidian-librarian tags cleanup /vault/path --interactive
-# Guided workflow through all tag improvements
-```
-
-### Directory Organization
-```bash
-# Analyze and suggest organization improvements
-obsidian-librarian organize analyze /vault/path
-# Output: 23 misplaced notes, suggest 3 new directories
-
-# Auto-organize misplaced notes
-obsidian-librarian organize auto /vault/path --dry-run
-# Output: Would move 15 notes to appropriate directories
-
-# Set up organization rules interactively
-obsidian-librarian organize setup /vault/path
-# Guided setup of patterns and rules
-
-# Watch for new notes and organize automatically
-obsidian-librarian organize watch /vault/path --daemon
-# Background process monitoring new notes
-```
-
-### Integrated Curation
-```bash
-# Comprehensive vault improvement
-obsidian-librarian curate /vault/path --tags --organize --dry-run
-# Full workflow: tag cleanup → directory organization → quality improvements
-
-# Interactive comprehensive curation
-obsidian-librarian curate /vault/path --tags --organize --interactive
-# Step-by-step guided improvements with user approval
-```
+### 🎨 **Comprehensive Curation** (v0.2.0)
+- ✅ `curate` command with multiple strategies
+- ✅ Interactive and batch processing modes
+- ✅ Integration with tag cleanup and file organization
 
 ---
 
-## Success Metrics
+## 📅 Release Timeline
 
-### Tag Management
-- [ ] Reduce tag redundancy by 80%+
-- [ ] Establish consistent tag hierarchy
-- [ ] Auto-tag 90%+ of untagged notes accurately
-- [ ] Enable bulk tag operations safely
+### v0.1.0-stable (Target: End of Week)
+- **Scope**: Stable CLI, database layer, Rust integration, local AI
+- **Requirements**: All High Priority tasks completed
+- **Success Metrics**: 
+  - Zero critical bugs
+  - All CLI commands working
+  - Optional dependencies handled gracefully
 
-### Directory Organization  
-- [ ] Achieve 95%+ accurate auto-classification
-- [ ] Reduce misplaced notes to <5%
-- [ ] Enable real-time organization
-- [ ] Support custom user patterns
+### v0.2.1 (Patch Release)
+- **Scope**: Bug fixes and documentation improvements  
+- **Focus**: User experience refinements
 
-### Overall Integration
-- [ ] Seamless workflow in `curate` command
-- [ ] Comprehensive analytics and reporting
-- [ ] Safe operations with backup/rollback
-- [ ] User-friendly interactive modes
+### v0.3.0 (Next Major Release)
+- **Scope**: Web UI dashboard, advanced analytics, plugin system
+- **Timeline**: 4-6 weeks after v0.1.0
 
 ---
 
-*This task list provides a comprehensive roadmap for implementing advanced tag management and directory organization features in Obsidian Librarian v2.*
+## 🚨 Blockers & Risks
+
+1. **CLI Import Issues**: Need to resolve Click->Typer conversion
+2. **Rust Compilation**: May need to provide Python-only fallback for all users
+3. **Database Dependencies**: Must ensure system works without optional deps
+4. **Local AI Setup**: Ollama installation may be complex for some users
+
+---
+
+**Last Updated**: 2024-12-13  
+**Next Review**: Weekly sprint planning
