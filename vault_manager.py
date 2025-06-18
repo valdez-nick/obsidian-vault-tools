@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import subprocess
+import re
 from pathlib import Path
 from datetime import datetime
 import time
@@ -175,12 +176,21 @@ class VaultManager:
         print(f"\n{Colors.GREEN}✓ Vault set to: {vault_path}{Colors.ENDC}")
         return vault_path
     
+    def quote_path(self, path):
+        """Properly quote a path for shell command usage"""
+        import shlex
+        return shlex.quote(path)
+    
     def run_command(self, command, description=None):
         """Run a shell command and handle output"""
         if description:
             print(f"\n{Colors.CYAN}{description}...{Colors.ENDC}")
         
         try:
+            # Debug output for troubleshooting
+            if self.config.get('debug', False):
+                print(f"{Colors.YELLOW}Debug - Running command: {command}{Colors.ENDC}")
+            
             result = subprocess.run(
                 command,
                 shell=True,
@@ -195,23 +205,32 @@ class VaultManager:
                     print(result.stdout)
                 return True
             else:
-                print(f"{Colors.RED}❌ Error{Colors.ENDC}")
+                print(f"{Colors.RED}❌ Command failed (exit code: {result.returncode}){Colors.ENDC}")
                 if result.stderr:
-                    print(f"{Colors.RED}{result.stderr}{Colors.ENDC}")
+                    print(f"{Colors.RED}Error details: {result.stderr.strip()}{Colors.ENDC}")
+                if result.stdout:
+                    print(f"{Colors.YELLOW}Output: {result.stdout.strip()}{Colors.ENDC}")
+                
+                # Show command for debugging
+                print(f"{Colors.YELLOW}Command that failed: {command}{Colors.ENDC}")
                 return False
+        except FileNotFoundError as e:
+            print(f"{Colors.RED}❌ Command not found: {str(e)}{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Make sure the required script/tool is in the same directory{Colors.ENDC}")
+            return False
         except Exception as e:
-            print(f"{Colors.RED}❌ Exception: {str(e)}{Colors.ENDC}")
+            print(f"{Colors.RED}❌ Unexpected error: {str(e)}{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Command: {command}{Colors.ENDC}")
             return False
     
     def analyze_vault_menu(self):
         """Vault analysis submenu"""
         while True:
             options = [
-                ('1', '📊 View tag statistics'),
-                ('2', '📝 Generate detailed report'),
-                ('3', '📁 Analyze folder structure'),
-                ('4', '🔍 Find files without tags'),
-                ('5', '💾 Export analysis to JSON'),
+                ('1', '📊 Analyze vault tags'),
+                ('2', '📁 Analyze folder structure'),
+                ('3', '🔍 Find files without tags'),
+                ('4', '💾 Generate tag analysis report'),
                 ('0', '← Back to main menu')
             ]
             
@@ -222,28 +241,22 @@ class VaultManager:
                 break
             elif choice == '1':
                 self.run_command(
-                    f'python3 analyze_tags_simple.py "{self.current_vault}"',
-                    'Analyzing tags'
+                    f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
+                    'Analyzing vault tags'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '2':
-                self.run_command(
-                    f'python3 analyze_tags_simple.py "{self.current_vault}" --detailed',
-                    'Generating detailed report'
-                )
-                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '3':
                 self.analyze_folder_structure()
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '4':
+            elif choice == '3':
                 self.find_untagged_files()
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '5':
-                output_file = f"vault_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            elif choice == '4':
                 self.run_command(
-                    f'python3 analyze_tags_simple.py "{self.current_vault}" --output "{output_file}"',
-                    f'Exporting analysis to {output_file}'
+                    f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
+                    'Generating analysis (JSON will be saved to vault directory)'
                 )
+                print(f"{Colors.CYAN}Note: JSON report saved as 'tag_analysis_report.json' in your vault directory{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def manage_tags_menu(self):
@@ -266,7 +279,7 @@ class VaultManager:
                 break
             elif choice == '1':
                 self.run_command(
-                    f'python3 fix_vault_tags.py "{self.current_vault}" --dry-run',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --dry-run',
                     'Analyzing tag issues'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
@@ -275,32 +288,32 @@ class VaultManager:
                 confirm = input(f"{Colors.CYAN}Are you sure? (y/n): {Colors.ENDC}").lower()
                 if confirm == 'y':
                     self.run_command(
-                        f'python3 fix_vault_tags.py "{self.current_vault}"',
+                        f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)}',
                         'Fixing all tag issues'
                     )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '3':
                 self.run_command(
-                    f'python3 fix_vault_tags.py "{self.current_vault}" --fix-quoted-only',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --fix-quoted-only',
                     'Fixing quoted tags'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '4':
                 self.run_command(
-                    f'python3 fix_vault_tags.py "{self.current_vault}" --merge-similar',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --merge-similar',
                     'Merging similar tags'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '5':
                 self.run_command(
-                    f'python3 fix_vault_tags.py "{self.current_vault}" --remove-generic',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --remove-generic',
                     'Removing generic tags'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '6':
                 if self.v2_available:
                     self.run_command(
-                        f'obsidian-librarian tags auto-tag "{self.current_vault}"',
+                        f'obsidian-librarian tags auto-tag {self.quote_path(self.current_vault)}',
                         'Auto-tagging untagged files with AI'
                     )
                 else:
@@ -327,13 +340,13 @@ class VaultManager:
                 break
             elif choice == '1':
                 self.run_command(
-                    f'./quick_incremental_backup.sh "{self.current_vault}"',
+                    f'./quick_incremental_backup.sh {self.quote_path(self.current_vault)}',
                     'Creating incremental backup'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '2':
                 self.run_command(
-                    f'python3 backup_vault.py "{self.current_vault}"',
+                    f'python3 backup_vault.py {self.quote_path(self.current_vault)}',
                     'Creating full backup'
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
@@ -376,7 +389,7 @@ class VaultManager:
             
             if choice == '1':
                 self.run_command(
-                    f'obsidian-librarian analyze "{self.current_vault}" --quality --structure',
+                    f'obsidian-librarian analyze {self.quote_path(self.current_vault)} --quality --structure',
                     'Analyzing content with AI'
                 )
             elif choice == '2':
@@ -384,39 +397,39 @@ class VaultManager:
                 if query:
                     self.show_loading("Researching topic", 3)
                     self.run_command(
-                        f'obsidian-librarian research "{self.current_vault}" "{query}"',
+                        f'obsidian-librarian research {self.quote_path(self.current_vault)} {self.quote_path(query)}',
                         f'Researching: {query}'
                     )
             elif choice == '3':
                 self.run_command(
-                    f'obsidian-librarian organize "{self.current_vault}" --strategy content --dry-run',
+                    f'obsidian-librarian organize {self.quote_path(self.current_vault)} --strategy content --dry-run',
                     'Planning smart organization'
                 )
                 confirm = input(f"\n{Colors.CYAN}Apply these changes? (y/n): {Colors.ENDC}").lower()
                 if confirm == 'y':
                     self.run_command(
-                        f'obsidian-librarian organize "{self.current_vault}" --strategy content',
+                        f'obsidian-librarian organize {self.quote_path(self.current_vault)} --strategy content',
                         'Organizing files'
                     )
             elif choice == '4':
                 self.run_command(
-                    f'obsidian-librarian duplicates "{self.current_vault}" --threshold 0.85',
+                    f'obsidian-librarian duplicates {self.quote_path(self.current_vault)} --threshold 0.85',
                     'Finding duplicate content'
                 )
             elif choice == '5':
                 self.run_command(
-                    f'obsidian-librarian stats "{self.current_vault}" --detailed',
+                    f'obsidian-librarian stats {self.quote_path(self.current_vault)} --detailed',
                     'Generating advanced analytics'
                 )
             elif choice == '6':
                 self.run_command(
-                    f'obsidian-librarian curate "{self.current_vault}" --duplicates --quality --structure --dry-run',
+                    f'obsidian-librarian curate {self.quote_path(self.current_vault)} --duplicates --quality --structure --dry-run',
                     'Planning comprehensive curation'
                 )
                 confirm = input(f"\n{Colors.CYAN}Apply curation? (y/n): {Colors.ENDC}").lower()
                 if confirm == 'y':
                     self.run_command(
-                        f'obsidian-librarian curate "{self.current_vault}" --duplicates --quality --structure',
+                        f'obsidian-librarian curate {self.quote_path(self.current_vault)} --duplicates --quality --structure',
                         'Curating vault'
                     )
             elif choice == '7':
