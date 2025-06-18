@@ -271,7 +271,10 @@ class NaturalLanguageProcessor:
                     r'(?:smart|ai|intelligent)\s+(?:organize|organization)',
                     r'(?:organize|structure)\s+(?:files?|vault)\s+(?:with\s+)?ai',
                     r'(?:auto|automatic)\s+(?:organization|organize)',
-                    r'(?:ai|smart)\s+(?:file|content)\s+(?:organization|structuring)'
+                    r'(?:ai|smart)\s+(?:file|content)\s+(?:organization|structuring)',
+                    r'organize\s+files?',
+                    r'organize\s+(?:my\s+)?(?:vault|content|notes?)',
+                    r'(?:organize|structure)\s+(?:everything|all)'
                 ],
                 'function': 'smart_file_organization',
                 'description': 'Smart file organization with AI',

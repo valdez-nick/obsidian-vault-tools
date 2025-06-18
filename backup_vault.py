@@ -184,6 +184,11 @@ def main():
     
     args = parser.parse_args()
     
+    # Validate vault path exists
+    if not os.path.exists(args.vault_path):
+        print(f"❌ Error: Vault path does not exist: {args.vault_path}")
+        sys.exit(1)
+    
     if args.list:
         list_backups(args.vault_path)
     else:
