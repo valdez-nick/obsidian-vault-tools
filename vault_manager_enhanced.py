@@ -32,6 +32,23 @@ except ImportError:
 # Import the original vault manager components
 from vault_manager import Colors, VaultManager
 
+# Import audio system
+try:
+    from audio.audio_manager import AudioManager, get_audio_manager, play_sound
+    from audio.audio_manager import start_dungeon_ambiance, stop_dungeon_ambiance
+    from audio.audio_manager import wizard_greeting, magical_success, dungeon_danger
+    AUDIO_AVAILABLE = True
+except ImportError:
+    AUDIO_AVAILABLE = False
+    # Create dummy functions if audio not available
+    def get_audio_manager(): return None
+    def play_sound(*args, **kwargs): return False
+    def start_dungeon_ambiance(): return False
+    def stop_dungeon_ambiance(): pass
+    def wizard_greeting(): return False
+    def magical_success(): return False
+    def dungeon_danger(): return False
+
 class ASCIIArtManager:
     """Manages ASCII art generation and display"""
     
@@ -158,14 +175,91 @@ class EnhancedVaultManager(VaultManager):
         self.ascii_manager = ASCIIArtManager()
         self.ascii_enabled = True
         
+        # Initialize audio system
+        self.audio_manager = get_audio_manager() if AUDIO_AVAILABLE else None
+        self.audio_enabled = AUDIO_AVAILABLE and (self.audio_manager is not None) and self.audio_manager.is_available()
+        
+        if self.audio_enabled:
+            print(f"{Colors.GREEN}🎵 Dungeon crawler audio system initialized{Colors.ENDC}")
+            # Start ambient atmosphere
+            start_dungeon_ambiance()
+        else:
+            print(f"{Colors.YELLOW}⚠️  Audio system not available - continuing in silent mode{Colors.ENDC}")
+    
+    def cleanup(self):
+        """Clean up resources when exiting"""
+        if self.audio_enabled:
+            print(f"\n{Colors.BLUE}🎵 Farewell from the digital wizard...{Colors.ENDC}")
+            if self.audio_manager:
+                play_sound('wizard_warn')  # Farewell sound
+                time.sleep(0.5)  # Let sound play
+                stop_dungeon_ambiance()
+                self.audio_manager.cleanup()
+        super().cleanup() if hasattr(super(), 'cleanup') else None
+        
     def show_welcome_art(self):
         """Display enhanced welcome ASCII art"""
         # Show the original logo
         super().show_welcome_art()
         
+        # Play wizard greeting sound
+        if self.audio_enabled:
+            wizard_greeting()
+        
         # Add a random decorative element
         if self.ascii_enabled and random.random() > 0.5:
             print(f"\n{Colors.BLUE}{self.ascii_manager.get_random_art()}{Colors.ENDC}")
+    
+    def get_choice_with_audio(self, valid_choices=None):
+        """Get user input with audio feedback"""
+        choice = input(f"\n{Colors.YELLOW}Your choice: {Colors.ENDC}").strip()
+        
+        if self.audio_enabled:
+            if choice == '0' or choice.lower() in ['exit', 'quit', 'back']:
+                play_sound('menu_back')
+            elif choice == '':
+                play_sound('menu_error')  # Empty input
+            elif valid_choices and choice not in valid_choices:
+                play_sound('error_chord')  # Invalid choice
+                dungeon_danger()  # Warning sound
+            else:
+                play_sound('menu_select')  # Valid selection
+        
+        return choice
+    
+    def play_menu_navigation_sound(self):
+        """Play sound for menu navigation"""
+        if self.audio_enabled:
+            play_sound('menu_blip')
+    
+    def play_operation_start_sound(self, operation_type='general'):
+        """Play sound for starting operations"""
+        if self.audio_enabled:
+            if operation_type == 'scan':
+                play_sound('scan_begin')
+            elif operation_type == 'backup':
+                play_sound('backup_begin')
+            elif operation_type == 'ascii':
+                play_sound('magic_begin')
+            else:
+                play_sound('menu_select')
+    
+    def play_operation_complete_sound(self, operation_type='general', success=True):
+        """Play sound for completed operations"""
+        if self.audio_enabled:
+            if success:
+                if operation_type == 'scan':
+                    play_sound('scan_complete')
+                elif operation_type == 'backup':
+                    play_sound('backup_complete')
+                elif operation_type == 'ascii':
+                    play_sound('magic_complete')
+                    magical_success()
+                else:
+                    play_sound('magic_success')
+            else:
+                play_sound('error_chord')
+                dungeon_danger()
     
     def show_ascii_menu(self):
         """ASCII Art tools submenu"""
@@ -181,21 +275,28 @@ class EnhancedVaultManager(VaultManager):
             ]
             
             self.show_menu('ASCII ART TOOLS', options)
-            choice = input().strip()
+            self.play_menu_navigation_sound()
+            choice = self.get_choice_with_audio(['0', '1', '2', '3', '4', '5', '6'])
             
             if choice == '0':
                 break
             elif choice == '1':
+                self.play_operation_start_sound('ascii')
                 self.convert_image_to_ascii()
             elif choice == '2':
+                self.play_operation_start_sound('ascii')
                 self.convert_screenshot_to_ascii()
             elif choice == '3':
+                self.play_menu_navigation_sound()
                 self.view_ascii_gallery()
             elif choice == '4':
+                self.play_operation_start_sound('ascii')
                 self.generate_flowchart_from_document()
             elif choice == '5':
+                self.play_operation_start_sound('ascii')
                 self.add_ascii_to_notes()
             elif choice == '6':
+                self.play_menu_navigation_sound()
                 self.ascii_art_settings()
     
     def convert_image_to_ascii(self):
@@ -297,9 +398,15 @@ class EnhancedVaultManager(VaultManager):
                     with open(output_path, 'w', encoding='utf-8') as f:
                         f.write(ascii_art)
                     print(f"{Colors.GREEN}✓ Saved to: {output_path}{Colors.ENDC}")
+                    self.play_operation_complete_sound('ascii', success=True)
+                else:
+                    self.play_operation_complete_sound('ascii', success=True)
                 
                 # Clean up
                 os.remove(screenshot_path)
+            else:
+                print(f"{Colors.RED}❌ Failed to convert screenshot{Colors.ENDC}")
+                self.play_operation_complete_sound('ascii', success=False)
     
     def generate_flowchart_from_document(self):
         """Generate ASCII flowchart from a document"""
@@ -437,12 +544,92 @@ class EnhancedVaultManager(VaultManager):
         print(f"4. Default Style: {Colors.YELLOW}{self.ascii_manager.default_style}{Colors.ENDC}")
         print(f"5. Default Width: {Colors.YELLOW}{self.ascii_manager.default_width}{Colors.ENDC}")
         
-        toggle = input(f"\n{Colors.YELLOW}Toggle ASCII art in menus? (y/n): {Colors.ENDC}").lower()
-        if toggle == 'y':
+        # Audio settings
+        print(f"\n{Colors.MAGENTA}🎵 AUDIO SETTINGS{Colors.ENDC}")
+        print(f"6. Audio System: {Colors.GREEN if self.audio_enabled else Colors.RED}"
+              f"{'Available' if self.audio_enabled else 'Not Available'}{Colors.ENDC}")
+        
+        if self.audio_enabled and self.audio_manager:
+            print(f"7. Master Volume: {Colors.YELLOW}{self.audio_manager.get_volume('master'):.1f}{Colors.ENDC}")
+            print(f"8. Effects Volume: {Colors.YELLOW}{self.audio_manager.get_volume('effects'):.1f}{Colors.ENDC}")
+            print(f"9. Ambient Volume: {Colors.YELLOW}{self.audio_manager.get_volume('ambient'):.1f}{Colors.ENDC}")
+        
+        print(f"\n{Colors.CYAN}Configuration Options:{Colors.ENDC}")
+        print("a) Toggle ASCII art in menus")
+        if self.audio_enabled:
+            print("v) Adjust volume settings")
+            print("t) Test sound effects")
+        print("q) Return to menu")
+        
+        choice = input(f"\n{Colors.YELLOW}Your choice: {Colors.ENDC}").lower().strip()
+        
+        if choice == 'a':
             self.ascii_enabled = not self.ascii_enabled
             self.config['ascii_enabled'] = self.ascii_enabled
             self.save_config()
             print(f"{Colors.GREEN}✓ ASCII art {'enabled' if self.ascii_enabled else 'disabled'}{Colors.ENDC}")
+            self.play_operation_complete_sound('general', success=True)
+        elif choice == 'v' and self.audio_enabled:
+            self.audio_volume_settings()
+        elif choice == 't' and self.audio_enabled:
+            self.test_audio_effects()
+        elif choice == 'q':
+            pass
+        else:
+            print(f"{Colors.RED}❌ Invalid choice{Colors.ENDC}")
+            if self.audio_enabled:
+                dungeon_danger()
+    
+    def audio_volume_settings(self):
+        """Configure audio volume settings"""
+        if not self.audio_enabled or not self.audio_manager:
+            return
+        
+        print(f"\n{Colors.MAGENTA}🎵 VOLUME SETTINGS{Colors.ENDC}")
+        print(f"Current volumes:")
+        print(f"  Master: {self.audio_manager.get_volume('master'):.1f}")
+        print(f"  Effects: {self.audio_manager.get_volume('effects'):.1f}")
+        print(f"  Ambient: {self.audio_manager.get_volume('ambient'):.1f}")
+        
+        category = input(f"\n{Colors.YELLOW}Adjust volume for (master/effects/ambient): {Colors.ENDC}").lower().strip()
+        
+        if category in ['master', 'effects', 'ambient']:
+            try:
+                volume = float(input(f"{Colors.YELLOW}New volume (0.0-1.0): {Colors.ENDC}"))
+                volume = max(0.0, min(1.0, volume))
+                self.audio_manager.set_volume(category, volume)
+                print(f"{Colors.GREEN}✓ {category.title()} volume set to {volume:.1f}{Colors.ENDC}")
+                play_sound('menu_select')  # Test the new volume
+            except ValueError:
+                print(f"{Colors.RED}❌ Invalid volume value{Colors.ENDC}")
+                dungeon_danger()
+    
+    def test_audio_effects(self):
+        """Test different audio effects"""
+        if not self.audio_enabled:
+            return
+        
+        print(f"\n{Colors.MAGENTA}🎵 AUDIO TEST{Colors.ENDC}")
+        print("Testing sound effects...")
+        
+        effects = [
+            ('Menu Blip', 'menu_blip'),
+            ('Menu Select', 'menu_select'),
+            ('Menu Back', 'menu_back'),
+            ('Wizard Greeting', 'wizard_hello'),
+            ('Magic Spell', 'spell_cast'),
+            ('Success', 'magic_success'),
+            ('Error', 'error_chord'),
+            ('Danger Warning', 'danger_sting')
+        ]
+        
+        for name, effect in effects:
+            print(f"  Playing: {name}")
+            play_sound(effect)
+            time.sleep(1.2)  # Pause between sounds
+        
+        print(f"{Colors.GREEN}✓ Audio test complete{Colors.ENDC}")
+        magical_success()
     
     def add_ascii_to_notes(self):
         """Add ASCII art to vault notes"""
