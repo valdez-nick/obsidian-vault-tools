@@ -114,6 +114,147 @@ class VaultManager:
             i += 1
         print(f"\r{message} ✓", flush=True)
     
+    def show_progress_bar(self, message, current, total, width=50, show_percentage=True):
+        """Display a progress bar with optional percentage"""
+        if total == 0:
+            percent = 1.0
+        else:
+            percent = current / total
+        filled = int(width * percent)
+        bar = f"{Colors.GREEN}{'█' * filled}{Colors.YELLOW}{'░' * (width - filled)}{Colors.ENDC}"
+        
+        if show_percentage:
+            percentage_text = f" {percent*100:.1f}% ({current}/{total})"
+        else:
+            percentage_text = f" ({current}/{total})"
+        
+        print(f"\r{Colors.CYAN}{message}{Colors.ENDC} [{bar}]{percentage_text}", end='', flush=True)
+        
+        if current >= total:
+            print()  # New line when complete
+    
+    def show_indeterminate_progress(self, message, duration=None):
+        """Show an indeterminate progress bar that moves back and forth"""
+        if duration is None:
+            duration = 5
+        
+        width = 40
+        end_time = time.time() + duration
+        position = 0
+        direction = 1
+        
+        while time.time() < end_time:
+            # Create a moving block
+            bar = ['░'] * width
+            block_size = 8
+            start = max(0, position - block_size // 2)
+            end = min(width, position + block_size // 2)
+            
+            for i in range(start, end):
+                intensity = 1 - abs(i - position) / (block_size // 2)
+                if intensity > 0.7:
+                    bar[i] = '█'
+                elif intensity > 0.3:
+                    bar[i] = '▓'
+                else:
+                    bar[i] = '▒'
+            
+            bar_str = f"{Colors.GREEN}{''.join(bar)}{Colors.ENDC}"
+            print(f"\r{Colors.CYAN}{message}{Colors.ENDC} [{bar_str}]", end='', flush=True)
+            
+            # Update position
+            position += direction
+            if position >= width - 1 or position <= 0:
+                direction *= -1
+            
+            time.sleep(0.1)
+        
+        # Show completion
+        completed_bar = f"{Colors.GREEN}{'█' * width}{Colors.ENDC}"
+        print(f"\r{Colors.CYAN}{message}{Colors.ENDC} [{completed_bar}] ✓")
+    
+    def run_command_with_progress(self, command, description=None, estimated_duration=None):
+        """Run a command with a progress indicator"""
+        import threading
+        import subprocess
+        
+        if description:
+            print(f"\n{Colors.CYAN}{description}...{Colors.ENDC}")
+        
+        # Debug output for troubleshooting
+        if self.config.get('debug', False):
+            print(f"{Colors.YELLOW}Debug - Running command: {command}{Colors.ENDC}")
+        
+        result = {'completed': False, 'returncode': None, 'stdout': '', 'stderr': ''}
+        
+        def run_process():
+            try:
+                proc = subprocess.run(
+                    command,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    cwd=os.path.dirname(os.path.abspath(__file__))
+                )
+                result['returncode'] = proc.returncode
+                result['stdout'] = proc.stdout
+                result['stderr'] = proc.stderr
+            except Exception as e:
+                result['error'] = str(e)
+            finally:
+                result['completed'] = True
+        
+        # Start the process in a separate thread
+        thread = threading.Thread(target=run_process)
+        thread.start()
+        
+        # Show progress while the command runs
+        if estimated_duration:
+            # Show determinate progress for known duration
+            start_time = time.time()
+            while not result['completed']:
+                elapsed = time.time() - start_time
+                if elapsed >= estimated_duration:
+                    progress = 0.9  # Cap at 90% until actually complete
+                else:
+                    progress = elapsed / estimated_duration
+                
+                self.show_progress_bar(description or "Processing", 
+                                     int(progress * 100), 100, 
+                                     show_percentage=True)
+                time.sleep(0.1)
+        else:
+            # Show indeterminate progress
+            spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+            i = 0
+            while not result['completed']:
+                print(f"\r{Colors.CYAN}{description or 'Processing'} {spinner[i % len(spinner)]}{Colors.ENDC}", 
+                      end='', flush=True)
+                time.sleep(0.1)
+                i += 1
+        
+        # Wait for completion
+        thread.join()
+        
+        # Show final result
+        if 'error' in result:
+            print(f"\r{Colors.RED}❌ Unexpected error: {result['error']}{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Command: {command}{Colors.ENDC}")
+            return False
+        elif result['returncode'] == 0:
+            print(f"\r{Colors.GREEN}✓ {description or 'Process'} completed successfully{Colors.ENDC}")
+            if result['stdout']:
+                print(result['stdout'])
+            return True
+        else:
+            print(f"\r{Colors.RED}❌ Command failed (exit code: {result['returncode']}){Colors.ENDC}")
+            if result['stderr']:
+                print(f"{Colors.RED}Error details: {result['stderr'].strip()}{Colors.ENDC}")
+            if result['stdout']:
+                print(f"{Colors.YELLOW}Output: {result['stdout'].strip()}{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Command that failed: {command}{Colors.ENDC}")
+            return False
+    
     def show_progress(self, current, total, width=50):
         """Display a progress bar"""
         percent = current / total
@@ -240,9 +381,10 @@ class VaultManager:
             if choice == '0':
                 break
             elif choice == '1':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
-                    'Analyzing vault tags'
+                    'Analyzing vault tags',
+                    estimated_duration=10
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '2':
@@ -252,9 +394,10 @@ class VaultManager:
                 self.find_untagged_files()
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '4':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
-                    'Generating analysis (JSON will be saved to vault directory)'
+                    'Generating comprehensive analysis report',
+                    estimated_duration=12
                 )
                 print(f"{Colors.CYAN}Note: JSON report saved as 'tag_analysis_report.json' in your vault directory{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
@@ -278,43 +421,49 @@ class VaultManager:
             if choice == '0':
                 break
             elif choice == '1':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --dry-run',
-                    'Analyzing tag issues'
+                    'Analyzing tag issues',
+                    estimated_duration=8
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '2':
                 print(f"\n{Colors.YELLOW}⚠️  This will modify your vault files!{Colors.ENDC}")
                 confirm = input(f"{Colors.CYAN}Are you sure? (y/n): {Colors.ENDC}").lower()
                 if confirm == 'y':
-                    self.run_command(
+                    self.run_command_with_progress(
                         f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)}',
-                        'Fixing all tag issues'
+                        'Fixing all tag issues',
+                        estimated_duration=15
                     )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '3':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --fix-quoted-only',
-                    'Fixing quoted tags'
+                    'Fixing quoted tags',
+                    estimated_duration=6
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '4':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --merge-similar',
-                    'Merging similar tags'
+                    'Merging similar tags',
+                    estimated_duration=12
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '5':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --remove-generic',
-                    'Removing generic tags'
+                    'Removing generic tags',
+                    estimated_duration=8
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '6':
                 if self.v2_available:
-                    self.run_command(
+                    self.run_command_with_progress(
                         f'obsidian-librarian tags auto-tag {self.quote_path(self.current_vault)}',
-                        'Auto-tagging untagged files with AI'
+                        'Auto-tagging untagged files with AI',
+                        estimated_duration=25
                     )
                 else:
                     print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
@@ -339,15 +488,17 @@ class VaultManager:
             if choice == '0':
                 break
             elif choice == '1':
-                self.run_command(
+                self.run_command_with_progress(
                     f'./quick_incremental_backup.sh {self.quote_path(self.current_vault)}',
-                    'Creating incremental backup'
+                    'Creating incremental backup',
+                    estimated_duration=20
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '2':
-                self.run_command(
+                self.run_command_with_progress(
                     f'python3 backup_vault.py {self.quote_path(self.current_vault)}',
-                    'Creating full backup'
+                    'Creating full backup',
+                    estimated_duration=45
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '3':
@@ -388,49 +539,56 @@ class VaultManager:
                 continue
             
             if choice == '1':
-                self.run_command(
+                self.run_command_with_progress(
                     f'obsidian-librarian analyze {self.quote_path(self.current_vault)} --quality --structure',
-                    'Analyzing content with AI'
+                    'Analyzing content with AI',
+                    estimated_duration=30
                 )
             elif choice == '2':
                 query = input(f"\n{Colors.CYAN}Enter research topic: {Colors.ENDC}")
                 if query:
-                    self.show_loading("Researching topic", 3)
-                    self.run_command(
+                    self.run_command_with_progress(
                         f'obsidian-librarian research {self.quote_path(self.current_vault)} {self.quote_path(query)}',
-                        f'Researching: {query}'
+                        f'Researching: {query}',
+                        estimated_duration=60
                     )
             elif choice == '3':
-                self.run_command(
+                self.run_command_with_progress(
                     f'obsidian-librarian organize {self.quote_path(self.current_vault)} --strategy content --dry-run',
-                    'Planning smart organization'
+                    'Planning smart organization',
+                    estimated_duration=20
                 )
                 confirm = input(f"\n{Colors.CYAN}Apply these changes? (y/n): {Colors.ENDC}").lower()
                 if confirm == 'y':
-                    self.run_command(
+                    self.run_command_with_progress(
                         f'obsidian-librarian organize {self.quote_path(self.current_vault)} --strategy content',
-                        'Organizing files'
+                        'Organizing files',
+                        estimated_duration=35
                     )
             elif choice == '4':
-                self.run_command(
+                self.run_command_with_progress(
                     f'obsidian-librarian duplicates {self.quote_path(self.current_vault)} --threshold 0.85',
-                    'Finding duplicate content'
+                    'Finding duplicate content',
+                    estimated_duration=25
                 )
             elif choice == '5':
-                self.run_command(
+                self.run_command_with_progress(
                     f'obsidian-librarian stats {self.quote_path(self.current_vault)} --detailed',
-                    'Generating advanced analytics'
+                    'Generating advanced analytics',
+                    estimated_duration=15
                 )
             elif choice == '6':
-                self.run_command(
+                self.run_command_with_progress(
                     f'obsidian-librarian curate {self.quote_path(self.current_vault)} --duplicates --quality --structure --dry-run',
-                    'Planning comprehensive curation'
+                    'Planning comprehensive curation',
+                    estimated_duration=40
                 )
                 confirm = input(f"\n{Colors.CYAN}Apply curation? (y/n): {Colors.ENDC}").lower()
                 if confirm == 'y':
-                    self.run_command(
+                    self.run_command_with_progress(
                         f'obsidian-librarian curate {self.quote_path(self.current_vault)} --duplicates --quality --structure',
-                        'Curating vault'
+                        'Curating vault',
+                        estimated_duration=90
                     )
             elif choice == '7':
                 self.configure_ai_settings()
@@ -578,13 +736,22 @@ $ make install{Colors.ENDC}
         print(f"\n{Colors.CYAN}Analyzing folder structure...{Colors.ENDC}")
         
         try:
+            # First pass: count total directories to show progress
+            total_dirs_to_scan = sum(1 for _, dirs, _ in os.walk(self.current_vault) 
+                                   if not any(d.startswith('.') for d in dirs))
+            
             total_dirs = 0
             total_files = 0
             folder_stats = {}
+            processed_dirs = 0
             
             for root, dirs, files in os.walk(self.current_vault):
                 # Skip hidden directories
                 dirs[:] = [d for d in dirs if not d.startswith('.')]
+                
+                processed_dirs += 1
+                self.show_progress_bar("Scanning directories", processed_dirs, 
+                                     total_dirs_to_scan, width=40, show_percentage=True)
                 
                 total_dirs += len(dirs)
                 md_files = [f for f in files if f.endswith('.md')]
@@ -593,6 +760,8 @@ $ make install{Colors.ENDC}
                 if md_files:
                     rel_path = os.path.relpath(root, self.current_vault)
                     folder_stats[rel_path] = len(md_files)
+                
+                time.sleep(0.02)  # Small delay to show progress
             
             print(f"\n{Colors.GREEN}Folder Structure Analysis:{Colors.ENDC}")
             print(f"Total folders: {total_dirs}")
@@ -611,26 +780,41 @@ $ make install{Colors.ENDC}
         print(f"\n{Colors.CYAN}Finding files without tags...{Colors.ENDC}")
         
         try:
-            untagged = []
-            total = 0
-            
+            # First pass: count total markdown files
+            print(f"{Colors.YELLOW}Counting files...{Colors.ENDC}")
+            all_md_files = []
             for root, dirs, files in os.walk(self.current_vault):
-                # Skip hidden directories
                 dirs[:] = [d for d in dirs if not d.startswith('.')]
-                
                 for file in files:
                     if file.endswith('.md'):
-                        total += 1
-                        file_path = os.path.join(root, file)
-                        
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                            if not re.search(r'#[\w\-/]+', content):
-                                rel_path = os.path.relpath(file_path, self.current_vault)
-                                untagged.append(rel_path)
+                        all_md_files.append(os.path.join(root, file))
+            
+            total_files = len(all_md_files)
+            untagged = []
+            processed = 0
+            
+            print(f"{Colors.CYAN}Scanning {total_files} files for tags...{Colors.ENDC}")
+            
+            for file_path in all_md_files:
+                processed += 1
+                self.show_progress_bar("Checking for tags", processed, 
+                                     total_files, width=40, show_percentage=True)
+                
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        # Check for inline tags (#tag) and frontmatter tags
+                        if not re.search(r'#[\w\-/]+', content) and not re.search(r'^tags:\s*\[.*\]', content, re.MULTILINE):
+                            rel_path = os.path.relpath(file_path, self.current_vault)
+                            untagged.append(rel_path)
+                except Exception:
+                    # Skip files that can't be read
+                    continue
+                
+                time.sleep(0.01)  # Small delay to show progress
             
             print(f"\n{Colors.GREEN}Untagged Files Analysis:{Colors.ENDC}")
-            print(f"Total files scanned: {total}")
+            print(f"Total files scanned: {total_files}")
             print(f"Files without tags: {len(untagged)}")
             
             if untagged:

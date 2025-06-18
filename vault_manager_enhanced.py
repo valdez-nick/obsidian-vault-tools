@@ -227,7 +227,7 @@ class EnhancedVaultManager(VaultManager):
         width = int(width) if width else 80
         
         print(f"\n{Colors.CYAN}Converting with {style} style...{Colors.ENDC}")
-        self.show_loading("Generating ASCII art", 2)
+        self.show_indeterminate_progress("Generating ASCII art", 3)
         
         ascii_art = self.ascii_manager.generate_from_image(image_path, width, style)
         
@@ -364,7 +364,7 @@ class EnhancedVaultManager(VaultManager):
         
         # Generate flowchart
         print(f"\n{Colors.CYAN}Analyzing document and generating flowchart...{Colors.ENDC}")
-        self.show_loading("Processing document", 3)
+        self.show_indeterminate_progress("Processing document", 5)
         
         try:
             # Import the flowchart generator
