@@ -14,6 +14,13 @@ from datetime import datetime
 import time
 from typing import Optional, Dict, Any
 
+# Import the natural language query system
+try:
+    from natural_language_query import NaturalLanguageProcessor, QueryResult
+    NLQ_AVAILABLE = True
+except ImportError:
+    NLQ_AVAILABLE = False
+
 # ANSI color codes for terminal
 class Colors:
     HEADER = '\033[95m'
@@ -32,6 +39,11 @@ class VaultManager:
         self.config = self.load_config()
         self.current_vault = self.config.get('last_vault', '')
         self.v2_available = self.check_v2_installation()
+        
+        # Initialize natural language processor
+        self.nlp = None
+        if NLQ_AVAILABLE:
+            self.nlp = NaturalLanguageProcessor(self)
         
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from file"""
@@ -363,6 +375,325 @@ class VaultManager:
             print(f"{Colors.RED}❌ Unexpected error: {str(e)}{Colors.ENDC}")
             print(f"{Colors.YELLOW}Command: {command}{Colors.ENDC}")
             return False
+    
+    def natural_language_interface(self):
+        """Interactive natural language query interface"""
+        if not NLQ_AVAILABLE:
+            print(f"{Colors.RED}❌ Natural language processing not available{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Make sure natural_language_query.py is in the same directory{Colors.ENDC}")
+            return
+        
+        self.clear_screen()
+        print(f"\n{Colors.HEADER}{Colors.BOLD}{'=' * 60}{Colors.ENDC}")
+        print(f"{Colors.HEADER}{Colors.BOLD}{'🤖 NATURAL LANGUAGE INTERFACE'.center(60)}{Colors.ENDC}")
+        print(f"{Colors.HEADER}{Colors.BOLD}{'=' * 60}{Colors.ENDC}")
+        
+        print(f"\n{Colors.CYAN}Welcome to the AI-powered vault manager!{Colors.ENDC}")
+        print(f"{Colors.BLUE}Ask me anything about your vault in natural language.{Colors.ENDC}")
+        print(f"\n{Colors.YELLOW}Examples:{Colors.ENDC}")
+        print(f"  • \"analyze my tags\"")
+        print(f"  • \"backup the vault\"") 
+        print(f"  • \"find files without tags\"")
+        print(f"  • \"research artificial intelligence\"")
+        print(f"  • \"help\" or \"what can you do?\"")
+        print(f"\n{Colors.GREEN}Type 'menu' to return to the standard menu interface{Colors.ENDC}")
+        print(f"{Colors.GREEN}Type 'exit' to quit the application{Colors.ENDC}")
+        
+        while True:
+            print(f"\n{Colors.CYAN}Vault: {Colors.YELLOW}{self.current_vault or 'Not set'}{Colors.ENDC}")
+            query = input(f"{Colors.BOLD}🤖 Ask me: {Colors.ENDC}").strip()
+            
+            if not query:
+                continue
+            
+            if query.lower() in ['menu', 'back', 'return']:
+                break
+                
+            if query.lower() in ['exit', 'quit', 'bye']:
+                print(f"\n{Colors.GREEN}Thanks for using the Natural Language Vault Manager!{Colors.ENDC}")
+                print(f"{Colors.BLUE}Your vault is in good hands. 🤖📚{Colors.ENDC}\n")
+                sys.exit(0)
+            
+            # Process the query
+            result = self.nlp.process_query(query)
+            self.handle_query_result(result, query)
+    
+    def handle_query_result(self, result: QueryResult, original_query: str):
+        """Handle the result of a natural language query"""
+        if result.confidence == 0.0:
+            print(f"\n{Colors.RED}❌ I didn't understand: \"{original_query}\"{Colors.ENDC}")
+            if result.suggestions:
+                print(f"\n{Colors.YELLOW}💡 Did you mean:{Colors.ENDC}")
+                for i, suggestion in enumerate(result.suggestions[:3], 1):
+                    print(f"  {i}. {suggestion}")
+                    
+                choice = input(f"\n{Colors.CYAN}Select option (1-{len(result.suggestions[:3])}) or press Enter to try again: {Colors.ENDC}").strip()
+                if choice.isdigit() and 1 <= int(choice) <= len(result.suggestions[:3]):
+                    # Re-process the selected suggestion
+                    selected = result.suggestions[int(choice)-1]
+                    new_result = self.nlp.process_query(selected)
+                    self.handle_query_result(new_result, selected)
+            else:
+                print(f"{Colors.YELLOW}Try 'help' to see available commands{Colors.ENDC}")
+            return
+        
+        if result.confidence < 0.6:
+            print(f"\n{Colors.YELLOW}🤔 I think you want: {result.description}{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Confidence: {result.confidence*100:.1f}%{Colors.ENDC}")
+            confirm = input(f"{Colors.CYAN}Is this correct? (y/n): {Colors.ENDC}").lower()
+            if confirm != 'y':
+                if result.suggestions:
+                    print(f"\n{Colors.YELLOW}💡 Other possibilities:{Colors.ENDC}")
+                    for suggestion in result.suggestions[:3]:
+                        print(f"  • {suggestion}")
+                return
+        
+        # Execute the function
+        print(f"\n{Colors.GREEN}✓ Executing: {result.description}{Colors.ENDC}")
+        if result.function:
+            try:
+                if result.action == 'research_topics' and 'research_topic' in result.parameters:
+                    # Special handling for research
+                    self.execute_research_query(result.parameters['research_topic'])
+                elif result.action == 'show_help':
+                    self.show_nlp_help()
+                elif result.action == 'exit_application':
+                    print(f"\n{Colors.GREEN}Thanks for using the Natural Language Vault Manager!{Colors.ENDC}")
+                    print(f"{Colors.BLUE}Your vault is in good hands. 🤖📚{Colors.ENDC}\n")
+                    sys.exit(0)
+                else:
+                    # Execute the mapped function
+                    result.function()
+            except Exception as e:
+                print(f"{Colors.RED}❌ Error executing command: {str(e)}{Colors.ENDC}")
+        else:
+            print(f"{Colors.RED}❌ Function not implemented: {result.action}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def execute_research_query(self, topic: str):
+        """Execute a research query with the extracted topic"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian research {self.quote_path(self.current_vault)} {self.quote_path(topic)}',
+                f'Researching: {topic}',
+                estimated_duration=60
+            )
+        else:
+            print(f"{Colors.YELLOW}⚠️  Research feature requires obsidian-librarian v2{Colors.ENDC}")
+            print(f"{Colors.BLUE}See the Advanced Tools menu for installation instructions{Colors.ENDC}")
+    
+    def show_nlp_help(self):
+        """Show natural language processing help"""
+        if self.nlp:
+            help_text = self.nlp.get_command_help()
+            print(f"\n{help_text}")
+        else:
+            self.show_help()
+    
+    # Mapping functions for NLP system
+    def analyze_vault_tags(self):
+        """Wrapper for tag analysis"""
+        self.run_command_with_progress(
+            f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
+            'Analyzing vault tags',
+            estimated_duration=10
+        )
+    
+    def generate_analysis_report(self):
+        """Wrapper for analysis report generation"""
+        self.run_command_with_progress(
+            f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
+            'Generating comprehensive analysis report',
+            estimated_duration=12
+        )
+        print(f"{Colors.CYAN}Note: JSON report saved as 'tag_analysis_report.json' in your vault directory{Colors.ENDC}")
+    
+    def preview_tag_issues(self):
+        """Wrapper for tag issue preview"""
+        self.run_command_with_progress(
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --dry-run',
+            'Analyzing tag issues',
+            estimated_duration=8
+        )
+    
+    def fix_all_tag_issues(self):
+        """Wrapper for fixing all tag issues"""
+        print(f"\n{Colors.YELLOW}⚠️  This will modify your vault files!{Colors.ENDC}")
+        confirm = input(f"{Colors.CYAN}Are you sure? (y/n): {Colors.ENDC}").lower()
+        if confirm == 'y':
+            self.run_command_with_progress(
+                f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)}',
+                'Fixing all tag issues',
+                estimated_duration=15
+            )
+    
+    def fix_quoted_tags(self):
+        """Wrapper for fixing quoted tags"""
+        self.run_command_with_progress(
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --fix-quoted-only',
+            'Fixing quoted tags',
+            estimated_duration=6
+        )
+    
+    def merge_similar_tags(self):
+        """Wrapper for merging similar tags"""
+        self.run_command_with_progress(
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --merge-similar',
+            'Merging similar tags',
+            estimated_duration=12
+        )
+    
+    def remove_generic_tags(self):
+        """Wrapper for removing generic tags"""
+        self.run_command_with_progress(
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --remove-generic',
+            'Removing generic tags',
+            estimated_duration=8
+        )
+    
+    def auto_tag_files(self):
+        """Wrapper for auto-tagging files"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian tags auto-tag {self.quote_path(self.current_vault)}',
+                'Auto-tagging untagged files with AI',
+                estimated_duration=25
+            )
+        else:
+            print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
+    
+    def create_incremental_backup(self):
+        """Wrapper for incremental backup"""
+        self.run_command_with_progress(
+            f'./quick_incremental_backup.sh {self.quote_path(self.current_vault)}',
+            'Creating incremental backup',
+            estimated_duration=20
+        )
+    
+    def create_full_backup(self):
+        """Wrapper for full backup"""
+        self.run_command_with_progress(
+            f'python3 backup_vault.py {self.quote_path(self.current_vault)}',
+            'Creating full backup',
+            estimated_duration=45
+        )
+    
+    def ai_content_analysis(self):
+        """Wrapper for AI content analysis"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian analyze {self.quote_path(self.current_vault)} --quality --structure',
+                'Analyzing content with AI',
+                estimated_duration=30
+            )
+        else:
+            print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
+    
+    def research_topics(self):
+        """Wrapper for research functionality"""
+        query = input(f"\n{Colors.CYAN}Enter research topic: {Colors.ENDC}")
+        if query:
+            self.execute_research_query(query)
+    
+    def smart_file_organization(self):
+        """Wrapper for smart organization"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian organize {self.quote_path(self.current_vault)} --strategy content --dry-run',
+                'Planning smart organization',
+                estimated_duration=20
+            )
+            confirm = input(f"\n{Colors.CYAN}Apply these changes? (y/n): {Colors.ENDC}").lower()
+            if confirm == 'y':
+                self.run_command_with_progress(
+                    f'obsidian-librarian organize {self.quote_path(self.current_vault)} --strategy content',
+                    'Organizing files',
+                    estimated_duration=35
+                )
+        else:
+            print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
+    
+    def find_duplicate_content(self):
+        """Wrapper for duplicate detection"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian duplicates {self.quote_path(self.current_vault)} --threshold 0.85',
+                'Finding duplicate content',
+                estimated_duration=25
+            )
+        else:
+            print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
+    
+    def generate_advanced_analytics(self):
+        """Wrapper for advanced analytics"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian stats {self.quote_path(self.current_vault)} --detailed',
+                'Generating advanced analytics',
+                estimated_duration=15
+            )
+        else:
+            print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
+    
+    def comprehensive_vault_curation(self):
+        """Wrapper for comprehensive curation"""
+        if self.v2_available:
+            self.run_command_with_progress(
+                f'obsidian-librarian curate {self.quote_path(self.current_vault)} --duplicates --quality --structure --dry-run',
+                'Planning comprehensive curation',
+                estimated_duration=40
+            )
+            confirm = input(f"\n{Colors.CYAN}Apply curation? (y/n): {Colors.ENDC}").lower()
+            if confirm == 'y':
+                self.run_command_with_progress(
+                    f'obsidian-librarian curate {self.quote_path(self.current_vault)} --duplicates --quality --structure',
+                    'Curating vault',
+                    estimated_duration=90
+                )
+        else:
+            print(f"\n{Colors.YELLOW}⚠️  This feature requires obsidian-librarian v2{Colors.ENDC}")
+    
+    def install_v2_features(self):
+        """Wrapper for v2 installation"""
+        self.show_v2_setup()
+    
+    def check_for_updates(self):
+        """Wrapper for update checking"""
+        print(f"\n{Colors.CYAN}Checking for updates...{Colors.ENDC}")
+        self.run_command('pip list --outdated | grep obsidian', 'Checking pip packages')
+    
+    def enable_debug_mode(self):
+        """Wrapper for debug mode"""
+        print(f"\n{Colors.CYAN}Debug mode enabled for next command{Colors.ENDC}")
+        self.config['debug'] = True
+        self.save_config()
+    
+    def clean_cache_files(self):
+        """Wrapper for cache cleaning"""
+        self.clean_cache()
+    
+    def change_vault_location(self):
+        """Wrapper for changing vault location"""
+        self.get_vault_path()
+    
+    def toggle_color_output(self):
+        """Wrapper for toggling colors"""
+        self.toggle_colors()
+    
+    def configure_backup_settings(self):
+        """Wrapper for backup settings"""
+        self.configure_backup_settings()
+    
+    def reset_to_defaults(self):
+        """Wrapper for resetting settings"""
+        self.reset_settings()
+    
+    def exit_application(self):
+        """Wrapper for exiting"""
+        print(f"\n{Colors.GREEN}Thanks for using Obsidian Vault Manager!{Colors.ENDC}")
+        print(f"{Colors.BLUE}Your vault is in good hands. 📚{Colors.ENDC}\n")
+        sys.exit(0)
     
     def analyze_vault_menu(self):
         """Vault analysis submenu"""
@@ -1151,6 +1482,7 @@ $ make install{Colors.ENDC}
         
         # Main menu loop
         while True:
+            nlp_status = "🤖 AI Query Interface" if NLQ_AVAILABLE else "🤖 AI Query Interface (Not Available)"
             options = [
                 ('1', '📊 Analyze Vault'),
                 ('2', '🏷️  Manage Tags'),
@@ -1159,6 +1491,7 @@ $ make install{Colors.ENDC}
                 ('5', '🔧 Advanced Tools'),
                 ('6', '📚 Help & Documentation'),
                 ('7', '⚙️  Settings'),
+                ('8', nlp_status),
                 ('0', '👋 Exit')
             ]
             
@@ -1183,6 +1516,13 @@ $ make install{Colors.ENDC}
                 self.show_help()
             elif choice == '7':
                 self.settings_menu()
+            elif choice == '8':
+                if NLQ_AVAILABLE:
+                    self.natural_language_interface()
+                else:
+                    print(f"\n{Colors.RED}❌ Natural language processing not available{Colors.ENDC}")
+                    print(f"{Colors.YELLOW}Make sure natural_language_query.py is in the same directory{Colors.ENDC}")
+                    time.sleep(2)
             else:
                 print(f"\n{Colors.RED}Invalid choice. Please try again.{Colors.ENDC}")
                 time.sleep(1)
