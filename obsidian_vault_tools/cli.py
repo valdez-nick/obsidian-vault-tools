@@ -197,6 +197,158 @@ def interactive(vault):
     except Exception as e:
         console.print(f"[red]Error starting interactive system: {e}[/red]")
 
+@cli.group()
+def mcp():
+    """MCP (Model Context Protocol) server management"""
+    pass
+
+@mcp.command()
+def list():
+    """List configured MCP servers"""
+    try:
+        from .mcp import MCPConfig
+        config = MCPConfig()
+        servers = config.get_server_status()
+        
+        if not servers:
+            console.print("No MCP servers configured.")
+            console.print("Use 'ovt mcp add' to add a server.")
+            return
+        
+        from rich.table import Table
+        table = Table(title="MCP Servers")
+        table.add_column("Name", style="cyan")
+        table.add_column("Command", style="green") 
+        table.add_column("Status", style="yellow")
+        table.add_column("Ready", style="bold")
+        
+        for name, info in servers.items():
+            command = info["config"].get("command", "N/A")
+            validation = info["validation"]
+            status = "✓ Valid" if validation["command_exists"] else "✗ Invalid"
+            ready = "✓ Ready" if info["ready"] else "✗ Not Ready"
+            
+            table.add_row(name, command, status, ready)
+        
+        console.print(table)
+        
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
+@mcp.command()
+@click.argument('name')
+def status(name):
+    """Show status of a specific MCP server"""
+    try:
+        from .mcp import get_client_manager
+        import asyncio
+        
+        manager = get_client_manager()
+        server_status = manager.get_server_status(name)
+        
+        if not server_status:
+            console.print(f"[red]Server '{name}' not found[/red]")
+            return
+        
+        console.print(f"Server: {name}")
+        console.print(f"Running: {'✓ Yes' if server_status['running'] else '✗ No'}")
+        if server_status.get('pid'):
+            console.print(f"PID: {server_status['pid']}")
+        if server_status.get('uptime'):
+            console.print(f"Uptime: {server_status['uptime']:.1f}s")
+        if server_status.get('last_error'):
+            console.print(f"[red]Last Error: {server_status['last_error']}[/red]")
+            
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
+@mcp.command()
+@click.argument('name')
+def start(name):
+    """Start an MCP server"""
+    try:
+        from .mcp import get_client_manager
+        import asyncio
+        
+        async def start_server():
+            manager = get_client_manager()
+            success = await manager.start_server(name)
+            if success:
+                console.print(f"[green]✓ Started MCP server: {name}[/green]")
+            else:
+                console.print(f"[red]✗ Failed to start MCP server: {name}[/red]")
+        
+        asyncio.run(start_server())
+        
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
+@mcp.command()
+@click.argument('name')
+def stop(name):
+    """Stop an MCP server"""
+    try:
+        from .mcp import get_client_manager
+        import asyncio
+        
+        async def stop_server():
+            manager = get_client_manager()
+            success = await manager.stop_server(name)
+            if success:
+                console.print(f"[green]✓ Stopped MCP server: {name}[/green]")
+            else:
+                console.print(f"[red]✗ Failed to stop MCP server: {name}[/red]")
+        
+        asyncio.run(stop_server())
+        
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
+@mcp.command()
+@click.argument('name')
+@click.argument('template', type=click.Choice(['github', 'memory', 'confluence', 'obsidian-pm']))
+@click.option('--script-path', help='Path to script file (for obsidian-pm template)')
+def add(name, template, script_path):
+    """Add a new MCP server from template"""
+    try:
+        from .mcp import MCPConfig
+        config = MCPConfig()
+        
+        kwargs = {}
+        if script_path:
+            kwargs['script_path'] = script_path
+        
+        success = config.create_server_from_template(name, template, **kwargs)
+        if success:
+            console.print(f"[green]✓ Added MCP server '{name}' from template '{template}'[/green]")
+            console.print("Configure credentials with 'ovt mcp credentials'")
+        else:
+            console.print(f"[red]✗ Failed to add server from template '{template}'[/red]")
+            
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
+@mcp.command()
+def credentials():
+    """Manage MCP credentials"""
+    try:
+        from .mcp import get_credential_manager
+        cred_manager = get_credential_manager()
+        
+        console.print("Stored credentials:")
+        creds = cred_manager.list_credentials()
+        
+        if not creds:
+            console.print("No credentials stored.")
+        else:
+            for cred in creds:
+                console.print(f"  - {cred}")
+        
+        console.print("\nTo add credentials, use environment variables or you'll be prompted when starting servers.")
+        
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
 @cli.command()
 def version():
     """Show version information"""

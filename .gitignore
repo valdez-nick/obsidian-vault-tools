@@ -26,6 +26,12 @@ obsidian_backups/
 private/
 sensitive/
 
+# MCP Credentials (NEVER COMMIT)
+**/credentials.json
+**/mcp_credentials.json  
+**/config.local.json
+**/mcp_config.local.json
+
 # Temporary files
 *.tmp
 *.temp

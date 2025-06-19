@@ -1733,6 +1733,7 @@ class EnhancedVaultManager(VaultManager):
                 ('5', 'Content migration'),
                 ('6', 'Plugin management'),
                 ('7', 'Diagnostic tools'),
+                ('8', '🔗 MCP Server Management'),
                 ('0', 'Back to main menu')
             ]
             
@@ -1758,6 +1759,8 @@ class EnhancedVaultManager(VaultManager):
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '7':
                 self.diagnostic_tools_menu()
+            elif choice == '8':
+                self.mcp_server_menu()
     
     def diagnostic_tools_menu(self):
         """Diagnostic tools submenu"""
@@ -1784,6 +1787,276 @@ class EnhancedVaultManager(VaultManager):
             elif choice == '4':
                 self.validate_dependencies()
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def mcp_server_menu(self):
+        """MCP server management menu"""
+        try:
+            # Import MCP modules dynamically
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), 'obsidian_vault_tools'))
+            
+            from obsidian_vault_tools.mcp import MCPConfig, get_client_manager
+            import asyncio
+            
+            config = MCPConfig()
+            client_manager = get_client_manager()
+            
+        except ImportError:
+            print(f"\n{Colors.RED}❌ MCP features not available{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Install with: pip install mcp cryptography{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
+        
+        while True:
+            # Get server status
+            try:
+                server_status = asyncio.run(self._get_mcp_server_status(client_manager, config))
+            except Exception as e:
+                print(f"{Colors.RED}Error getting server status: {e}{Colors.ENDC}")
+                server_status = {}
+            
+            options = [
+                ('1', '📋 List configured servers'),
+                ('2', '▶️  Start MCP server'),
+                ('3', '⏹️  Stop MCP server'),
+                ('4', '🔄 Restart MCP server'),
+                ('5', '➕ Add new server'),
+                ('6', '🔧 MCP tools interface'),
+                ('7', '📚 MCP resources'),
+                ('0', 'Back to advanced tools')
+            ]
+            
+            # Add status info to title
+            running_count = sum(1 for s in server_status.values() if s.get('running', False))
+            total_count = len(server_status)
+            status_info = f"({running_count}/{total_count} running)" if total_count > 0 else "(no servers)"
+            
+            choice = self.get_menu_choice(f'🔗 MCP SERVER MANAGEMENT {status_info}', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self._show_mcp_server_list(config, client_manager)
+            elif choice == '2':
+                self._start_mcp_server(config, client_manager)
+            elif choice == '3':
+                self._stop_mcp_server(config, client_manager)
+            elif choice == '4':
+                self._restart_mcp_server(config, client_manager)
+            elif choice == '5':
+                self._add_mcp_server(config)
+            elif choice == '6':
+                self._mcp_tools_interface(client_manager)
+            elif choice == '7':
+                self._mcp_resources_interface(client_manager)
+    
+    async def _get_mcp_server_status(self, client_manager, config):
+        """Get MCP server status"""
+        return client_manager.get_all_server_status()
+    
+    def _show_mcp_server_list(self, config, client_manager):
+        """Show list of MCP servers"""
+        print(f"\n{Colors.CYAN}📋 MCP Server Status{Colors.ENDC}")
+        
+        try:
+            import asyncio
+            server_status = asyncio.run(self._get_mcp_server_status(client_manager, config))
+            
+            if not server_status:
+                print(f"{Colors.YELLOW}No MCP servers configured.{Colors.ENDC}")
+                print(f"{Colors.BLUE}Use option 5 to add a server.{Colors.ENDC}")
+            else:
+                print(f"\n{Colors.HEADER}{'Name':<20} {'Status':<12} {'Command':<30}{Colors.ENDC}")
+                print("-" * 70)
+                
+                for name, status in server_status.items():
+                    running = status.get('running', False)
+                    status_str = f"{Colors.GREEN}✓ Running{Colors.ENDC}" if running else f"{Colors.RED}✗ Stopped{Colors.ENDC}"
+                    
+                    # Get command from config
+                    server_config = config.get_server_config(name)
+                    command = server_config.get('command', 'N/A') if server_config else 'N/A'
+                    
+                    print(f"{name:<20} {status_str:<20} {command:<30}")
+        
+        except Exception as e:
+            print(f"{Colors.RED}Error getting server status: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _start_mcp_server(self, config, client_manager):
+        """Start an MCP server"""
+        servers = config.list_servers()
+        if not servers:
+            print(f"\n{Colors.YELLOW}No servers configured. Add one first.{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
+        
+        print(f"\n{Colors.CYAN}📋 Available servers:{Colors.ENDC}")
+        for i, server in enumerate(servers):
+            print(f"  {i+1}. {server}")
+        
+        choice = input(f"\n{Colors.YELLOW}Enter server number to start: {Colors.ENDC}")
+        
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(servers):
+                server_name = servers[idx]
+                print(f"\n{Colors.BLUE}Starting server '{server_name}'...{Colors.ENDC}")
+                
+                import asyncio
+                success = asyncio.run(client_manager.start_server(server_name))
+                
+                if success:
+                    print(f"{Colors.GREEN}✓ Server '{server_name}' started successfully!{Colors.ENDC}")
+                else:
+                    print(f"{Colors.RED}❌ Failed to start server '{server_name}'.{Colors.ENDC}")
+            else:
+                print(f"{Colors.RED}Invalid selection.{Colors.ENDC}")
+        except (ValueError, Exception) as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _stop_mcp_server(self, config, client_manager):
+        """Stop an MCP server"""
+        import asyncio
+        running_servers = []
+        
+        try:
+            all_status = asyncio.run(self._get_mcp_server_status(client_manager, config))
+            running_servers = [name for name, status in all_status.items() if status.get('running', False)]
+        except Exception as e:
+            print(f"{Colors.RED}Error getting server status: {e}{Colors.ENDC}")
+            return
+        
+        if not running_servers:
+            print(f"\n{Colors.YELLOW}No servers are currently running.{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
+        
+        print(f"\n{Colors.CYAN}📋 Running servers:{Colors.ENDC}")
+        for i, server in enumerate(running_servers):
+            print(f"  {i+1}. {server}")
+        
+        choice = input(f"\n{Colors.YELLOW}Enter server number to stop: {Colors.ENDC}")
+        
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(running_servers):
+                server_name = running_servers[idx]
+                print(f"\n{Colors.BLUE}Stopping server '{server_name}'...{Colors.ENDC}")
+                
+                success = asyncio.run(client_manager.stop_server(server_name))
+                
+                if success:
+                    print(f"{Colors.GREEN}✓ Server '{server_name}' stopped successfully!{Colors.ENDC}")
+                else:
+                    print(f"{Colors.RED}❌ Failed to stop server '{server_name}'.{Colors.ENDC}")
+            else:
+                print(f"{Colors.RED}Invalid selection.{Colors.ENDC}")
+        except (ValueError, Exception) as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _restart_mcp_server(self, config, client_manager):
+        """Restart an MCP server"""
+        servers = config.list_servers()
+        if not servers:
+            print(f"\n{Colors.YELLOW}No servers configured.{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
+        
+        print(f"\n{Colors.CYAN}📋 Available servers:{Colors.ENDC}")
+        for i, server in enumerate(servers):
+            print(f"  {i+1}. {server}")
+        
+        choice = input(f"\n{Colors.YELLOW}Enter server number to restart: {Colors.ENDC}")
+        
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(servers):
+                server_name = servers[idx]
+                print(f"\n{Colors.BLUE}Restarting server '{server_name}'...{Colors.ENDC}")
+                
+                import asyncio
+                success = asyncio.run(client_manager.restart_server(server_name))
+                
+                if success:
+                    print(f"{Colors.GREEN}✓ Server '{server_name}' restarted successfully!{Colors.ENDC}")
+                else:
+                    print(f"{Colors.RED}❌ Failed to restart server '{server_name}'.{Colors.ENDC}")
+            else:
+                print(f"{Colors.RED}Invalid selection.{Colors.ENDC}")
+        except (ValueError, Exception) as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _add_mcp_server(self, config):
+        """Add a new MCP server"""
+        print(f"\n{Colors.CYAN}➕ Add New MCP Server{Colors.ENDC}")
+        
+        templates = ['github', 'memory', 'confluence', 'obsidian-pm', 'web-fetch']
+        
+        print(f"\n{Colors.YELLOW}Available templates:{Colors.ENDC}")
+        for i, template in enumerate(templates):
+            descriptions = {
+                'github': 'GitHub repository access',
+                'memory': 'Persistent conversation memory',
+                'confluence': 'Atlassian Confluence/Jira access',
+                'obsidian-pm': 'Custom Obsidian PM intelligence',
+                'web-fetch': 'Web content fetching'
+            }
+            print(f"  {i+1}. {template} - {descriptions.get(template, '')}")
+        
+        template_choice = input(f"\n{Colors.YELLOW}Choose template (1-{len(templates)}): {Colors.ENDC}")
+        
+        try:
+            template_idx = int(template_choice) - 1
+            if 0 <= template_idx < len(templates):
+                template = templates[template_idx]
+                server_name = input(f"{Colors.YELLOW}Enter server name: {Colors.ENDC}")
+                
+                if not server_name:
+                    print(f"{Colors.RED}Server name cannot be empty.{Colors.ENDC}")
+                    return
+                
+                kwargs = {}
+                if template == 'obsidian-pm':
+                    script_path = input(f"{Colors.YELLOW}Enter script path: {Colors.ENDC}")
+                    if script_path:
+                        kwargs['script_path'] = script_path
+                
+                success = config.create_server_from_template(server_name, template, **kwargs)
+                
+                if success:
+                    print(f"{Colors.GREEN}✓ Added server '{server_name}' from template '{template}'!{Colors.ENDC}")
+                    print(f"{Colors.BLUE}Configure credentials using environment variables or they'll be prompted when starting.{Colors.ENDC}")
+                else:
+                    print(f"{Colors.RED}❌ Failed to add server.{Colors.ENDC}")
+            else:
+                print(f"{Colors.RED}Invalid template selection.{Colors.ENDC}")
+        except (ValueError, Exception) as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _mcp_tools_interface(self, client_manager):
+        """Interface for calling MCP tools"""
+        print(f"\n{Colors.CYAN}🔧 MCP Tools Interface{Colors.ENDC}")
+        print(f"{Colors.YELLOW}This feature allows you to call tools provided by running MCP servers.{Colors.ENDC}")
+        print(f"{Colors.BLUE}Feature coming soon in next update!{Colors.ENDC}")
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _mcp_resources_interface(self, client_manager):
+        """Interface for accessing MCP resources"""
+        print(f"\n{Colors.CYAN}📚 MCP Resources Interface{Colors.ENDC}")
+        print(f"{Colors.YELLOW}This feature allows you to access resources provided by running MCP servers.{Colors.ENDC}")
+        print(f"{Colors.BLUE}Feature coming soon in next update!{Colors.ENDC}")
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def test_navigation_system(self):
         """Test arrow key navigation system"""

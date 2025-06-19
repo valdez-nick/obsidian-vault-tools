@@ -57,6 +57,10 @@ setup(
             "numpy>=1.21",
             "torch>=1.9",
         ],
+        "mcp": [
+            "mcp>=0.9.0",
+            "cryptography>=3.4.8",
+        ],
     },
     entry_points={
         "console_scripts": [
