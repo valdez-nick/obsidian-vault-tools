@@ -1,0 +1,156 @@
+# Default Model Configuration for Vault Query System
+# This file contains default configurations that are automatically applied
+# Users can override these in model_config.yaml
+
+# Available model providers
+providers:
+  ollama:
+    base_url: "${OLLAMA_HOST:-http://localhost:11434}"
+    timeout: 300
+    auto_detect: true
+
+# Model definitions with automatic fallback
+models:
+  # Intent classification - lightweight and fast
+  intent_classifier:
+    provider: "ollama"
+    model: "${OBSIDIAN_AI_MODEL:-auto}"  # Will be auto-detected
+    temperature: 0.1
+    max_tokens: 100
+    description: "Classifies query intent (search, count, summarize, etc.)"
+    
+  # General Q&A - main workhorse
+  general_qa:
+    provider: "ollama"
+    model: "${OBSIDIAN_AI_MODEL:-auto}"  # Will be auto-detected
+    temperature: 0.7
+    max_tokens: 500
+    description: "General question answering about vault content"
+    
+  # Code and technical analysis
+  code_analyzer:
+    provider: "ollama"
+    model: "${OBSIDIAN_AI_MODEL:-auto}"  # Will be auto-detected
+    temperature: 0.3
+    max_tokens: 1000
+    description: "Analyzes code snippets and technical content"
+    
+  # Summarization tasks
+  summarizer:
+    provider: "ollama"
+    model: "${OBSIDIAN_AI_MODEL:-auto}"  # Will be auto-detected
+    temperature: 0.5
+    max_tokens: 300
+    description: "Summarizes long documents and aggregates information"
+    
+  # Entity extraction
+  entity_extractor:
+    provider: "ollama"
+    model: "${OBSIDIAN_AI_MODEL:-auto}"  # Will be auto-detected
+    temperature: 0.1
+    max_tokens: 200
+    description: "Extracts names, dates, projects from text"
+
+# Model preferences for auto-detection
+model_preferences:
+  # Priority order for model selection (first available will be used)
+  priority:
+    - "dolphin3:latest"
+    - "dolphin3"
+    - "llama3.2:latest"
+    - "llama3.2"
+    - "llama2:latest"
+    - "llama2:7b"
+    - "mistral:latest"
+    - "mistral:7b-instruct"
+    - "phi3:latest"
+    - "phi:2.7b"
+    
+  # Model capability mappings
+  capabilities:
+    dolphin3:
+      all_purpose: true
+      code_analysis: excellent
+      summarization: excellent
+      classification: excellent
+      entity_extraction: excellent
+    llama3.2:
+      all_purpose: true
+      code_analysis: good
+      summarization: excellent
+      classification: good
+      entity_extraction: good
+    mistral:
+      all_purpose: true
+      code_analysis: good
+      summarization: excellent
+      classification: good
+      entity_extraction: moderate
+    phi:
+      all_purpose: false
+      code_analysis: moderate
+      summarization: moderate
+      classification: excellent
+      entity_extraction: good
+
+# Ensemble strategies
+ensemble:
+  # Use single model mode if only one model is available
+  auto_single_model: true
+  
+  strategies:
+    voting:
+      enabled: true
+      min_agreement: 0.6
+      
+    weighted_confidence:
+      enabled: true
+      confidence_threshold: 0.7
+      
+    cascade:
+      enabled: true
+      escalation_threshold: 0.5
+      
+    specialized:
+      enabled: true
+      # Rules will be auto-configured based on available models
+      routing_rules: []
+          
+# Query routing configuration
+routing:
+  # Use intent classifier first
+  use_classifier: true
+  
+  # Fallback order if primary model fails
+  fallback_chain: []  # Will be auto-populated
+    
+  # Cache settings
+  cache:
+    enabled: true
+    ttl_seconds: 3600
+    max_size_mb: 100
+    
+# Performance settings
+performance:
+  # Maximum concurrent model calls
+  max_concurrent: 3
+  
+  # Timeout for model responses
+  response_timeout: 60
+  
+  # Batch processing for multiple queries
+  batch_size: 5
+  
+  # Resource limits
+  max_memory_gb: 8
+  
+# Data collection for improvement
+feedback:
+  # Collect query-response pairs
+  collect_queries: true
+  
+  # Path to store feedback data
+  data_path: "./llm_feedback"
+  
+  # Minimum confidence to auto-save
+  auto_save_threshold: 0.8

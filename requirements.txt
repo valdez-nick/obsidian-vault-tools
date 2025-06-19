@@ -1,0 +1,104 @@
+# Core Dependencies
+# =================
+
+# Web framework and async HTTP
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+httpx>=0.25.0
+aiohttp>=3.9.0  # For async HTTP requests (Ollama API)
+
+# CLI and UI
+typer[all]>=0.9.0
+rich>=13.7.0
+click>=8.1.0
+
+# AI and Machine Learning Core
+# ============================
+langchain>=0.0.350
+openai>=1.3.0
+anthropic>=0.7.0
+sentence-transformers>=2.2.0  # For embeddings
+scikit-learn>=1.3.0  # For custom classifiers
+numpy>=1.24.0
+
+# Vector Database and Search
+qdrant-client>=1.6.0
+
+# Database
+duckdb>=0.9.0
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# Redis and Caching
+redis>=5.0.0
+aioredis>=2.0.0
+hiredis>=2.2.0
+
+# Web Scraping and Content Processing
+beautifulsoup4>=4.12.0
+html2text>=2020.1.16
+trafilatura>=1.6.0
+
+# Data Processing and Configuration
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+PyYAML>=6.0  # For config file parsing
+
+# File Handling and Templating
+aiofiles>=23.2.0
+python-frontmatter>=1.0.0
+jinja2>=3.1.0
+watchdog>=3.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+python-dotenv>=1.0.0
+nest-asyncio>=1.5.0  # For async compatibility
+
+# Version Control
+GitPython>=3.1.40
+
+# Async and Concurrency
+asyncio-throttle>=1.0.0
+
+# Monitoring and Logging
+structlog>=23.2.0
+prometheus-client>=0.19.0
+psutil>=5.9.0
+
+# Rust Integration (for hybrid Python-Rust architecture)
+maturin>=1.0,<2.0
+
+# Optional Dependencies for Advanced LLM Features
+# ===============================================
+# Install these with: pip install -r requirements.txt -r requirements-optional.txt
+# Or: pip install obsidian-librarian[llm]
+
+# These are commented out by default to avoid heavy dependencies
+# Uncomment if you need local transformer models or advanced vector search
+
+# transformers>=4.36.0  # For custom transformer models
+# torch>=2.1.0  # For transformers (CPU version by default)
+# faiss-cpu>=1.7.4  # For vector search (CPU version)
+
+# Note: For GPU support, replace torch with:
+# torch>=2.1.0 --index-url https://download.pytorch.org/whl/cu118
+
+# Development Dependencies (optional)
+# ==================================
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# pytest-cov>=4.1.0
+# pytest-mock>=3.12.0
+# black>=23.11.0
+# isort>=5.12.0
+# flake8>=6.1.0
+# mypy>=1.7.0
+# pre-commit>=3.5.0
+
+# Documentation Dependencies (optional)
+# ====================================
+# mkdocs>=1.5.0
+# mkdocs-material>=9.4.0
+# mkdocstrings[python]>=0.24.0
