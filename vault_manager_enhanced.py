@@ -1578,42 +1578,64 @@ class EnhancedVaultManager(VaultManager):
                 self.play_menu_navigation_sound()
             return input().strip()
     
-    def analyze_vault_menu(self):
-        """Override analyze vault menu with arrow key navigation"""
+    def smart_analysis_menu(self):
+        """Smart vault analysis combining basic and AI-powered features"""
         while True:
             options = [
-                ('1', 'Full vault analysis'),
-                ('2', 'Tag analysis'),
-                ('3', 'Link analysis'),
-                ('4', 'Content statistics'),
-                ('5', 'Duplicate detection'),
+                ('1', 'Quick vault overview'),
+                ('2', 'AI-powered content analysis' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('3', 'Tag analysis & insights'),
+                ('4', 'Advanced vault analytics' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('5', 'Link analysis & graph'),
+                ('6', 'Content statistics'),
                 ('0', 'Back to main menu')
             ]
             
-            choice = self.get_menu_choice('📊 VAULT ANALYSIS', options)
+            choice = self.get_menu_choice('📊 SMART VAULT ANALYSIS', options)
             
             if choice == '0':
                 break
             elif choice == '1':
                 self.play_operation_start_sound('scan')
-                super().analyze_vault_menu()
-                return  # Exit after running parent method
-            elif choice == '2':
-                self.play_operation_start_sound('scan')
+                # Quick overview using basic analysis
+                print(f"\n{Colors.CYAN}Running quick vault overview...{Colors.ENDC}")
                 self.run_command_with_progress(
                     f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
-                    'Analyzing tags',
+                    'Analyzing vault structure',
                     estimated_duration=5
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                if self.v2_available:
+                    self.run_v2_analysis()
+                else:
+                    print(f"\n{Colors.YELLOW}AI-powered analysis requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '3':
-                print(f"\n{Colors.YELLOW}Link analysis feature coming soon!{Colors.ENDC}")
+                self.play_operation_start_sound('scan')
+                self.run_command_with_progress(
+                    f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
+                    'Analyzing tags with insights',
+                    estimated_duration=5
+                )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '4':
-                print(f"\n{Colors.YELLOW}Content statistics feature coming soon!{Colors.ENDC}")
-                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                if self.v2_available:
+                    self.run_v2_analytics()
+                else:
+                    print(f"\n{Colors.YELLOW}Advanced analytics requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '5':
-                print(f"\n{Colors.YELLOW}Duplicate detection feature coming soon!{Colors.ENDC}")
+                print(f"\n{Colors.YELLOW}Link analysis feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '6':
+                print(f"\n{Colors.YELLOW}Content statistics feature coming soon!{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def manage_tags_menu(self):
@@ -1704,13 +1726,13 @@ class EnhancedVaultManager(VaultManager):
         """Override advanced tools menu with arrow key navigation"""
         while True:
             options = [
-                ('1', 'File versioning'),
-                ('2', 'Bulk rename'),
-                ('3', 'Content migration'),
-                ('4', 'Plugin management'),
-                ('5', 'Diagnostic tools'),
-                ('6', 'Organize output files'),
-                ('7', 'Intelligent janitor'),
+                ('1', 'Intelligent janitor'),
+                ('2', 'Organize output files'),
+                ('3', 'File versioning'),
+                ('4', 'Bulk rename'),
+                ('5', 'Content migration'),
+                ('6', 'Plugin management'),
+                ('7', 'Diagnostic tools'),
                 ('0', 'Back to main menu')
             ]
             
@@ -1719,23 +1741,23 @@ class EnhancedVaultManager(VaultManager):
             if choice == '0':
                 break
             elif choice == '1':
+                self.intelligent_janitor_menu()
+            elif choice == '2':
+                self.organize_output_files()
+            elif choice == '3':
                 print(f"\n{Colors.YELLOW}File versioning feature coming soon!{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '2':
+            elif choice == '4':
                 print(f"\n{Colors.YELLOW}Bulk rename feature coming soon!{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '3':
+            elif choice == '5':
                 print(f"\n{Colors.YELLOW}Content migration feature coming soon!{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '4':
+            elif choice == '6':
                 print(f"\n{Colors.YELLOW}Plugin management feature coming soon!{Colors.ENDC}")
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
-            elif choice == '5':
-                self.diagnostic_tools_menu()
-            elif choice == '6':
-                self.organize_output_files()
             elif choice == '7':
-                self.intelligent_janitor_menu()
+                self.diagnostic_tools_menu()
     
     def diagnostic_tools_menu(self):
         """Diagnostic tools submenu"""
@@ -1795,7 +1817,9 @@ class EnhancedVaultManager(VaultManager):
                 ('1', 'Audio settings'),
                 ('2', 'Display settings'),
                 ('3', 'Path settings'),
-                ('4', 'Reset configuration'),
+                ('4', 'AI model configuration'),
+                ('5', 'V2 setup & installation'),
+                ('6', 'Reset configuration'),
                 ('0', 'Back to main menu')
             ]
             
@@ -1810,6 +1834,10 @@ class EnhancedVaultManager(VaultManager):
             elif choice == '3':
                 self.path_settings_menu()
             elif choice == '4':
+                self.ai_model_configuration()
+            elif choice == '5':
+                self.setup_v2_installation()
+            elif choice == '6':
                 self.reset_configuration()
     
     def audio_settings_menu(self):
@@ -2158,6 +2186,208 @@ class EnhancedVaultManager(VaultManager):
         
         # Delegate to existing AI configuration
         self.ai_model_configuration()
+    
+    def research_and_create_menu(self):
+        """Research topics and create notes menu"""
+        while True:
+            options = [
+                ('1', '🔍 Research a topic' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('2', '📝 Create note from research'),
+                ('3', '🌐 Web research & summarize'),
+                ('4', '📚 Research history'),
+                ('5', '⚙️  Configure research sources'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('🔍 RESEARCH & CREATE', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                if self.v2_available:
+                    self.run_v2_research()
+                else:
+                    print(f"\n{Colors.YELLOW}Research feature requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                print(f"\n{Colors.YELLOW}Create note from research feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                print(f"\n{Colors.YELLOW}Web research feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                self.view_research_history()
+            elif choice == '5':
+                print(f"\n{Colors.YELLOW}Research source configuration coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def tags_and_organization_menu(self):
+        """Enhanced tag management with smart organization"""
+        while True:
+            options = [
+                ('1', 'Preview all tag fixes'),
+                ('2', 'Apply all tag fixes'),
+                ('3', 'Smart file organization' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('4', 'Auto-organize by content' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('5', 'Tag hierarchy analysis'),
+                ('6', 'Bulk tag operations'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('🏷️ TAGS & ORGANIZATION', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.play_operation_start_sound('scan')
+                self.run_command_with_progress(
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --dry-run',
+                    'Previewing tag fixes',
+                    estimated_duration=8
+                )
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                self.play_operation_start_sound('scan')
+                self.run_command_with_progress(
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply',
+                    'Applying all tag fixes',
+                    estimated_duration=15
+                )
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                if self.v2_available:
+                    self.run_v2_organization()
+                else:
+                    print(f"\n{Colors.YELLOW}Smart organization requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                if self.v2_available:
+                    print(f"\n{Colors.CYAN}Auto-organizing by content...{Colors.ENDC}")
+                    self.run_v2_organization()
+                else:
+                    print(f"\n{Colors.YELLOW}Auto-organization requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '5':
+                print(f"\n{Colors.YELLOW}Tag hierarchy analysis coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '6':
+                self.bulk_tag_operations_menu()
+    
+    def bulk_tag_operations_menu(self):
+        """Bulk tag operations submenu"""
+        while True:
+            options = [
+                ('1', 'Fix quoted tags only'),
+                ('2', 'Merge similar tags'),
+                ('3', 'Remove generic tags'),
+                ('4', 'Add tags by pattern'),
+                ('5', 'Remove tags by pattern'),
+                ('0', 'Back to tags menu')
+            ]
+            
+            choice = self.get_menu_choice('🏷️ BULK TAG OPERATIONS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.play_operation_start_sound('scan')
+                self.fix_quoted_tags()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                self.play_operation_start_sound('scan')
+                self.merge_similar_tags()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                self.play_operation_start_sound('scan')
+                self.remove_generic_tags()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                print(f"\n{Colors.YELLOW}Add tags by pattern feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '5':
+                print(f"\n{Colors.YELLOW}Remove tags by pattern feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def duplicates_and_curation_menu(self):
+        """Find duplicates and curate content"""
+        while True:
+            options = [
+                ('1', 'Find duplicate content' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('2', 'Merge duplicate notes'),
+                ('3', 'Comprehensive curation' + (' ✓' if self.v2_available else ' (Setup Required)')),
+                ('4', 'Content quality analysis'),
+                ('5', 'Archive old content'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('🔄 DUPLICATES & CURATION', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                if self.v2_available:
+                    self.run_v2_duplicates()
+                else:
+                    print(f"\n{Colors.YELLOW}Duplicate detection requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                print(f"\n{Colors.YELLOW}Merge duplicates feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                if self.v2_available:
+                    self.run_v2_curation()
+                else:
+                    print(f"\n{Colors.YELLOW}Comprehensive curation requires V2 setup{Colors.ENDC}")
+                    if input(f"{Colors.CYAN}Would you like to set it up now? (y/N): {Colors.ENDC}").lower() == 'y':
+                        self.setup_v2_installation()
+                    else:
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                print(f"\n{Colors.YELLOW}Content quality analysis coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '5':
+                print(f"\n{Colors.YELLOW}Archive old content feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def view_research_history(self):
+        """View research history"""
+        print(f"\n{Colors.CYAN}Research History{Colors.ENDC}")
+        
+        research_dir = self.get_output_directory('research')
+        if os.path.exists(research_dir):
+            research_files = sorted(
+                [f for f in os.listdir(research_dir) if f.endswith('.md')],
+                key=lambda x: os.path.getmtime(os.path.join(research_dir, x)),
+                reverse=True
+            )
+            
+            if research_files:
+                print(f"\n{Colors.GREEN}Recent research notes:{Colors.ENDC}")
+                for i, filename in enumerate(research_files[:10]):
+                    filepath = os.path.join(research_dir, filename)
+                    mod_time = datetime.fromtimestamp(os.path.getmtime(filepath))
+                    print(f"  {i+1}. {filename} - {mod_time.strftime('%Y-%m-%d %H:%M')}")
+                
+                if len(research_files) > 10:
+                    print(f"  ... and {len(research_files) - 10} more")
+            else:
+                print(f"{Colors.YELLOW}No research history found{Colors.ENDC}")
+        else:
+            print(f"{Colors.YELLOW}No research directory found{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def get_output_directory(self, feature_name: str) -> str:
         """Get organized output directory for a specific feature"""
@@ -2595,15 +2825,15 @@ class EnhancedVaultManager(VaultManager):
         # Enhanced main menu loop
         while True:
             options = [
-                ('1', '📊 Analyze Vault'),
-                ('2', '🏷️  Manage Tags'),
-                ('3', '💾 Backup Vault'),
+                ('1', '📊 Smart Vault Analysis'),
+                ('2', '🔍 Research & Create Notes'),
+                ('3', '🏷️  Manage Tags & Organization'),
                 ('4', '🤖 Query Vault with AI' if self.llm_enabled else '🤖 Query Vault (Pattern Matching)' if self.pattern_matching_mode else '🤖 Query Vault (Not Available)'),
-                ('5', '🚀 V2 Features' if self.v2_available else '🚀 V2 Features (Not Installed)'),
-                ('6', '🎨 ASCII Art Tools'),
-                ('7', '🔧 Advanced Tools'),
-                ('8', '📚 Help & Documentation'),
-                ('9', '🤖 AI Model Configuration' if self.llm_enabled or self.pattern_matching_mode else '🤖 AI Model Configuration (LLM Not Available)'),
+                ('5', '🔄 Find Duplicates & Curate'),
+                ('6', '💾 Backup & Sync'),
+                ('7', '🎨 ASCII Art Tools'),
+                ('8', '🔧 Advanced Tools'),
+                ('9', '📚 Help & Documentation'),
                 ('10', '⚙️  Settings'),
                 ('0', '👋 Exit')
             ]
@@ -2626,24 +2856,24 @@ class EnhancedVaultManager(VaultManager):
                 print(f"{Colors.BLUE}Your vault is in good hands. 📚🎨{Colors.ENDC}\n")
                 break
             elif choice == '1':
-                self.analyze_vault_menu()
+                self.smart_analysis_menu()
             elif choice == '2':
-                self.manage_tags_menu()
+                self.research_and_create_menu()
             elif choice == '3':
-                self.backup_vault_menu()
+                self.tags_and_organization_menu()
             elif choice == '4':
                 self.play_menu_navigation_sound()
                 self.vault_query_interface()
             elif choice == '5':
-                self.v2_features_menu()
+                self.duplicates_and_curation_menu()
             elif choice == '6':
-                self.show_ascii_menu()
+                self.backup_vault_menu()
             elif choice == '7':
-                self.advanced_tools_menu()
+                self.show_ascii_menu()
             elif choice == '8':
-                self.show_help()
+                self.advanced_tools_menu()
             elif choice == '9':
-                self.ai_model_configuration()
+                self.show_help()
             elif choice == '10':
                 self.settings_menu()
             else:
