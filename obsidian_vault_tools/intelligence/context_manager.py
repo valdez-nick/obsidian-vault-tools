@@ -4,7 +4,7 @@ Context Manager
 Tracks user context, vault state, and interaction history.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 from collections import deque, defaultdict
 import json

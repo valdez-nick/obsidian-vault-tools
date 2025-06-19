@@ -5,7 +5,7 @@ Central coordinator for the intelligence system.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, Union
+from typing import Dict, Any, Optional, Union, List
 import logging
 
 from .intent_detector import IntentDetector, IntentType

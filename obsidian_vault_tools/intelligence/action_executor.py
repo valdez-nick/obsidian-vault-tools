@@ -5,7 +5,7 @@ Maps intents to concrete actions and executes them.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, Callable, List
+from typing import Dict, Any, Optional, Callable, List, Tuple
 from dataclasses import dataclass
 import logging
 
