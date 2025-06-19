@@ -2616,10 +2616,14 @@ class EnhancedVaultManager(VaultManager):
         """Run V2 content analysis"""
         print(f"\n{Colors.CYAN}Running AI-powered content analysis...{Colors.ENDC}")
         
-        v2_path = os.path.join(os.path.dirname(__file__), 'obsidian-librarian-v2', 'python')
-        
+        # Check if obsidian_librarian is available
         try:
-            # Use Python module directly
+            import subprocess
+            result = subprocess.run(['python', '-c', 'import obsidian_librarian'], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                raise ImportError("obsidian_librarian not available")
+            
             cmd = [
                 'python', '-m', 'obsidian_librarian.cli', 
                 'analyze', self.current_vault, 
@@ -2631,8 +2635,12 @@ class EnhancedVaultManager(VaultManager):
                 'Analyzing content with AI',
                 estimated_duration=30
             )
-        except Exception as e:
-            print(f"{Colors.RED}❌ Analysis failed: {e}{Colors.ENDC}")
+        except (ImportError, FileNotFoundError, Exception) as e:
+            print(f"{Colors.YELLOW}⚠️  Advanced analysis requires obsidian_librarian package{Colors.ENDC}")
+            print(f"{Colors.BLUE}Falling back to basic content analysis...{Colors.ENDC}")
+            
+            # Provide basic analysis using built-in tools
+            self._run_basic_analysis()
         
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
@@ -2642,7 +2650,14 @@ class EnhancedVaultManager(VaultManager):
         if query:
             print(f"\n{Colors.CYAN}Researching: {query}{Colors.ENDC}")
             
+            # Check if obsidian_librarian is available
             try:
+                import subprocess
+                result = subprocess.run(['python', '-c', 'import obsidian_librarian'], 
+                                      capture_output=True, text=True)
+                if result.returncode != 0:
+                    raise ImportError("obsidian_librarian not available")
+                
                 cmd = [
                     'python', '-m', 'obsidian_librarian.cli',
                     'research', self.current_vault, query
@@ -2653,8 +2668,12 @@ class EnhancedVaultManager(VaultManager):
                     f'Researching: {query}',
                     estimated_duration=60
                 )
-            except Exception as e:
-                print(f"{Colors.RED}❌ Research failed: {e}{Colors.ENDC}")
+            except (ImportError, FileNotFoundError, Exception) as e:
+                print(f"{Colors.YELLOW}⚠️  Advanced research requires obsidian_librarian package{Colors.ENDC}")
+                print(f"{Colors.BLUE}Falling back to basic research assistance...{Colors.ENDC}")
+                
+                # Provide basic research fallback
+                self._run_basic_research(query)
         
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
@@ -2662,7 +2681,14 @@ class EnhancedVaultManager(VaultManager):
         """Run V2 smart organization"""
         print(f"\n{Colors.CYAN}Planning smart organization...{Colors.ENDC}")
         
+        # Check if obsidian_librarian is available
         try:
+            import subprocess
+            result = subprocess.run(['python', '-c', 'import obsidian_librarian'], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                raise ImportError("obsidian_librarian not available")
+            
             cmd = [
                 'python', '-m', 'obsidian_librarian.cli',
                 'organize', self.current_vault,
@@ -2688,8 +2714,12 @@ class EnhancedVaultManager(VaultManager):
                     'Organizing files',
                     estimated_duration=35
                 )
-        except Exception as e:
-            print(f"{Colors.RED}❌ Organization failed: {e}{Colors.ENDC}")
+        except (ImportError, FileNotFoundError, Exception) as e:
+            print(f"{Colors.YELLOW}⚠️  Advanced organization requires obsidian_librarian package{Colors.ENDC}")
+            print(f"{Colors.BLUE}Falling back to basic organization tools...{Colors.ENDC}")
+            
+            # Provide basic organization fallback
+            self._run_basic_organization()
         
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
@@ -2697,7 +2727,14 @@ class EnhancedVaultManager(VaultManager):
         """Run V2 duplicate detection"""
         print(f"\n{Colors.CYAN}Finding duplicate content...{Colors.ENDC}")
         
+        # Check if obsidian_librarian is available
         try:
+            import subprocess
+            result = subprocess.run(['python', '-c', 'import obsidian_librarian'], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                raise ImportError("obsidian_librarian not available")
+            
             cmd = [
                 'python', '-m', 'obsidian_librarian.cli',
                 'duplicates', self.current_vault,
@@ -2709,8 +2746,12 @@ class EnhancedVaultManager(VaultManager):
                 'Finding duplicate content',
                 estimated_duration=25
             )
-        except Exception as e:
-            print(f"{Colors.RED}❌ Duplicate detection failed: {e}{Colors.ENDC}")
+        except (ImportError, FileNotFoundError, Exception) as e:
+            print(f"{Colors.YELLOW}⚠️  Advanced duplicate detection requires obsidian_librarian package{Colors.ENDC}")
+            print(f"{Colors.BLUE}Falling back to basic duplicate detection...{Colors.ENDC}")
+            
+            # Provide basic duplicate detection fallback
+            self._run_basic_duplicates()
         
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
@@ -2718,7 +2759,14 @@ class EnhancedVaultManager(VaultManager):
         """Run V2 advanced analytics"""
         print(f"\n{Colors.CYAN}Generating advanced analytics...{Colors.ENDC}")
         
+        # Check if obsidian_librarian is available
         try:
+            import subprocess
+            result = subprocess.run(['python', '-c', 'import obsidian_librarian'], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                raise ImportError("obsidian_librarian not available")
+            
             cmd = [
                 'python', '-m', 'obsidian_librarian.cli',
                 'status', self.current_vault,
@@ -2730,16 +2778,323 @@ class EnhancedVaultManager(VaultManager):
                 'Generating analytics',
                 estimated_duration=15
             )
-        except Exception as e:
-            print(f"{Colors.RED}❌ Analytics failed: {e}{Colors.ENDC}")
+        except (ImportError, FileNotFoundError, Exception) as e:
+            print(f"{Colors.YELLOW}⚠️  Advanced analytics requires obsidian_librarian package{Colors.ENDC}")
+            print(f"{Colors.BLUE}Falling back to basic vault analytics...{Colors.ENDC}")
+            
+            # Provide basic analytics using built-in tools
+            self._run_basic_analytics()
         
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
+    def _run_basic_analytics(self):
+        """Run basic analytics using built-in tools"""
+        try:
+            from .vault_analyzer import VaultAnalyzer
+            
+            print(f"\n{Colors.CYAN}📊 Basic Vault Analytics{Colors.ENDC}")
+            analyzer = VaultAnalyzer(self.current_vault)
+            
+            # Get basic statistics
+            stats = analyzer.get_vault_statistics()
+            
+            print(f"\n{Colors.GREEN}📈 Vault Overview:{Colors.ENDC}")
+            print(f"  📄 Total files: {stats.get('total_files', 0)}")
+            print(f"  📝 Markdown files: {stats.get('markdown_files', 0)}")
+            print(f"  📁 Directories: {stats.get('directories', 0)}")
+            print(f"  🏷️  Total tags: {stats.get('total_tags', 0)}")
+            print(f"  🔗 Total links: {stats.get('total_links', 0)}")
+            print(f"  📊 Avg file size: {stats.get('avg_file_size', 0):.1f} KB")
+            
+            # Tag distribution
+            if 'tag_distribution' in stats:
+                print(f"\n{Colors.GREEN}🏷️  Top Tags:{Colors.ENDC}")
+                for tag, count in stats['tag_distribution'][:5]:
+                    print(f"  #{tag}: {count} files")
+            
+            # File type distribution
+            if 'file_types' in stats:
+                print(f"\n{Colors.GREEN}📄 File Types:{Colors.ENDC}")
+                for ext, count in stats['file_types'].items():
+                    print(f"  {ext}: {count} files")
+                    
+            print(f"\n{Colors.BLUE}💡 For advanced analytics with AI insights, install obsidian_librarian{Colors.ENDC}")
+            
+        except ImportError:
+            print(f"{Colors.YELLOW}⚠️  VaultAnalyzer not available. Using basic file counting...{Colors.ENDC}")
+            self._run_simple_file_count()
+    
+    def _run_simple_file_count(self):
+        """Simple file counting fallback"""
+        import os
+        
+        total_files = 0
+        markdown_files = 0
+        directories = 0
+        
+        for root, dirs, files in os.walk(self.current_vault):
+            directories += len(dirs)
+            for file in files:
+                total_files += 1
+                if file.endswith('.md'):
+                    markdown_files += 1
+        
+        print(f"\n{Colors.GREEN}📈 Basic File Count:{Colors.ENDC}")
+        print(f"  📄 Total files: {total_files}")
+        print(f"  📝 Markdown files: {markdown_files}")
+        print(f"  📁 Directories: {directories}")
+        print(f"\n{Colors.BLUE}💡 Install obsidian_librarian for advanced analytics{Colors.ENDC}")
+    
+    def _run_basic_analysis(self):
+        """Run basic content analysis using built-in tools"""
+        print(f"\n{Colors.CYAN}📊 Basic Content Analysis{Colors.ENDC}")
+        
+        try:
+            import os
+            import re
+            
+            # Basic file analysis
+            md_files = []
+            for root, dirs, files in os.walk(self.current_vault):
+                for file in files:
+                    if file.endswith('.md'):
+                        md_files.append(os.path.join(root, file))
+            
+            print(f"  📝 Found {len(md_files)} Markdown files")
+            
+            # Analyze content patterns
+            total_words = 0
+            total_tags = set()
+            total_links = 0
+            
+            for file_path in md_files[:10]:  # Sample first 10 files
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        # Count words
+                        words = len(content.split())
+                        total_words += words
+                        
+                        # Extract tags
+                        tags = re.findall(r'#([a-zA-Z0-9_-]+)', content)
+                        total_tags.update(tags)
+                        
+                        # Count internal links
+                        links = re.findall(r'\[\[([^\]]+)\]\]', content)
+                        total_links += len(links)
+                        
+                except Exception as e:
+                    continue
+            
+            print(f"  📊 Sample analysis (first 10 files):")
+            print(f"    Words: {total_words}")
+            print(f"    Unique tags: {len(total_tags)}")
+            print(f"    Internal links: {total_links}")
+            
+            if total_tags:
+                print(f"  🏷️  Sample tags: {', '.join(list(total_tags)[:5])}")
+            
+        except Exception as e:
+            print(f"  ❌ Analysis error: {e}")
+        
+        print(f"\n{Colors.BLUE}💡 For AI-powered analysis, install obsidian_librarian{Colors.ENDC}")
+    
+    def _run_basic_research(self, query):
+        """Run enhanced research using intelligence system"""
+        print(f"\n{Colors.CYAN}📚 Enhanced Research System{Colors.ENDC}")
+        print(f"Research topic: {query}")
+        
+        try:
+            # Use the intelligence system for research
+            from obsidian_vault_tools.intelligence import IntelligenceOrchestrator
+            
+            # Create orchestrator with current vault manager context
+            orchestrator = IntelligenceOrchestrator(self)
+            
+            # Process the research request
+            print(f"\n{Colors.BLUE}🤖 Processing research request...{Colors.ENDC}")
+            result = orchestrator.process_input_sync(f"research {query}")
+            
+            # Display results
+            if result.success:
+                print(f"\n{Colors.GREEN}{result.message}{Colors.ENDC}")
+                
+                # Show follow-up actions if available
+                if hasattr(result, 'follow_up_actions') and result.follow_up_actions:
+                    print(f"\n{Colors.YELLOW}📋 Suggested next steps:{Colors.ENDC}")
+                    for action in result.follow_up_actions:
+                        print(f"  • {action.replace('_', ' ').title()}")
+            else:
+                print(f"\n{Colors.RED}❌ {result.message}{Colors.ENDC}")
+                
+                # Fall back to basic search
+                self._run_basic_search_fallback(query)
+                
+        except Exception as e:
+            print(f"\n{Colors.RED}❌ Research error: {e}{Colors.ENDC}")
+            # Fall back to basic search
+            self._run_basic_search_fallback(query)
+    
+    def _run_basic_search_fallback(self, query):
+        """Basic search fallback when intelligence system fails"""
+        print(f"\n{Colors.YELLOW}📝 Falling back to basic search...{Colors.ENDC}")
+        
+        try:
+            import os
+            
+            related_files = []
+            search_terms = query.lower().split()
+            
+            for root, dirs, files in os.walk(self.current_vault):
+                for file in files:
+                    if file.endswith('.md'):
+                        file_path = os.path.join(root, file)
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                content = f.read().lower()
+                                for term in search_terms:
+                                    if term in content:
+                                        related_files.append(os.path.basename(file))
+                                        break
+                        except Exception:
+                            continue
+            
+            if related_files:
+                print(f"\n  📄 Found {len(related_files)} related files in your vault:")
+                for file in related_files[:5]:
+                    print(f"    • {file}")
+                if len(related_files) > 5:
+                    print(f"    ... and {len(related_files) - 5} more")
+            else:
+                print(f"  🔍 No related content found in your vault")
+                
+        except Exception as e:
+            print(f"  ❌ Search error: {e}")
+    
+    def _run_basic_organization(self):
+        """Run basic organization tools"""
+        print(f"\n{Colors.CYAN}📁 Basic Organization Tools{Colors.ENDC}")
+        
+        try:
+            import os
+            from collections import defaultdict
+            
+            # Analyze current organization
+            file_types = defaultdict(list)
+            orphaned_files = []
+            
+            for root, dirs, files in os.walk(self.current_vault):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    if file.endswith('.md'):
+                        # Check if file is in root or subdirectory
+                        relative_path = os.path.relpath(file_path, self.current_vault)
+                        if '/' not in relative_path:
+                            orphaned_files.append(file)
+                        
+            print(f"  📊 Organization analysis:")
+            print(f"    Files in root directory: {len(orphaned_files)}")
+            
+            if orphaned_files:
+                print(f"\n  📝 Files that could be organized:")
+                for file in orphaned_files[:5]:
+                    print(f"    • {file}")
+                if len(orphaned_files) > 5:
+                    print(f"    ... and {len(orphaned_files) - 5} more")
+            
+            print(f"\n{Colors.YELLOW}📁 Organization suggestions:{Colors.ENDC}")
+            print(f"  1. Create folders by topic (e.g., 'Projects', 'Daily Notes')")
+            print(f"  2. Group files by date or category")
+            print(f"  3. Use consistent naming conventions")
+            print(f"  4. Create an index file for navigation")
+            
+        except Exception as e:
+            print(f"  ❌ Organization analysis error: {e}")
+        
+        print(f"\n{Colors.BLUE}💡 For AI-powered organization, install obsidian_librarian{Colors.ENDC}")
+    
+    def _run_basic_duplicates(self):
+        """Run basic duplicate detection"""
+        print(f"\n{Colors.CYAN}🔍 Basic Duplicate Detection{Colors.ENDC}")
+        
+        try:
+            import os
+            import hashlib
+            from collections import defaultdict
+            
+            file_hashes = defaultdict(list)
+            duplicate_names = defaultdict(list)
+            
+            for root, dirs, files in os.walk(self.current_vault):
+                for file in files:
+                    if file.endswith('.md'):
+                        file_path = os.path.join(root, file)
+                        
+                        # Check for duplicate names
+                        duplicate_names[file].append(file_path)
+                        
+                        # Check for duplicate content (by hash)
+                        try:
+                            with open(file_path, 'rb') as f:
+                                file_hash = hashlib.md5(f.read()).hexdigest()
+                                file_hashes[file_hash].append(file_path)
+                        except Exception:
+                            continue
+            
+            # Report duplicates
+            name_duplicates = {name: paths for name, paths in duplicate_names.items() if len(paths) > 1}
+            content_duplicates = {hash_val: paths for hash_val, paths in file_hashes.items() if len(paths) > 1}
+            
+            if name_duplicates:
+                print(f"  📛 Found {len(name_duplicates)} duplicate file names:")
+                for name, paths in list(name_duplicates.items())[:3]:
+                    print(f"    • {name} ({len(paths)} copies)")
+            
+            if content_duplicates:
+                print(f"  📄 Found {len(content_duplicates)} duplicate content groups:")
+                for i, (hash_val, paths) in enumerate(list(content_duplicates.items())[:3]):
+                    print(f"    • Group {i+1}: {len(paths)} identical files")
+            
+            if not name_duplicates and not content_duplicates:
+                print(f"  ✅ No obvious duplicates found")
+            
+        except Exception as e:
+            print(f"  ❌ Duplicate detection error: {e}")
+        
+        print(f"\n{Colors.BLUE}💡 For advanced duplicate detection, install obsidian_librarian{Colors.ENDC}")
+    
+    def _run_basic_curation(self):
+        """Run basic curation workflow"""
+        print(f"\n{Colors.CYAN}✨ Basic Curation Workflow{Colors.ENDC}")
+        
+        print(f"Running combined basic analysis...")
+        
+        # Run existing basic tools in sequence
+        self._run_basic_analysis()
+        print(f"\n{Colors.CYAN}─────────────────────────────────────{Colors.ENDC}")
+        self._run_basic_duplicates()
+        print(f"\n{Colors.CYAN}─────────────────────────────────────{Colors.ENDC}")
+        self._run_basic_organization()
+        
+        print(f"\n{Colors.GREEN}✅ Basic curation workflow completed!{Colors.ENDC}")
+        print(f"\n{Colors.YELLOW}📝 Curation summary:{Colors.ENDC}")
+        print(f"  1. Analyzed vault content and structure")
+        print(f"  2. Checked for duplicate files")
+        print(f"  3. Reviewed organization opportunities")
+        print(f"\n{Colors.BLUE}💡 For comprehensive AI-powered curation, install obsidian_librarian{Colors.ENDC}")
+
     def run_v2_curation(self):
         """Run V2 comprehensive curation"""
         print(f"\n{Colors.CYAN}Running comprehensive curation...{Colors.ENDC}")
         
+        # Check if obsidian_librarian is available
         try:
+            import subprocess
+            result = subprocess.run(['python', '-c', 'import obsidian_librarian'], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                raise ImportError("obsidian_librarian not available")
+            
             cmd = [
                 'python', '-m', 'obsidian_librarian.cli',
                 'curate', self.current_vault,
@@ -2751,8 +3106,12 @@ class EnhancedVaultManager(VaultManager):
                 'Curating vault content',
                 estimated_duration=45
             )
-        except Exception as e:
-            print(f"{Colors.RED}❌ Curation failed: {e}{Colors.ENDC}")
+        except (ImportError, FileNotFoundError, Exception) as e:
+            print(f"{Colors.YELLOW}⚠️  Advanced curation requires obsidian_librarian package{Colors.ENDC}")
+            print(f"{Colors.BLUE}Falling back to basic curation workflow...{Colors.ENDC}")
+            
+            # Provide basic curation fallback
+            self._run_basic_curation()
         
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
