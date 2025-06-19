@@ -1,0 +1,3 @@
+[console_scripts]
+obsidian-tools = obsidian_vault_tools.cli:main
+ovt = obsidian_vault_tools.cli:main

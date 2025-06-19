@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "obsidian-vault-tools"
+version = "1.0.0"
+description = "Comprehensive toolkit for managing Obsidian vaults"
+readme = "README.md"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0",
+    "rich>=10.0", 
+    "pyyaml>=5.4",
+    "pillow>=8.0",
+    "pygame>=2.0",
+    "aiohttp>=3.8",
+    "python-dotenv>=0.19",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "pytest-asyncio>=0.18",
+    "black>=21.0",
+    "ruff>=0.0.261",
+    "mypy>=0.900",
+    "pre-commit>=2.20",
+]
+ai = [
+    "openai>=0.27",
+    "transformers>=4.20",
+    "sentence-transformers>=2.0",
+    "numpy>=1.21",
+    "torch>=1.9",
+]
+all = [
+    "obsidian-vault-tools[dev]",
+    "obsidian-vault-tools[ai]",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/obsidian-vault-tools"
+Documentation = "https://obsidian-vault-tools.readthedocs.io"
+Repository = "https://github.com/yourusername/obsidian-vault-tools"
+"Bug Tracker" = "https://github.com/yourusername/obsidian-vault-tools/issues"
+
+[project.scripts]
+obsidian-tools = "obsidian_vault_tools.cli:main"
+ovt = "obsidian_vault_tools.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["obsidian_vault_tools*"]
+
+[tool.setuptools.package-data]
+obsidian_vault_tools = [
+    "audio/sounds/**/*.wav",
+    "config/*.yaml",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP", "YTT", "B", "A", "C4", "SIM", "ARG"]
+ignore = ["E501"]
+target-version = "py38"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --cov=obsidian_vault_tools --cov-report=html --cov-report=term"

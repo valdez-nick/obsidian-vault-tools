@@ -1,0 +1,35 @@
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+.obsidian/core-plugins-migration.json
+.obsidian/cache
+.obsidian/hot-reload
+
+# macOS
+.DS_Store
+
+# Tool outputs (if using obsidian-vault-tools)
+*-output/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Backups
+*.backup
+*.bak
+obsidian_backups/
+
+# Personal/Sensitive
+.env
+.env.local
+private/
+sensitive/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Log files
+*.log

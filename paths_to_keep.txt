@@ -1,0 +1,71 @@
+# Python tools
+analyze_tags_simple.py
+vault_manager.py
+vault_manager_enhanced.py
+menu_navigator.py
+vault_query_system.py
+vault_query_system_llm.py
+file_versioning.py
+fix_vault_tags.py
+llm_model_manager.py
+query_router.py
+feedback_collector.py
+cli_config.py
+natural_language_query.py
+comprehensive_e2e_test.py
+
+# ASCII art tools
+ascii_art_converter.py
+ascii_magic_converter.py
+better_ascii_converter.py
+ascii_flowchart_generator.py
+
+# Audio tools
+audio_demo.py
+audio_diagnostic.py
+audio_test_isolated.py
+audio_test_alternative.py
+audio_test_improved.py
+simple_beep_test.py
+regenerate_obvious_sounds.py
+test_obvious_sounds.py
+audio_fix_obvious.py
+
+# Backup tools
+backup_vault.py
+
+# Demo files
+demo_vault_manager.py
+demo_enhanced_manager.py
+
+# Shell scripts
+quick_backup.sh
+quick_incremental_backup.sh
+run_tests.sh
+setup_kopia_backup.sh
+
+# Configuration files
+requirements.txt
+requirements-optional.txt
+model_config.yaml
+model_config_defaults.yaml
+
+# Directories
+audio/
+models/
+llm_feedback/
+embedding_cache/
+
+# Tool documentation
+VAULT_MANAGER_README.md
+TOOLS_README.md
+ASCII_ART_GUIDE.md
+AUDIO_SYSTEM_README.md
+ENHANCED_FEATURES_DEMO.md
+FLOWCHART_GUIDE.md
+LLM_SETUP_GUIDE.md
+LLM_INTEGRATION_SUMMARY.md
+QUICK_START.md
+
+# Also include the librarian v2 for now (we'll reorganize later)
+obsidian-librarian-v2/
