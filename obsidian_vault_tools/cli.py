@@ -107,17 +107,26 @@ def organize(vault):
     organizer = FileOrganizer(vault)
     suggestions = organizer.suggest_folder_structure()
     
-    console.print(f"Organization suggestions for: {vault}")
-    console.print(suggestions['summary'])
+    click.echo(f"Organization suggestions for: {vault}")
+    click.echo(suggestions['summary'])
     
     if suggestions['suggestions']:
-        console.print("\nTop suggestions:")
-        for file_path, suggestion in list(suggestions['suggestions'].items())[:5]:
-            console.print(f"  {file_path}")
-            console.print(f"    Current: {suggestion['current']}")
-            console.print(f"    Suggested: {suggestion['suggested']}")
-            console.print(f"    Reason: {suggestion['reason']}")
-            console.print()
+        click.echo("\nTop suggestions:")
+        # Get first 5 suggestions 
+        # Note: Avoiding list() builtin to prevent name collision with the 'list' MCP command
+        suggestions_items = []
+        for i, (file_path, suggestion) in enumerate(suggestions['suggestions'].items()):
+            if i >= 5:
+                break
+            suggestions_items.append((file_path, suggestion))
+        
+        for item in suggestions_items:
+            file_path, suggestion = item
+            click.echo(f"  {file_path}")
+            click.echo(f"    Current: {suggestion['current']}")
+            click.echo(f"    Suggested: {suggestion['suggested']}")
+            click.echo(f"    Reason: {suggestion['reason']}")
+            click.echo()
 
 @cli.group()
 def config():
@@ -206,8 +215,8 @@ def mcp():
 def list():
     """List configured MCP servers"""
     try:
-        from .mcp import MCPConfig
-        from .mcp.setup_wizard import run_setup_wizard_if_needed
+        from .mcp_tools import MCPConfig
+        from .mcp_tools.setup_wizard import run_setup_wizard_if_needed
         
         # Run setup wizard if this is first time
         if run_setup_wizard_if_needed():
@@ -246,7 +255,7 @@ def list():
 def status(name):
     """Show status of a specific MCP server"""
     try:
-        from .mcp import get_client_manager
+        from .mcp_tools import get_client_manager
         import asyncio
         
         manager = get_client_manager()
@@ -273,7 +282,7 @@ def status(name):
 def start(name):
     """Start an MCP server"""
     try:
-        from .mcp import get_client_manager
+        from .mcp_tools import get_client_manager
         import asyncio
         
         async def start_server():
@@ -294,7 +303,7 @@ def start(name):
 def stop(name):
     """Stop an MCP server"""
     try:
-        from .mcp import get_client_manager
+        from .mcp_tools import get_client_manager
         import asyncio
         
         async def stop_server():
@@ -317,7 +326,7 @@ def stop(name):
 def add(name, template, script_path):
     """Add a new MCP server from template"""
     try:
-        from .mcp import MCPConfig
+        from .mcp_tools import MCPConfig
         config = MCPConfig()
         
         kwargs = {}
@@ -338,7 +347,7 @@ def add(name, template, script_path):
 def credentials():
     """Manage MCP credentials"""
     try:
-        from .mcp import get_credential_manager
+        from .mcp_tools import get_credential_manager
         cred_manager = get_credential_manager()
         
         console.print("Stored credentials:")

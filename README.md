@@ -36,6 +36,22 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 - **File Organization**: Organize files by content, date, or custom rules
 - **Intelligent Cleanup**: AI-powered file cleanup suggestions
 
+### 🌐 MCP Integration (Model Context Protocol)
+- **Dynamic Tool Discovery**: Automatically discover and integrate MCP tools
+- **Multi-Server Support**: Connect to multiple MCP servers simultaneously
+- **Interactive Tool Execution**: Execute tools with guided parameter input
+- **Server Management**: Start, stop, and manage MCP servers
+- **Tool Categorization**: Organize tools by function and server
+- **Execution History**: Track tool usage and performance statistics
+
+Supported MCP Servers:
+- 🧠 **Obsidian PM Intelligence**: Custom vault intelligence and analysis
+- 🔍 **GitHub Integration**: Repository search and management
+- 💾 **Memory Server**: Persistent conversation context
+- 📚 **Confluence/Jira**: Document and project management
+- 🌐 **Web Fetch**: Web content analysis and scraping
+- 🤔 **Sequential Thinking**: Structured reasoning tools
+
 ## 📦 Installation
 
 ### Via pip (Recommended)
@@ -59,6 +75,13 @@ pip install -e .
 ### With AI Features
 ```bash
 pip install obsidian-vault-tools[ai]
+```
+
+### With MCP Integration
+```bash
+pip install obsidian-vault-tools[mcp]
+# or install manually
+pip install mcp cryptography
 ```
 
 ## 🚀 Quick Start
@@ -127,6 +150,15 @@ ovt flowchart note.md         # Generate flowchart
 ovt ascii gallery             # View ASCII art gallery
 ```
 
+### MCP Integration
+```bash
+ovt interactive               # Access MCP tools via interactive menu
+ovt mcp start server-name     # Start MCP server
+ovt mcp stop server-name      # Stop MCP server
+ovt mcp list                  # List configured servers
+ovt mcp tools                 # List available tools
+```
+
 ### Maintenance
 ```bash
 ovt backup                    # Create backup
@@ -156,6 +188,32 @@ output_dirs:
   ascii: ./ascii-output
   analysis: ./analysis-output
 ```
+
+### MCP Configuration
+MCP servers are configured in `~/.obsidian-tools/mcp_config.json`:
+
+```json
+{
+  "servers": {
+    "obsidian-pm-intelligence": {
+      "command": "obsidian-pm-intelligence",
+      "args": ["--vault", "[YOUR_VAULT_PATH]"],
+      "env": {"DEBUG": "false"}
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "[YOUR_GITHUB_TOKEN]"}
+    }
+  }
+}
+```
+
+**Security Note**: Replace `[YOUR_*]` placeholders with actual values. Credentials are automatically encrypted when stored.
 
 ## 🔌 AI Model Support
 
