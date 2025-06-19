@@ -206,8 +206,8 @@ def mcp():
 def list():
     """List configured MCP servers"""
     try:
-        from .mcp import MCPConfig
-        from .mcp.setup_wizard import run_setup_wizard_if_needed
+        from .mcp_tools import MCPConfig
+        from .mcp_tools.setup_wizard import run_setup_wizard_if_needed
         
         # Run setup wizard if this is first time
         if run_setup_wizard_if_needed():
@@ -246,7 +246,7 @@ def list():
 def status(name):
     """Show status of a specific MCP server"""
     try:
-        from .mcp import get_client_manager
+        from .mcp_tools import get_client_manager
         import asyncio
         
         manager = get_client_manager()
@@ -273,7 +273,7 @@ def status(name):
 def start(name):
     """Start an MCP server"""
     try:
-        from .mcp import get_client_manager
+        from .mcp_tools import get_client_manager
         import asyncio
         
         async def start_server():
@@ -294,7 +294,7 @@ def start(name):
 def stop(name):
     """Stop an MCP server"""
     try:
-        from .mcp import get_client_manager
+        from .mcp_tools import get_client_manager
         import asyncio
         
         async def stop_server():
@@ -317,7 +317,7 @@ def stop(name):
 def add(name, template, script_path):
     """Add a new MCP server from template"""
     try:
-        from .mcp import MCPConfig
+        from .mcp_tools import MCPConfig
         config = MCPConfig()
         
         kwargs = {}
@@ -338,7 +338,7 @@ def add(name, template, script_path):
 def credentials():
     """Manage MCP credentials"""
     try:
-        from .mcp import get_credential_manager
+        from .mcp_tools import get_credential_manager
         cred_manager = get_credential_manager()
         
         console.print("Stored credentials:")

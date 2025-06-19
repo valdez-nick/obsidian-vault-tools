@@ -1734,6 +1734,7 @@ class EnhancedVaultManager(VaultManager):
                 ('6', 'Plugin management'),
                 ('7', 'Diagnostic tools'),
                 ('8', '🔗 MCP Server Management'),
+                ('9', '🛠️ MCP Tools'),
                 ('0', 'Back to main menu')
             ]
             
@@ -1761,6 +1762,28 @@ class EnhancedVaultManager(VaultManager):
                 self.diagnostic_tools_menu()
             elif choice == '8':
                 self.mcp_server_menu()
+            elif choice == '9':
+                self.mcp_tools_direct_access()
+    
+    def mcp_tools_direct_access(self):
+        """Direct access to MCP tools interface"""
+        try:
+            # Import MCP modules dynamically
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), 'obsidian_vault_tools'))
+            
+            from obsidian_vault_tools.mcp_tools import get_client_manager
+            client_manager = get_client_manager()
+            
+            # Call the MCP tools interface directly
+            self._mcp_tools_interface(client_manager)
+            
+        except ImportError:
+            print(f"\n{Colors.RED}❌ MCP features not available{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Install with: pip install mcp cryptography{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
     
     def diagnostic_tools_menu(self):
         """Diagnostic tools submenu"""
@@ -1796,7 +1819,7 @@ class EnhancedVaultManager(VaultManager):
             import os
             sys.path.append(os.path.join(os.path.dirname(__file__), 'obsidian_vault_tools'))
             
-            from obsidian_vault_tools.mcp import MCPConfig, get_client_manager
+            from obsidian_vault_tools.mcp_tools import MCPConfig, get_client_manager
             import asyncio
             
             config = MCPConfig()
@@ -2045,17 +2068,299 @@ class EnhancedVaultManager(VaultManager):
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def _mcp_tools_interface(self, client_manager):
-        """Interface for calling MCP tools"""
-        print(f"\n{Colors.CYAN}🔧 MCP Tools Interface{Colors.ENDC}")
-        print(f"{Colors.YELLOW}This feature allows you to call tools provided by running MCP servers.{Colors.ENDC}")
-        print(f"{Colors.BLUE}Feature coming soon in next update!{Colors.ENDC}")
+        """Dynamic MCP tools interface"""
+        try:
+            # Import MCP tools dynamically
+            import sys
+            import os
+            import asyncio
+            sys.path.append(os.path.join(os.path.dirname(__file__), 'obsidian_vault_tools'))
+            
+            from obsidian_vault_tools.mcp_tools.tools.menu_builder import get_menu_builder
+            from obsidian_vault_tools.mcp_tools.tools.executor import get_executor
+            
+            menu_builder = get_menu_builder()
+            executor = get_executor()
+            
+        except ImportError as e:
+            print(f"\n{Colors.RED}❌ MCP tools not available: {e}{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
+        
+        while True:
+            try:
+                # Build main tools menu
+                tools_menu = asyncio.run(menu_builder.build_tools_menu())
+                
+                if not tools_menu or tools_menu[0][0] == '0':
+                    print(f"\n{Colors.YELLOW}No MCP tools available.{Colors.ENDC}")
+                    print(f"{Colors.BLUE}Start some MCP servers first using the MCP Server Management menu.{Colors.ENDC}")
+                    input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                    break
+                
+                choice = self.get_menu_choice('🛠️ MCP TOOLS', tools_menu)
+                
+                if choice == '0':
+                    break
+                elif choice == 'r':
+                    # Force refresh tools
+                    print(f"\n{Colors.BLUE}🔄 Refreshing tool discovery...{Colors.ENDC}")
+                    asyncio.run(menu_builder.build_tools_menu(force_refresh=True))
+                    print(f"{Colors.GREEN}✓ Tools refreshed{Colors.ENDC}")
+                    input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                elif choice == 's':
+                    # Show execution statistics
+                    self._show_execution_stats(executor)
+                elif choice == 'h':
+                    # Show execution history
+                    self._show_execution_history(executor)
+                elif choice.isdigit():
+                    # Navigate to server tools
+                    server_index = int(choice) - 1
+                    server_names = list(asyncio.run(menu_builder.discovery_service.discover_all_tools()).keys())
+                    if 0 <= server_index < len(server_names):
+                        server_name = server_names[server_index]
+                        self._server_tools_menu(server_name, menu_builder, executor)
+                
+            except Exception as e:
+                print(f"\n{Colors.RED}Error in tools interface: {e}{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                break
+    
+    def _server_tools_menu(self, server_name, menu_builder, executor):
+        """Menu for tools from a specific server"""
+        while True:
+            try:
+                import asyncio
+                
+                # Build server tools menu
+                server_tools_menu = asyncio.run(menu_builder.build_server_tools_menu(server_name))
+                
+                server_display = menu_builder._get_server_display_name(server_name)
+                choice = self.get_menu_choice(f'{server_display} TOOLS', server_tools_menu)
+                
+                if choice == '0':
+                    break
+                elif choice == 'r':
+                    # Refresh tools for this server
+                    print(f"\n{Colors.BLUE}🔄 Refreshing tools for {server_name}...{Colors.ENDC}")
+                    asyncio.run(menu_builder.discovery_service.discover_tools(server_name, force_refresh=True))
+                    print(f"{Colors.GREEN}✓ Tools refreshed{Colors.ENDC}")
+                    input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                elif choice == 's':
+                    # Search tools
+                    self._search_tools_menu(server_name, menu_builder, executor)
+                elif choice.isdigit():
+                    # Execute selected tool
+                    tool = asyncio.run(menu_builder.get_tool_by_menu_selection(server_name, choice))
+                    if tool:
+                        self._execute_tool_interactive(tool, executor)
+                
+            except Exception as e:
+                print(f"\n{Colors.RED}Error in server tools menu: {e}{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                break
+    
+    def _execute_tool_interactive(self, tool, executor):
+        """Interactive tool execution with parameter prompts"""
+        try:
+            import asyncio
+            from obsidian_vault_tools.mcp_tools.tools.menu_builder import get_menu_builder
+            
+            menu_builder = get_menu_builder()
+            
+            print(f"\n{Colors.CYAN}🔧 Executing Tool: {tool.name}{Colors.ENDC}")
+            print(f"{Colors.BLUE}Server: {tool.server}{Colors.ENDC}")
+            if tool.description:
+                print(f"{Colors.YELLOW}Description: {tool.description}{Colors.ENDC}")
+            
+            # Get parameter prompts
+            param_prompts = menu_builder.build_parameter_prompts(tool)
+            
+            if not param_prompts:
+                # No parameters needed, execute directly
+                print(f"\n{Colors.GREEN}Executing tool (no parameters required)...{Colors.ENDC}")
+                result = asyncio.run(executor.execute_tool(tool.server, tool.name, {}))
+                self._display_tool_result(result, menu_builder)
+                return
+            
+            # Collect parameters from user
+            print(f"\n{Colors.YELLOW}Please provide the following parameters:{Colors.ENDC}")
+            arguments = {}
+            
+            for prompt in param_prompts:
+                param_name = prompt['name']
+                param_desc = prompt['description']
+                param_type = prompt['type']
+                required = prompt['required']
+                default = prompt['default']
+                enum_values = prompt['enum']
+                
+                # Build prompt string
+                prompt_str = f"\n{Colors.CYAN}{prompt['display_name']}{Colors.ENDC}"
+                if required:
+                    prompt_str += f" {Colors.RED}(required){Colors.ENDC}"
+                if param_desc:
+                    prompt_str += f": {param_desc}"
+                if enum_values:
+                    prompt_str += f"\n  Options: {', '.join(map(str, enum_values))}"
+                if default is not None:
+                    prompt_str += f"\n  Default: {default}"
+                
+                # Get user input
+                user_input = input(f"{prompt_str}\n> ").strip()
+                
+                # Handle empty input
+                if not user_input:
+                    if required:
+                        print(f"{Colors.RED}Error: Required parameter cannot be empty{Colors.ENDC}")
+                        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                        return
+                    elif default is not None:
+                        arguments[param_name] = default
+                        continue
+                    else:
+                        continue
+                
+                # Type conversion
+                try:
+                    if param_type == 'integer':
+                        arguments[param_name] = int(user_input)
+                    elif param_type == 'number':
+                        arguments[param_name] = float(user_input)
+                    elif param_type == 'boolean':
+                        arguments[param_name] = user_input.lower() in ('true', 'yes', '1', 'on')
+                    elif param_type == 'array':
+                        # Simple comma-separated array
+                        arguments[param_name] = [item.strip() for item in user_input.split(',')]
+                    else:
+                        arguments[param_name] = user_input
+                except ValueError:
+                    print(f"{Colors.RED}Error: Invalid {param_type} value{Colors.ENDC}")
+                    input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                    return
+            
+            # Execute tool
+            print(f"\n{Colors.GREEN}Executing tool with parameters...{Colors.ENDC}")
+            result = asyncio.run(executor.execute_tool(tool.server, tool.name, arguments))
+            self._display_tool_result(result, menu_builder)
+            
+        except Exception as e:
+            print(f"\n{Colors.RED}Error executing tool: {e}{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _display_tool_result(self, result, menu_builder):
+        """Display tool execution result"""
+        print(f"\n{Colors.HEADER}{'='*60}{Colors.ENDC}")
+        print(f"{Colors.HEADER}TOOL EXECUTION RESULT{Colors.ENDC}")
+        print(f"{Colors.HEADER}{'='*60}{Colors.ENDC}")
+        
+        if result.success:
+            print(f"{Colors.GREEN}✓ Tool executed successfully{Colors.ENDC}")
+            if result.execution_time:
+                print(f"{Colors.BLUE}Execution time: {result.execution_time:.2f} seconds{Colors.ENDC}")
+            
+            if result.result is not None:
+                print(f"\n{Colors.CYAN}Result:{Colors.ENDC}")
+                formatted_result = menu_builder.format_tool_result(result.result)
+                print(formatted_result)
+        else:
+            print(f"{Colors.RED}❌ Tool execution failed{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Error: {result.error}{Colors.ENDC}")
+        
+        print(f"\n{Colors.HEADER}{'='*60}{Colors.ENDC}")
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _show_execution_stats(self, executor):
+        """Show tool execution statistics"""
+        stats = executor.get_execution_stats()
+        
+        print(f"\n{Colors.CYAN}📊 Tool Execution Statistics{Colors.ENDC}")
+        print(f"{Colors.BLUE}Total executions: {stats['total_executions']}{Colors.ENDC}")
+        print(f"{Colors.BLUE}Success rate: {stats['success_rate']:.1f}%{Colors.ENDC}")
+        print(f"{Colors.BLUE}Average execution time: {stats['average_execution_time']:.2f}s{Colors.ENDC}")
+        
+        if stats['most_used_tools']:
+            print(f"\n{Colors.YELLOW}Most used tools:{Colors.ENDC}")
+            for tool_info in stats['most_used_tools']:
+                print(f"  {Colors.GREEN}{tool_info['tool']}{Colors.ENDC}: {tool_info['count']} times")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _show_execution_history(self, executor):
+        """Show recent tool execution history"""
+        history = executor.get_execution_history()
+        recent_history = history[-10:]  # Last 10 executions
+        
+        print(f"\n{Colors.CYAN}📜 Recent Tool Execution History{Colors.ENDC}")
+        
+        if not recent_history:
+            print(f"{Colors.YELLOW}No tool executions yet.{Colors.ENDC}")
+        else:
+            for i, result in enumerate(reversed(recent_history), 1):
+                status_icon = "✓" if result.success else "❌"
+                status_color = Colors.GREEN if result.success else Colors.RED
+                
+                timestamp = result.timestamp.strftime("%H:%M:%S") if result.timestamp else "Unknown"
+                
+                print(f"{Colors.BLUE}{i:2d}.{Colors.ENDC} {status_color}{status_icon}{Colors.ENDC} "
+                      f"{Colors.CYAN}{result.server_name}:{result.tool_name}{Colors.ENDC} "
+                      f"({timestamp})")
+                
+                if result.execution_time:
+                    print(f"     {Colors.BLUE}Time: {result.execution_time:.2f}s{Colors.ENDC}")
+                
+                if not result.success and result.error:
+                    error_preview = result.error[:50] + "..." if len(result.error) > 50 else result.error
+                    print(f"     {Colors.RED}Error: {error_preview}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def _search_tools_menu(self, server_name, menu_builder, executor):
+        """Search tools menu"""
+        try:
+            import asyncio
+            
+            query = input(f"\n{Colors.YELLOW}Enter search query: {Colors.ENDC}").strip()
+            if not query:
+                return
+            
+            # Search tools on this server
+            tools = asyncio.run(menu_builder.discovery_service.discover_tools(server_name))
+            matching_tools = menu_builder.discovery_service.search_tools(query, tools)
+            
+            if not matching_tools:
+                print(f"\n{Colors.YELLOW}No tools found matching '{query}'{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                return
+            
+            print(f"\n{Colors.CYAN}Found {len(matching_tools)} tools matching '{query}':{Colors.ENDC}")
+            
+            for i, tool in enumerate(matching_tools, 1):
+                icon = menu_builder._get_tool_icon(tool)
+                print(f"{Colors.BLUE}{i:2d}.{Colors.ENDC} {icon} {Colors.GREEN}{tool.name}{Colors.ENDC}")
+                if tool.description:
+                    print(f"     {tool.description[:60]}...")
+            
+            # Allow user to select and execute a tool
+            try:
+                selection = input(f"\n{Colors.YELLOW}Select tool number to execute (or Enter to go back): {Colors.ENDC}").strip()
+                if selection.isdigit():
+                    tool_index = int(selection) - 1
+                    if 0 <= tool_index < len(matching_tools):
+                        self._execute_tool_interactive(matching_tools[tool_index], executor)
+            except ValueError:
+                pass
+                
+        except Exception as e:
+            print(f"\n{Colors.RED}Error in search: {e}{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def _mcp_resources_interface(self, client_manager):
         """Interface for accessing MCP resources"""
         print(f"\n{Colors.CYAN}📚 MCP Resources Interface{Colors.ENDC}")
         print(f"{Colors.YELLOW}This feature allows you to access resources provided by running MCP servers.{Colors.ENDC}")
-        print(f"{Colors.BLUE}Feature coming soon in next update!{Colors.ENDC}")
+        print(f"{Colors.BLUE}Resource integration coming in next update!{Colors.ENDC}")
         input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
     
     def test_navigation_system(self):
