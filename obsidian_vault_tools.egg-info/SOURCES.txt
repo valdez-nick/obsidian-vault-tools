@@ -15,3 +15,12 @@ obsidian_vault_tools.egg-info/dependency_links.txt
 obsidian_vault_tools.egg-info/entry_points.txt
 obsidian_vault_tools.egg-info/requires.txt
 obsidian_vault_tools.egg-info/top_level.txt
+obsidian_vault_tools/mcp_tools/__init__.py
+obsidian_vault_tools/mcp_tools/client_manager.py
+obsidian_vault_tools/mcp_tools/config.py
+obsidian_vault_tools/mcp_tools/credentials.py
+obsidian_vault_tools/mcp_tools/setup_wizard.py
+obsidian_vault_tools/mcp_tools/tools/__init__.py
+obsidian_vault_tools/mcp_tools/tools/discovery.py
+obsidian_vault_tools/mcp_tools/tools/executor.py
+obsidian_vault_tools/mcp_tools/tools/menu_builder.py

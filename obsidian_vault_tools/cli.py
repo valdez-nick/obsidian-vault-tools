@@ -107,17 +107,26 @@ def organize(vault):
     organizer = FileOrganizer(vault)
     suggestions = organizer.suggest_folder_structure()
     
-    console.print(f"Organization suggestions for: {vault}")
-    console.print(suggestions['summary'])
+    click.echo(f"Organization suggestions for: {vault}")
+    click.echo(suggestions['summary'])
     
     if suggestions['suggestions']:
-        console.print("\nTop suggestions:")
-        for file_path, suggestion in list(suggestions['suggestions'].items())[:5]:
-            console.print(f"  {file_path}")
-            console.print(f"    Current: {suggestion['current']}")
-            console.print(f"    Suggested: {suggestion['suggested']}")
-            console.print(f"    Reason: {suggestion['reason']}")
-            console.print()
+        click.echo("\nTop suggestions:")
+        # Get first 5 suggestions 
+        # Note: Avoiding list() builtin to prevent name collision with the 'list' MCP command
+        suggestions_items = []
+        for i, (file_path, suggestion) in enumerate(suggestions['suggestions'].items()):
+            if i >= 5:
+                break
+            suggestions_items.append((file_path, suggestion))
+        
+        for item in suggestions_items:
+            file_path, suggestion = item
+            click.echo(f"  {file_path}")
+            click.echo(f"    Current: {suggestion['current']}")
+            click.echo(f"    Suggested: {suggestion['suggested']}")
+            click.echo(f"    Reason: {suggestion['reason']}")
+            click.echo()
 
 @cli.group()
 def config():
