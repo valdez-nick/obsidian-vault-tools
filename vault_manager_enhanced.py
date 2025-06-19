@@ -33,6 +33,10 @@ except ImportError:
 
 # Import the original vault manager components
 from vault_manager import Colors, VaultManager
+from obsidian_vault_tools.security import (
+    validate_path, sanitize_filename, validate_json_input, 
+    InputValidationError, rate_limit, sanitize_log_data
+)
 
 # Import menu navigation system
 try:
@@ -509,10 +513,18 @@ class EnhancedVaultManager(VaultManager):
             # Offer to save
             save = input(f"\n{Colors.YELLOW}Save to file? (y/n): {Colors.ENDC}").lower()
             if save == 'y':
-                output_path = Path(image_path).stem + f"_ascii_{style}.txt"
-                with open(output_path, 'w', encoding='utf-8') as f:
-                    f.write(ascii_art)
-                print(f"{Colors.GREEN}✓ Saved to: {output_path}{Colors.ENDC}")
+                try:
+                    # SECURITY: Validate and sanitize output filename
+                    base_name = sanitize_filename(Path(image_path).stem)
+                    style_name = sanitize_filename(style)
+                    output_filename = f"{base_name}_ascii_{style_name}.txt"
+                    output_path = validate_path(output_filename, base_path=Path.cwd())
+                    
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        f.write(ascii_art)
+                    print(f"{Colors.GREEN}✓ Saved to: {output_path}{Colors.ENDC}")
+                except (InputValidationError, OSError) as e:
+                    print(f"{Colors.RED}❌ Failed to save file: {e}{Colors.ENDC}")
         else:
             print(f"{Colors.RED}❌ Failed to generate ASCII art{Colors.ENDC}")
     
@@ -859,6 +871,26 @@ class EnhancedVaultManager(VaultManager):
             
             if not query or query.lower() in ['quit', 'exit', 'q']:
                 break
+            
+            # SECURITY: Validate and sanitize query input
+            try:
+                # Basic input validation
+                if len(query) > 1000:  # Reasonable limit for queries
+                    print(f"{Colors.RED}Query too long (max 1000 characters){Colors.ENDC}")
+                    continue
+                
+                # Check for potentially dangerous patterns
+                dangerous_patterns = ['<script', 'javascript:', 'eval(', 'exec(', '__import__']
+                if any(pattern in query.lower() for pattern in dangerous_patterns):
+                    print(f"{Colors.RED}Invalid query format{Colors.ENDC}")
+                    continue
+                
+                # Sanitize for logging
+                query = query.strip()
+                
+            except Exception as e:
+                print(f"{Colors.RED}Query validation error: {e}{Colors.ENDC}")
+                continue
             
             # Check for rating command
             if query.lower().startswith('rate '):

@@ -44,8 +44,25 @@ for module_name, imports in modules_to_test:
     print(f"\n{module_name}:")
     for import_stmt in imports:
         try:
-            exec(import_stmt)
-            print(f"  ✓ {import_stmt}")
+            # SECURITY: Using safe import instead of exec() to prevent code injection
+            # Parse the import statement safely
+            if import_stmt.startswith("from ") and " import " in import_stmt:
+                parts = import_stmt.replace("from ", "").split(" import ")
+                module_path = parts[0].strip()
+                import_name = parts[1].strip()
+                
+                # Use importlib for safe importing
+                import importlib
+                module = importlib.import_module(module_path)
+                # Verify the attribute exists
+                if hasattr(module, import_name):
+                    print(f"  ✓ {import_stmt}")
+                else:
+                    print(f"  ✗ {import_stmt}")
+                    print(f"    Error: {import_name} not found in {module_path}")
+            else:
+                print(f"  ✗ {import_stmt}")
+                print(f"    Error: Invalid import format")
         except Exception as e:
             print(f"  ✗ {import_stmt}")
             print(f"    Error: {e}")

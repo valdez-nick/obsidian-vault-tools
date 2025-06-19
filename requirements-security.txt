@@ -1,0 +1,27 @@
+# Security-related dependencies
+# Use: pip install -r requirements-security.txt
+
+# Security scanning
+bandit==1.7.5           # Security linter for Python
+safety==3.0.1           # Check for security vulnerabilities in dependencies
+pip-audit==2.6.1        # Audit Python packages for known vulnerabilities
+
+# Cryptography
+cryptography>=41.0.7    # For secure encryption/decryption
+pycryptodome>=3.19.0    # Additional crypto algorithms
+
+# Input validation and sanitization
+bleach>=6.0.0           # HTML sanitization
+validators>=0.22.0      # Data validation
+pydantic>=2.5.0         # Data validation with types
+
+# Rate limiting (if using Flask/FastAPI)
+slowapi>=0.1.9          # Rate limiting for FastAPI
+flask-limiter>=3.5.0    # Rate limiting for Flask
+
+# Secure headers (for web interfaces)
+secure>=0.3.0           # Security headers for web apps
+
+# Monitoring and logging
+structlog>=23.2.0       # Structured logging
+sentry-sdk>=1.38.0      # Error monitoring (optional)
