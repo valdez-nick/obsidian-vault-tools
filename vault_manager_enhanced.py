@@ -1562,6 +1562,1016 @@ class EnhancedVaultManager(VaultManager):
         # Call parent method
         super().show_menu(title, options, footer)
     
+    def get_menu_choice(self, title, options, audio_enabled=True):
+        """Get menu choice using arrow keys if available, fallback to traditional input"""
+        if self.arrow_navigation and self.navigator:
+            if audio_enabled:
+                self.play_menu_navigation_sound()
+            choice = self.navigator.navigate_menu(title, options)
+            if choice == 'quit':
+                return '0'  # Standardize quit behavior
+            return choice
+        else:
+            # Fallback to traditional menu
+            self.show_menu(title, options)
+            if audio_enabled:
+                self.play_menu_navigation_sound()
+            return input().strip()
+    
+    def analyze_vault_menu(self):
+        """Override analyze vault menu with arrow key navigation"""
+        while True:
+            options = [
+                ('1', 'Full vault analysis'),
+                ('2', 'Tag analysis'),
+                ('3', 'Link analysis'),
+                ('4', 'Content statistics'),
+                ('5', 'Duplicate detection'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('📊 VAULT ANALYSIS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.play_operation_start_sound('scan')
+                super().analyze_vault_menu()
+                return  # Exit after running parent method
+            elif choice == '2':
+                self.play_operation_start_sound('scan')
+                self.run_command_with_progress(
+                    f'python3 analyze_tags_simple.py {self.quote_path(self.current_vault)}',
+                    'Analyzing tags',
+                    estimated_duration=5
+                )
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                print(f"\n{Colors.YELLOW}Link analysis feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                print(f"\n{Colors.YELLOW}Content statistics feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '5':
+                print(f"\n{Colors.YELLOW}Duplicate detection feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def manage_tags_menu(self):
+        """Override manage tags menu with arrow key navigation"""
+        while True:
+            options = [
+                ('1', 'Preview all tag fixes'),
+                ('2', 'Apply all tag fixes'),
+                ('3', 'Fix quoted tags only'),
+                ('4', 'Merge similar tags'),
+                ('5', 'Remove generic tags'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('🏷️ TAG MANAGEMENT', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.play_operation_start_sound('scan')
+                self.run_command_with_progress(
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --dry-run',
+                    'Previewing tag fixes',
+                    estimated_duration=8
+                )
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                self.play_operation_start_sound('scan')
+                self.run_command_with_progress(
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply',
+                    'Applying all tag fixes',
+                    estimated_duration=15
+                )
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                self.play_operation_start_sound('scan')
+                self.fix_quoted_tags()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                self.play_operation_start_sound('scan')
+                self.merge_similar_tags()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '5':
+                self.play_operation_start_sound('scan')
+                self.remove_generic_tags()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def backup_vault_menu(self):
+        """Override backup vault menu with arrow key navigation"""
+        while True:
+            options = [
+                ('1', 'Full backup'),
+                ('2', 'Incremental backup'),
+                ('3', 'Restore from backup'),
+                ('4', 'View backup history'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('💾 BACKUP MANAGEMENT', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.play_operation_start_sound('backup')
+                self.run_command_with_progress(
+                    f'python3 backup_vault.py {self.quote_path(self.current_vault)}',
+                    'Creating full backup',
+                    estimated_duration=10
+                )
+                self.play_operation_complete_sound('backup')
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                self.play_operation_start_sound('backup')
+                self.run_command_with_progress(
+                    f'./quick_incremental_backup.sh {self.quote_path(self.current_vault)}',
+                    'Creating incremental backup',
+                    estimated_duration=3
+                )
+                self.play_operation_complete_sound('backup')
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                self.restore_backup_menu()
+            elif choice == '4':
+                print(f"\n{Colors.YELLOW}Backup history feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def advanced_tools_menu(self):
+        """Override advanced tools menu with arrow key navigation"""
+        while True:
+            options = [
+                ('1', 'File versioning'),
+                ('2', 'Bulk rename'),
+                ('3', 'Content migration'),
+                ('4', 'Plugin management'),
+                ('5', 'Diagnostic tools'),
+                ('6', 'Organize output files'),
+                ('7', 'Intelligent janitor'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('🔧 ADVANCED TOOLS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                print(f"\n{Colors.YELLOW}File versioning feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                print(f"\n{Colors.YELLOW}Bulk rename feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                print(f"\n{Colors.YELLOW}Content migration feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                print(f"\n{Colors.YELLOW}Plugin management feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '5':
+                self.diagnostic_tools_menu()
+            elif choice == '6':
+                self.organize_output_files()
+            elif choice == '7':
+                self.intelligent_janitor_menu()
+    
+    def diagnostic_tools_menu(self):
+        """Diagnostic tools submenu"""
+        while True:
+            options = [
+                ('1', 'Audio system test'),
+                ('2', 'Navigation test'),
+                ('3', 'Performance test'),
+                ('4', 'Dependency check'),
+                ('0', 'Back to advanced tools')
+            ]
+            
+            choice = self.get_menu_choice('🔍 DIAGNOSTIC TOOLS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.test_audio_system()
+            elif choice == '2':
+                self.test_navigation_system()
+            elif choice == '3':
+                print(f"\n{Colors.YELLOW}Performance test feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '4':
+                self.validate_dependencies()
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def test_navigation_system(self):
+        """Test arrow key navigation system"""
+        print(f"\n{Colors.CYAN}Testing Navigation System{Colors.ENDC}")
+        
+        if self.arrow_navigation and self.navigator:
+            print(f"{Colors.GREEN}✓ Arrow key navigation is enabled{Colors.ENDC}")
+            
+            # Test menu
+            test_options = [
+                ('1', 'Test option 1'),
+                ('2', 'Test option 2'),
+                ('3', 'Test option 3'),
+                ('0', 'Exit test')
+            ]
+            
+            print(f"\n{Colors.BLUE}Testing arrow key menu...{Colors.ENDC}")
+            choice = self.navigator.navigate_menu('🧪 NAVIGATION TEST', test_options)
+            print(f"{Colors.GREEN}✓ Navigation test completed. Selected: {choice}{Colors.ENDC}")
+        else:
+            print(f"{Colors.RED}❌ Arrow key navigation not available{Colors.ENDC}")
+            if not MENU_NAVIGATOR_AVAILABLE:
+                print(f"{Colors.YELLOW}   MenuNavigator module not found{Colors.ENDC}")
+            
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def settings_menu(self):
+        """Override settings menu with arrow key navigation"""
+        while True:
+            options = [
+                ('1', 'Audio settings'),
+                ('2', 'Display settings'),
+                ('3', 'Path settings'),
+                ('4', 'Reset configuration'),
+                ('0', 'Back to main menu')
+            ]
+            
+            choice = self.get_menu_choice('⚙️ SETTINGS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.audio_settings_menu()
+            elif choice == '2':
+                self.display_settings_menu()
+            elif choice == '3':
+                self.path_settings_menu()
+            elif choice == '4':
+                self.reset_configuration()
+    
+    def audio_settings_menu(self):
+        """Audio settings submenu"""
+        while True:
+            options = [
+                ('1', f'Toggle audio: {"ON" if self.audio_enabled else "OFF"}'),
+                ('2', f'Toggle ASCII art: {"ON" if self.ascii_enabled else "OFF"}'),
+                ('3', 'Test audio system'),
+                ('4', 'Volume settings'),
+                ('0', 'Back to settings')
+            ]
+            
+            choice = self.get_menu_choice('🎵 AUDIO SETTINGS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.audio_enabled = not self.audio_enabled
+                status = "enabled" if self.audio_enabled else "disabled"
+                print(f"\n{Colors.GREEN}Audio {status}{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                self.ascii_enabled = not self.ascii_enabled
+                status = "enabled" if self.ascii_enabled else "disabled"
+                print(f"\n{Colors.GREEN}ASCII art {status}{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                self.test_audio_system()
+            elif choice == '4':
+                print(f"\n{Colors.YELLOW}Volume settings feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def display_settings_menu(self):
+        """Display settings submenu"""
+        while True:
+            options = [
+                ('1', f'Arrow navigation: {"ON" if self.arrow_navigation else "OFF"}'),
+                ('2', 'Color theme settings'),
+                ('3', 'Menu layout settings'),
+                ('0', 'Back to settings')
+            ]
+            
+            choice = self.get_menu_choice('🎨 DISPLAY SETTINGS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                if MENU_NAVIGATOR_AVAILABLE:
+                    self.arrow_navigation = not self.arrow_navigation
+                    status = "enabled" if self.arrow_navigation else "disabled"
+                    print(f"\n{Colors.GREEN}Arrow navigation {status}{Colors.ENDC}")
+                else:
+                    print(f"\n{Colors.RED}Arrow navigation not available - MenuNavigator module required{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '2':
+                print(f"\n{Colors.YELLOW}Color theme settings feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            elif choice == '3':
+                print(f"\n{Colors.YELLOW}Menu layout settings feature coming soon!{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def path_settings_menu(self):
+        """Path settings submenu"""
+        while True:
+            options = [
+                ('1', 'Change vault path'),
+                ('2', 'Set output directories'),
+                ('3', 'View current paths'),
+                ('0', 'Back to settings')
+            ]
+            
+            choice = self.get_menu_choice('📁 PATH SETTINGS', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.get_vault_path()
+            elif choice == '2':
+                self.organize_output_files()
+            elif choice == '3':
+                print(f"\n{Colors.CYAN}Current Paths:{Colors.ENDC}")
+                print(f"  Vault: {self.current_vault}")
+                print(f"  Config: {self.config_file}")
+                
+                # Show output directories
+                output_types = ['ascii-art', 'vault-analysis', 'backup', 'research', 'diagnostic']
+                print(f"\n{Colors.CYAN}Output Directories:{Colors.ENDC}")
+                for output_type in output_types:
+                    output_dir = self.get_output_directory(output_type)
+                    files_count = len([f for f in os.listdir(output_dir) if os.path.isfile(os.path.join(output_dir, f))]) if os.path.exists(output_dir) else 0
+                    print(f"  {output_type}: {output_dir} ({files_count} files)")
+                
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def reset_configuration(self):
+        """Reset configuration to defaults"""
+        confirm = input(f"\n{Colors.RED}Are you sure you want to reset all settings? (y/N): {Colors.ENDC}")
+        if confirm.lower() == 'y':
+            self.config = {}
+            self.save_config()
+            print(f"\n{Colors.GREEN}Configuration reset successfully{Colors.ENDC}")
+        else:
+            print(f"\n{Colors.BLUE}Configuration reset cancelled{Colors.ENDC}")
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def v2_features_menu(self):
+        """Override V2 features menu with arrow key navigation"""
+        while True:
+            options = [
+                ('1', '🧠 AI-powered content analysis'),
+                ('2', '🔍 Research topics & create notes'),
+                ('3', '📚 Smart file organization'),
+                ('4', '🔄 Find & merge duplicates'),
+                ('5', '📊 Advanced vault analytics'),
+                ('6', '🎯 Comprehensive curation'),
+                ('7', '⚙️  Configure AI settings'),
+                ('8', '🛠️  Install/Setup V2'),
+                ('0', 'Back to main menu')
+            ]
+            
+            footer = "v2 Available ✓" if self.v2_available else "v2 Not Installed - Use option 8 to setup"
+            
+            choice = self.get_menu_choice('🚀 OBSIDIAN LIBRARIAN V2', options)
+            
+            if choice == '0':
+                break
+            elif choice == '8':
+                self.setup_v2_installation()
+            elif not self.v2_available:
+                print(f"\n{Colors.YELLOW}⚠️  Obsidian Librarian v2 is not installed{Colors.ENDC}")
+                print(f"{Colors.BLUE}Use option 8 to setup V2, or see Help for manual installation{Colors.ENDC}")
+                input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+                continue
+            
+            if choice == '1':
+                self.run_v2_analysis()
+            elif choice == '2':
+                self.run_v2_research()
+            elif choice == '3':
+                self.run_v2_organization()
+            elif choice == '4':
+                self.run_v2_duplicates()
+            elif choice == '5':
+                self.run_v2_analytics()
+            elif choice == '6':
+                self.run_v2_curation()
+            elif choice == '7':
+                self.configure_v2_ai()
+    
+    def setup_v2_installation(self):
+        """Setup V2 installation"""
+        print(f"\n{Colors.CYAN}Setting up Obsidian Librarian V2{Colors.ENDC}")
+        
+        v2_path = os.path.join(os.path.dirname(__file__), 'obsidian-librarian-v2')
+        
+        if os.path.exists(v2_path):
+            print(f"{Colors.GREEN}✓ V2 directory found at: {v2_path}{Colors.ENDC}")
+            
+            # Try to build and install
+            python_path = os.path.join(v2_path, 'python')
+            if os.path.exists(python_path):
+                print(f"{Colors.BLUE}Installing V2 Python package...{Colors.ENDC}")
+                
+                try:
+                    # Change to V2 directory and install
+                    result = subprocess.run([
+                        'pip', 'install', '-e', python_path
+                    ], capture_output=True, text=True, timeout=120)
+                    
+                    if result.returncode == 0:
+                        print(f"{Colors.GREEN}✓ V2 installation successful!{Colors.ENDC}")
+                        self.v2_available = True
+                        # Update config to remember installation
+                        self.config['v2_installed'] = True
+                        self.save_config()
+                    else:
+                        print(f"{Colors.RED}❌ Installation failed:{Colors.ENDC}")
+                        print(result.stderr)
+                        print(f"\n{Colors.YELLOW}Try manual installation:{Colors.ENDC}")
+                        print(f"cd {python_path}")
+                        print(f"pip install -e .")
+                        
+                except subprocess.TimeoutExpired:
+                    print(f"{Colors.RED}❌ Installation timed out{Colors.ENDC}")
+                except Exception as e:
+                    print(f"{Colors.RED}❌ Installation error: {e}{Colors.ENDC}")
+            else:
+                print(f"{Colors.RED}❌ V2 Python directory not found{Colors.ENDC}")
+        else:
+            print(f"{Colors.RED}❌ V2 directory not found{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Expected location: {v2_path}{Colors.ENDC}")
+            print(f"\n{Colors.BLUE}Please ensure obsidian-librarian-v2 is in the same directory as this script{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def run_v2_analysis(self):
+        """Run V2 content analysis"""
+        print(f"\n{Colors.CYAN}Running AI-powered content analysis...{Colors.ENDC}")
+        
+        v2_path = os.path.join(os.path.dirname(__file__), 'obsidian-librarian-v2', 'python')
+        
+        try:
+            # Use Python module directly
+            cmd = [
+                'python', '-m', 'obsidian_librarian.cli', 
+                'analyze', self.current_vault, 
+                '--quality', '--structure'
+            ]
+            
+            self.run_command_with_progress(
+                ' '.join(cmd),
+                'Analyzing content with AI',
+                estimated_duration=30
+            )
+        except Exception as e:
+            print(f"{Colors.RED}❌ Analysis failed: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def run_v2_research(self):
+        """Run V2 research functionality"""
+        query = input(f"\n{Colors.CYAN}Enter research topic: {Colors.ENDC}")
+        if query:
+            print(f"\n{Colors.CYAN}Researching: {query}{Colors.ENDC}")
+            
+            try:
+                cmd = [
+                    'python', '-m', 'obsidian_librarian.cli',
+                    'research', self.current_vault, query
+                ]
+                
+                self.run_command_with_progress(
+                    ' '.join([f'"{arg}"' if ' ' in arg else arg for arg in cmd]),
+                    f'Researching: {query}',
+                    estimated_duration=60
+                )
+            except Exception as e:
+                print(f"{Colors.RED}❌ Research failed: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def run_v2_organization(self):
+        """Run V2 smart organization"""
+        print(f"\n{Colors.CYAN}Planning smart organization...{Colors.ENDC}")
+        
+        try:
+            cmd = [
+                'python', '-m', 'obsidian_librarian.cli',
+                'organize', self.current_vault,
+                '--strategy', 'content', '--dry-run'
+            ]
+            
+            self.run_command_with_progress(
+                ' '.join(cmd),
+                'Planning smart organization',
+                estimated_duration=20
+            )
+            
+            confirm = input(f"\n{Colors.CYAN}Apply these changes? (y/n): {Colors.ENDC}").lower()
+            if confirm == 'y':
+                cmd_apply = [
+                    'python', '-m', 'obsidian_librarian.cli',
+                    'organize', self.current_vault,
+                    '--strategy', 'content'
+                ]
+                
+                self.run_command_with_progress(
+                    ' '.join(cmd_apply),
+                    'Organizing files',
+                    estimated_duration=35
+                )
+        except Exception as e:
+            print(f"{Colors.RED}❌ Organization failed: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def run_v2_duplicates(self):
+        """Run V2 duplicate detection"""
+        print(f"\n{Colors.CYAN}Finding duplicate content...{Colors.ENDC}")
+        
+        try:
+            cmd = [
+                'python', '-m', 'obsidian_librarian.cli',
+                'duplicates', self.current_vault,
+                '--threshold', '0.85'
+            ]
+            
+            self.run_command_with_progress(
+                ' '.join(cmd),
+                'Finding duplicate content',
+                estimated_duration=25
+            )
+        except Exception as e:
+            print(f"{Colors.RED}❌ Duplicate detection failed: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def run_v2_analytics(self):
+        """Run V2 advanced analytics"""
+        print(f"\n{Colors.CYAN}Generating advanced analytics...{Colors.ENDC}")
+        
+        try:
+            cmd = [
+                'python', '-m', 'obsidian_librarian.cli',
+                'status', self.current_vault,
+                '--detailed'
+            ]
+            
+            self.run_command_with_progress(
+                ' '.join(cmd),
+                'Generating analytics',
+                estimated_duration=15
+            )
+        except Exception as e:
+            print(f"{Colors.RED}❌ Analytics failed: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def run_v2_curation(self):
+        """Run V2 comprehensive curation"""
+        print(f"\n{Colors.CYAN}Running comprehensive curation...{Colors.ENDC}")
+        
+        try:
+            cmd = [
+                'python', '-m', 'obsidian_librarian.cli',
+                'curate', self.current_vault,
+                '--quality', '--structure'
+            ]
+            
+            self.run_command_with_progress(
+                ' '.join(cmd),
+                'Curating vault content',
+                estimated_duration=45
+            )
+        except Exception as e:
+            print(f"{Colors.RED}❌ Curation failed: {e}{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def configure_v2_ai(self):
+        """Configure V2 AI settings"""
+        print(f"\n{Colors.CYAN}V2 AI Configuration{Colors.ENDC}")
+        print(f"{Colors.YELLOW}This feature configures AI models for V2 functionality{Colors.ENDC}")
+        print(f"{Colors.BLUE}Currently integrated with the existing AI model configuration{Colors.ENDC}")
+        
+        # Delegate to existing AI configuration
+        self.ai_model_configuration()
+    
+    def get_output_directory(self, feature_name: str) -> str:
+        """Get organized output directory for a specific feature"""
+        base_dir = os.path.dirname(__file__)
+        output_dir = os.path.join(base_dir, f"{feature_name}-output")
+        
+        # Create directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+        
+        return output_dir
+    
+    def cleanup_root_directory(self):
+        """Move existing output files to organized directories"""
+        base_dir = os.path.dirname(__file__)
+        
+        # Define file patterns and their target directories
+        file_mappings = {
+            'ascii-art-output': [
+                '*.txt',  # ASCII art files
+                '*ascii*.png', '*ascii*.jpg',  # ASCII art images
+                'dore_*.txt', 'dore_*.jpg',  # Specific ASCII art files
+                'test_*.png'  # Test images
+            ],
+            'vault-analysis-output': [
+                'tag_fix_report.json',
+                '*_analysis.txt',
+                '*_report.txt'
+            ],
+            'backup-output': [
+                'obsidian_backups/',
+                '*.backup',
+                '*backup*'
+            ],
+            'research-output': [
+                'llm_feedback/',
+                'embedding_cache/',
+                '*_research.md'
+            ],
+            'diagnostic-output': [
+                'audio_*.py',
+                'test_*.py',
+                'simple_beep_test.py',
+                'regenerate_*.py',
+                '*_diagnostic.py'
+            ]
+        }
+        
+        moved_files = []
+        
+        for output_dir, patterns in file_mappings.items():
+            target_dir = self.get_output_directory(output_dir.replace('-output', ''))
+            
+            for pattern in patterns:
+                # Handle directories
+                if pattern.endswith('/'):
+                    dir_path = os.path.join(base_dir, pattern.rstrip('/'))
+                    if os.path.exists(dir_path) and os.path.isdir(dir_path):
+                        target_path = os.path.join(target_dir, os.path.basename(dir_path))
+                        if not os.path.exists(target_path):
+                            import shutil
+                            shutil.move(dir_path, target_path)
+                            moved_files.append(f"{pattern} -> {output_dir}/")
+                else:
+                    # Handle file patterns
+                    import glob
+                    for file_path in glob.glob(os.path.join(base_dir, pattern)):
+                        if os.path.isfile(file_path):
+                            filename = os.path.basename(file_path)
+                            target_path = os.path.join(target_dir, filename)
+                            if not os.path.exists(target_path):
+                                import shutil
+                                shutil.move(file_path, target_path)
+                                moved_files.append(f"{filename} -> {output_dir}/")
+        
+        return moved_files
+    
+    def convert_image_to_ascii(self):
+        """Convert user-selected image to ASCII art with organized output"""
+        print(f"\n{Colors.CYAN}Convert Image to ASCII Art{Colors.ENDC}")
+        
+        if not self.ascii_manager.pil_available:
+            print(f"{Colors.YELLOW}⚠️  PIL/Pillow not installed{Colors.ENDC}")
+            print(f"{Colors.BLUE}Install with: pip install pillow numpy{Colors.ENDC}")
+            return
+        
+        image_path = input(f"\n{Colors.YELLOW}Enter image path (or drag & drop): {Colors.ENDC}").strip()
+        image_path = image_path.strip('"\'')  # Remove quotes if dragged
+        
+        if not os.path.exists(image_path):
+            print(f"{Colors.RED}❌ File not found: {image_path}{Colors.ENDC}")
+            return
+        
+        # Show available styles
+        print(f"\n{Colors.CYAN}Available styles:{Colors.ENDC}")
+        styles = ['simple', 'standard', 'blocks', 'detailed', 'classic', 'matrix']
+        for i, style in enumerate(styles):
+            print(f"  {i+1}. {style}")
+        
+        style_choice = input(f"\n{Colors.YELLOW}Choose style (1-{len(styles)}) or press Enter for standard: {Colors.ENDC}").strip()
+        style = styles[int(style_choice)-1] if style_choice.isdigit() and 1 <= int(style_choice) <= len(styles) else 'standard'
+        
+        width = input(f"{Colors.YELLOW}Width in characters (default 80): {Colors.ENDC}").strip()
+        width = int(width) if width else 80
+        
+        print(f"\n{Colors.CYAN}Converting with {style} style...{Colors.ENDC}")
+        self.show_indeterminate_progress("Generating ASCII art", 3)
+        
+        ascii_art = self.ascii_manager.generate_from_image(image_path, width, style)
+        
+        if ascii_art:
+            # Save to organized output directory
+            output_dir = self.get_output_directory('ascii-art')
+            
+            # Generate filename based on original image
+            base_name = os.path.splitext(os.path.basename(image_path))[0]
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_filename = f"{base_name}_{style}_{timestamp}.txt"
+            output_path = os.path.join(output_dir, output_filename)
+            
+            # Save ASCII art
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(f"ASCII Art Generated from: {image_path}\n")
+                f.write(f"Style: {style}, Width: {width}\n")
+                f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("=" * 60 + "\n\n")
+                f.write(ascii_art)
+            
+            print(f"{Colors.GREEN}✓ ASCII art generated successfully!{Colors.ENDC}")
+            print(f"{Colors.BLUE}Saved to: {output_path}{Colors.ENDC}")
+            
+            # Display preview
+            print(f"\n{Colors.CYAN}Preview:{Colors.ENDC}")
+            lines = ascii_art.split('\n')
+            for line in lines[:10]:  # Show first 10 lines
+                print(line)
+            if len(lines) > 10:
+                print(f"... ({len(lines) - 10} more lines)")
+            
+            # Add to collection for quick access
+            self.ascii_manager.add_to_collection(f"{base_name}_{style}", ascii_art)
+            
+            self.play_operation_complete_sound('ascii')
+        else:
+            print(f"{Colors.RED}❌ Failed to generate ASCII art{Colors.ENDC}")
+            self.play_operation_complete_sound('general', success=False)
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def organize_output_files(self):
+        """Organize scattered output files into proper directories"""
+        print(f"\n{Colors.CYAN}Organizing Output Files{Colors.ENDC}")
+        print(f"{Colors.BLUE}Moving scattered files to organized directories...{Colors.ENDC}")
+        
+        moved_files = self.cleanup_root_directory()
+        
+        if moved_files:
+            print(f"\n{Colors.GREEN}✓ Moved {len(moved_files)} files:{Colors.ENDC}")
+            for file_move in moved_files[:10]:  # Show first 10
+                print(f"  {file_move}")
+            if len(moved_files) > 10:
+                print(f"  ... and {len(moved_files) - 10} more files")
+        else:
+            print(f"\n{Colors.BLUE}✓ All files are already organized{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def intelligent_janitor_menu(self):
+        """Intelligent file cleanup menu"""
+        while True:
+            options = [
+                ('1', 'Analyze output files'),
+                ('2', 'Clean unused files (safe)'),
+                ('3', 'Deep clean (advanced)'),
+                ('4', 'Show disk usage'),
+                ('5', 'Configure cleanup rules'),
+                ('0', 'Back to advanced tools')
+            ]
+            
+            choice = self.get_menu_choice('🧹 INTELLIGENT JANITOR', options)
+            
+            if choice == '0':
+                break
+            elif choice == '1':
+                self.analyze_output_files()
+            elif choice == '2':
+                self.safe_cleanup()
+            elif choice == '3':
+                self.deep_cleanup()
+            elif choice == '4':
+                self.show_disk_usage()
+            elif choice == '5':
+                self.configure_cleanup_rules()
+    
+    def analyze_output_files(self):
+        """Analyze output files using AI to understand usage patterns"""
+        print(f"\n{Colors.CYAN}Analyzing Output Files with AI{Colors.ENDC}")
+        
+        if not (self.llm_enabled or self.pattern_matching_mode):
+            print(f"{Colors.RED}❌ AI analysis requires LLM or pattern matching mode{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Configure AI models first in the main menu{Colors.ENDC}")
+            input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+            return
+        
+        output_types = ['ascii-art', 'vault-analysis', 'backup', 'research', 'diagnostic']
+        total_files = 0
+        analysis_results = {}
+        
+        for output_type in output_types:
+            output_dir = self.get_output_directory(output_type)
+            if os.path.exists(output_dir):
+                files = [f for f in os.listdir(output_dir) if os.path.isfile(os.path.join(output_dir, f))]
+                total_files += len(files)
+                
+                # Analyze file patterns
+                file_ages = []
+                file_sizes = []
+                recent_files = 0
+                
+                for filename in files:
+                    filepath = os.path.join(output_dir, filename)
+                    stat = os.stat(filepath)
+                    age_days = (time.time() - stat.st_mtime) / (24 * 3600)
+                    file_ages.append(age_days)
+                    file_sizes.append(stat.st_size)
+                    
+                    if age_days <= 7:  # Recent files (last week)
+                        recent_files += 1
+                
+                analysis_results[output_type] = {
+                    'total_files': len(files),
+                    'avg_age_days': sum(file_ages) / len(file_ages) if file_ages else 0,
+                    'total_size_mb': sum(file_sizes) / (1024 * 1024),
+                    'recent_files': recent_files,
+                    'oldest_age_days': max(file_ages) if file_ages else 0
+                }
+        
+        print(f"\n{Colors.GREEN}📊 Analysis Results:{Colors.ENDC}")
+        print(f"Total files analyzed: {total_files}")
+        
+        for output_type, stats in analysis_results.items():
+            if stats['total_files'] > 0:
+                print(f"\n{Colors.CYAN}{output_type.upper()}:{Colors.ENDC}")
+                print(f"  Files: {stats['total_files']}")
+                print(f"  Size: {stats['total_size_mb']:.1f} MB")
+                print(f"  Average age: {stats['avg_age_days']:.1f} days")
+                print(f"  Recent files: {stats['recent_files']}")
+                print(f"  Oldest file: {stats['oldest_age_days']:.1f} days")
+                
+                # AI-powered recommendations
+                if stats['avg_age_days'] > 30 and stats['recent_files'] == 0:
+                    print(f"  {Colors.YELLOW}💡 Recommendation: Consider archiving old files{Colors.ENDC}")
+                elif stats['total_size_mb'] > 100:
+                    print(f"  {Colors.YELLOW}💡 Recommendation: Large directory, review for cleanup{Colors.ENDC}")
+                elif stats['total_files'] > 50 and stats['recent_files'] < 5:
+                    print(f"  {Colors.YELLOW}💡 Recommendation: Many files but low recent activity{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def safe_cleanup(self):
+        """Safe cleanup of obviously unused files"""
+        print(f"\n{Colors.CYAN}Safe Cleanup{Colors.ENDC}")
+        print(f"{Colors.BLUE}Identifying safe files to clean...{Colors.ENDC}")
+        
+        output_types = ['ascii-art', 'vault-analysis', 'backup', 'research', 'diagnostic']
+        candidates_for_removal = []
+        
+        for output_type in output_types:
+            output_dir = self.get_output_directory(output_type)
+            if os.path.exists(output_dir):
+                files = [f for f in os.listdir(output_dir) if os.path.isfile(os.path.join(output_dir, f))]
+                
+                for filename in files:
+                    filepath = os.path.join(output_dir, filename)
+                    stat = os.stat(filepath)
+                    age_days = (time.time() - stat.st_mtime) / (24 * 3600)
+                    
+                    # Safe cleanup criteria
+                    should_remove = False
+                    reason = ""
+                    
+                    if age_days > 90 and filename.startswith('test_'):
+                        should_remove = True
+                        reason = "Old test file (>90 days)"
+                    elif age_days > 60 and 'temp' in filename.lower():
+                        should_remove = True
+                        reason = "Old temporary file (>60 days)"
+                    elif age_days > 180 and output_type == 'diagnostic':
+                        should_remove = True
+                        reason = "Old diagnostic file (>180 days)"
+                    elif stat.st_size == 0:
+                        should_remove = True
+                        reason = "Empty file"
+                    elif filename.endswith('.log') and age_days > 30:
+                        should_remove = True
+                        reason = "Old log file (>30 days)"
+                    
+                    if should_remove:
+                        candidates_for_removal.append((filepath, reason, stat.st_size))
+        
+        if candidates_for_removal:
+            total_size = sum(size for _, _, size in candidates_for_removal)
+            print(f"\n{Colors.YELLOW}Found {len(candidates_for_removal)} files for safe removal ({total_size / (1024*1024):.1f} MB):{Colors.ENDC}")
+            
+            for filepath, reason, size in candidates_for_removal[:10]:
+                rel_path = os.path.relpath(filepath)
+                print(f"  {rel_path} - {reason} ({size / 1024:.1f} KB)")
+            
+            if len(candidates_for_removal) > 10:
+                print(f"  ... and {len(candidates_for_removal) - 10} more files")
+            
+            confirm = input(f"\n{Colors.CYAN}Remove these files? (y/N): {Colors.ENDC}").lower()
+            if confirm == 'y':
+                removed_count = 0
+                for filepath, _, _ in candidates_for_removal:
+                    try:
+                        os.remove(filepath)
+                        removed_count += 1
+                    except Exception as e:
+                        print(f"{Colors.RED}Failed to remove {filepath}: {e}{Colors.ENDC}")
+                
+                print(f"{Colors.GREEN}✓ Removed {removed_count} files, freed {total_size / (1024*1024):.1f} MB{Colors.ENDC}")
+            else:
+                print(f"{Colors.BLUE}Cleanup cancelled{Colors.ENDC}")
+        else:
+            print(f"{Colors.GREEN}✓ No files found for safe cleanup{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def deep_cleanup(self):
+        """Advanced cleanup with user confirmation"""
+        print(f"\n{Colors.CYAN}Deep Cleanup (Advanced){Colors.ENDC}")
+        print(f"{Colors.RED}⚠️  This is an advanced feature that requires careful review{Colors.ENDC}")
+        
+        confirm = input(f"\n{Colors.YELLOW}Continue with deep cleanup analysis? (y/N): {Colors.ENDC}").lower()
+        if confirm != 'y':
+            return
+        
+        # This would implement more aggressive cleanup logic
+        print(f"\n{Colors.YELLOW}Deep cleanup feature coming soon!{Colors.ENDC}")
+        print(f"{Colors.BLUE}Will include:{Colors.ENDC}")
+        print(f"  • Duplicate file detection")
+        print(f"  • Large file analysis") 
+        print(f"  • Unused dependency cleanup")
+        print(f"  • Advanced pattern-based removal")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def show_disk_usage(self):
+        """Show disk usage for output directories"""
+        print(f"\n{Colors.CYAN}Disk Usage Analysis{Colors.ENDC}")
+        
+        output_types = ['ascii-art', 'vault-analysis', 'backup', 'research', 'diagnostic']
+        total_size = 0
+        
+        for output_type in output_types:
+            output_dir = self.get_output_directory(output_type)
+            if os.path.exists(output_dir):
+                dir_size = 0
+                file_count = 0
+                
+                for root, dirs, files in os.walk(output_dir):
+                    for filename in files:
+                        filepath = os.path.join(root, filename)
+                        try:
+                            dir_size += os.path.getsize(filepath)
+                            file_count += 1
+                        except OSError:
+                            pass
+                
+                total_size += dir_size
+                print(f"{output_type:15}: {dir_size / (1024*1024):8.1f} MB ({file_count:3d} files)")
+        
+        print(f"{'':15}   {'='*20}")
+        print(f"{'Total':15}: {total_size / (1024*1024):8.1f} MB")
+        
+        # Show vault size for comparison if available
+        if self.current_vault and os.path.exists(self.current_vault):
+            vault_size = 0
+            vault_files = 0
+            
+            for root, dirs, files in os.walk(self.current_vault):
+                # Skip .obsidian directory
+                dirs[:] = [d for d in dirs if not d.startswith('.')]
+                for filename in files:
+                    if filename.endswith('.md'):
+                        filepath = os.path.join(root, filename)
+                        try:
+                            vault_size += os.path.getsize(filepath)
+                            vault_files += 1
+                        except OSError:
+                            pass
+            
+            print(f"\n{Colors.BLUE}Vault comparison:{Colors.ENDC}")
+            print(f"{'Vault (.md files)':15}: {vault_size / (1024*1024):8.1f} MB ({vault_files:3d} files)")
+            print(f"{'Output files':15}: {total_size / (1024*1024):8.1f} MB")
+            
+            if total_size > vault_size:
+                ratio = total_size / vault_size if vault_size > 0 else float('inf')
+                print(f"{Colors.YELLOW}⚠️  Output files are {ratio:.1f}x larger than vault content{Colors.ENDC}")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
+    def configure_cleanup_rules(self):
+        """Configure intelligent cleanup rules"""
+        print(f"\n{Colors.CYAN}Cleanup Rules Configuration{Colors.ENDC}")
+        print(f"{Colors.YELLOW}Feature coming soon!{Colors.ENDC}")
+        print(f"{Colors.BLUE}Will include configurable rules for:{Colors.ENDC}")
+        print(f"  • File age thresholds")
+        print(f"  • Size limits")
+        print(f"  • Pattern matching")
+        print(f"  • Auto-cleanup scheduling")
+        
+        input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
+    
     def run(self):
         """Enhanced main application loop"""
         # Show enhanced welcome
@@ -1588,18 +2598,25 @@ class EnhancedVaultManager(VaultManager):
                 ('1', '📊 Analyze Vault'),
                 ('2', '🏷️  Manage Tags'),
                 ('3', '💾 Backup Vault'),
-                ('4', '🚀 V2 Features' if self.v2_available else '🚀 V2 Features (Not Installed)'),
-                ('5', '🎨 ASCII Art Tools'),  # New menu option
-                ('6', '🔧 Advanced Tools'),
-                ('7', '📚 Help & Documentation'),
-                ('8', '🤖 AI Model Configuration' if self.llm_enabled or self.pattern_matching_mode else '🤖 AI Model Configuration (LLM Not Available)'),
-                ('9', '⚙️  Settings'),
+                ('4', '🤖 Query Vault with AI' if self.llm_enabled else '🤖 Query Vault (Pattern Matching)' if self.pattern_matching_mode else '🤖 Query Vault (Not Available)'),
+                ('5', '🚀 V2 Features' if self.v2_available else '🚀 V2 Features (Not Installed)'),
+                ('6', '🎨 ASCII Art Tools'),
+                ('7', '🔧 Advanced Tools'),
+                ('8', '📚 Help & Documentation'),
+                ('9', '🤖 AI Model Configuration' if self.llm_enabled or self.pattern_matching_mode else '🤖 AI Model Configuration (LLM Not Available)'),
+                ('10', '⚙️  Settings'),
                 ('0', '👋 Exit')
             ]
             
-            # Use enhanced menu display
-            self.show_menu_with_art('MAIN MENU', options, 'Choose an option to get started!')
-            choice = input().strip()
+            # Use arrow key navigation if available, fallback to traditional menu
+            if self.arrow_navigation and self.navigator:
+                choice = self.navigator.navigate_menu('🏰 ENHANCED VAULT MANAGER - MAIN MENU', options)
+                if choice == 'quit':
+                    choice = '0'  # Treat quit as exit
+            else:
+                # Fallback to enhanced menu display
+                self.show_menu_with_art('MAIN MENU', options, 'Choose an option to get started!')
+                choice = input().strip()
             
             if choice == '0':
                 # Show farewell art
@@ -1615,16 +2632,19 @@ class EnhancedVaultManager(VaultManager):
             elif choice == '3':
                 self.backup_vault_menu()
             elif choice == '4':
-                self.v2_features_menu()
+                self.play_menu_navigation_sound()
+                self.vault_query_interface()
             elif choice == '5':
-                self.show_ascii_menu()  # New ASCII art menu
+                self.v2_features_menu()
             elif choice == '6':
-                self.advanced_tools_menu()
+                self.show_ascii_menu()
             elif choice == '7':
-                self.show_help()
+                self.advanced_tools_menu()
             elif choice == '8':
-                self.ai_model_configuration()
+                self.show_help()
             elif choice == '9':
+                self.ai_model_configuration()
+            elif choice == '10':
                 self.settings_menu()
             else:
                 print(f"\n{Colors.RED}Invalid choice. Please try again.{Colors.ENDC}")

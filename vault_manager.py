@@ -61,13 +61,39 @@ class VaultManager:
     def check_v2_installation(self) -> bool:
         """Check if obsidian-librarian v2 is installed"""
         try:
+            # First check if the Python package is available
+            import importlib.util
+            
+            # Check for the v2 directory structure
+            v2_path = os.path.join(os.path.dirname(__file__), 'obsidian-librarian-v2')
+            python_path = os.path.join(v2_path, 'python')
+            
+            if os.path.exists(v2_path) and os.path.exists(python_path):
+                # Check if the Python package is importable
+                spec = importlib.util.spec_from_file_location(
+                    "obsidian_librarian", 
+                    os.path.join(python_path, "obsidian_librarian", "__init__.py")
+                )
+                if spec is not None:
+                    return True
+            
+            # Fallback: try to import as installed package
+            try:
+                import obsidian_librarian
+                return True
+            except ImportError:
+                pass
+            
+            # Last resort: check CLI command
             result = subprocess.run(
                 ['obsidian-librarian', '--version'],
                 capture_output=True,
-                text=True
+                text=True,
+                timeout=5
             )
             return result.returncode == 0
-        except:
+        except Exception as e:
+            # If there's any error, assume v2 is not available
             return False
     
     def clear_screen(self):
