@@ -2,9 +2,9 @@
 # Use: pip install -r requirements-security.txt
 
 # Security scanning
-bandit==1.7.5           # Security linter for Python
-safety==3.0.1           # Check for security vulnerabilities in dependencies
-pip-audit==2.6.1        # Audit Python packages for known vulnerabilities
+bandit>=1.7.5           # Security linter for Python
+safety>=2.3.0           # Check for security vulnerabilities in dependencies (compatible with pydantic v2)
+pip-audit>=2.6.0        # Audit Python packages for known vulnerabilities
 
 # Cryptography
 cryptography>=41.0.7    # For secure encryption/decryption
@@ -13,7 +13,7 @@ pycryptodome>=3.19.0    # Additional crypto algorithms
 # Input validation and sanitization
 bleach>=6.0.0           # HTML sanitization
 validators>=0.22.0      # Data validation
-pydantic>=2.5.0         # Data validation with types
+# pydantic already installed by main requirements
 
 # Rate limiting (if using Flask/FastAPI)
 slowapi>=0.1.9          # Rate limiting for FastAPI
