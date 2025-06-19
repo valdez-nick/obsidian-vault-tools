@@ -12,10 +12,12 @@ from collections import defaultdict
 import argparse
 
 class TagFixer:
-    def __init__(self, vault_path, dry_run=True):
+    def __init__(self, vault_path, dry_run=True, operations=None):
         self.vault_path = Path(vault_path)
         self.dry_run = dry_run
         self.changes_made = defaultdict(list)
+        # Operations to perform - if None, do all operations
+        self.operations = operations or ['quoted', 'similar', 'generic', 'hierarchy']
         
     def log_change(self, file_path, change_type, old_value, new_value):
         """Log a change for reporting"""
@@ -113,11 +115,15 @@ class TagFixer:
                 
             original_content = content
             
-            # Apply all fixes
-            content = self.fix_quoted_tags(content, file_path)
-            content = self.standardize_similar_tags(content, file_path)
-            content = self.remove_generic_tags(content, file_path)
-            content = self.fix_hierarchy_tags(content, file_path)
+            # Apply fixes based on selected operations
+            if 'quoted' in self.operations:
+                content = self.fix_quoted_tags(content, file_path)
+            if 'similar' in self.operations:
+                content = self.standardize_similar_tags(content, file_path)
+            if 'generic' in self.operations:
+                content = self.remove_generic_tags(content, file_path)
+            if 'hierarchy' in self.operations:
+                content = self.fix_hierarchy_tags(content, file_path)
             
             # Only write if changes were made
             if content != original_content and not self.dry_run:
@@ -184,11 +190,48 @@ class TagFixer:
 def main():
     parser = argparse.ArgumentParser(description='Fix tags in Obsidian vault')
     parser.add_argument('vault_path', help='Path to Obsidian vault')
-    parser.add_argument('--apply', action='store_true', help='Apply changes (default is dry run)')
+    
+    # Mode arguments (mutually exclusive with apply for backward compatibility)
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument('--apply', action='store_true', help='Apply changes (default is dry run)')
+    mode_group.add_argument('--dry-run', action='store_true', help='Preview changes without applying (default)')
+    
+    # Operation-specific arguments
+    parser.add_argument('--fix-quoted-only', action='store_true', 
+                       help='Only fix quoted tags (e.g., "#tag" to #tag)')
+    parser.add_argument('--merge-similar', action='store_true',
+                       help='Only merge similar tags')
+    parser.add_argument('--remove-generic', action='store_true',
+                       help='Only remove generic tags')
+    parser.add_argument('--fix-hierarchy', action='store_true',
+                       help='Only fix hierarchical tag issues')
     
     args = parser.parse_args()
     
-    fixer = TagFixer(args.vault_path, dry_run=not args.apply)
+    # Determine dry run mode
+    if args.apply:
+        dry_run = False
+    elif args.dry_run:
+        dry_run = True
+    else:
+        # Default to dry run if no mode specified
+        dry_run = True
+    
+    # Determine which operations to perform
+    operations = []
+    if args.fix_quoted_only:
+        operations = ['quoted']
+    elif args.merge_similar:
+        operations = ['similar']
+    elif args.remove_generic:
+        operations = ['generic']
+    elif args.fix_hierarchy:
+        operations = ['hierarchy']
+    else:
+        # Default: perform all operations
+        operations = ['quoted', 'similar', 'generic', 'hierarchy']
+    
+    fixer = TagFixer(args.vault_path, dry_run=dry_run, operations=operations)
     fixer.process_vault()
 
 if __name__ == '__main__':

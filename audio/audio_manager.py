@@ -66,13 +66,14 @@ class AudioManager:
             self.enabled = False
             return False
     
-    def play_effect(self, effect_name: str, volume_override: Optional[float] = None) -> bool:
+    def play_effect(self, effect_name: str, volume_override: Optional[float] = None, stop_previous: bool = True) -> bool:
         """
         Play a sound effect
         
         Args:
             effect_name: Name of the effect to play
             volume_override: Optional volume override (0.0 to 1.0)
+            stop_previous: Whether to stop currently playing effects
             
         Returns:
             True if sound played successfully
@@ -81,11 +82,33 @@ class AudioManager:
             return False
             
         try:
+            # Stop any currently playing effects if requested
+            if stop_previous:
+                # Stop all channels except channel 0 (reserved for ambient)
+                for channel_id in range(1, pygame.mixer.get_num_channels()):
+                    channel = pygame.mixer.Channel(channel_id)
+                    if channel.get_busy():
+                        channel.stop()
+            
             sound = self._get_sound(effect_name)
             if sound:
                 volume = volume_override or (self.volumes['master'] * self.volumes['effects'])
                 sound.set_volume(volume)
-                sound.play()
+                
+                # Try to find a free channel (not channel 0)
+                channel = None
+                for channel_id in range(1, pygame.mixer.get_num_channels()):
+                    test_channel = pygame.mixer.Channel(channel_id)
+                    if not test_channel.get_busy():
+                        channel = test_channel
+                        break
+                
+                if channel:
+                    channel.play(sound)
+                else:
+                    # If no free channel, use any available channel
+                    sound.play()
+                
                 return True
         except Exception as e:
             print(f"Error playing effect {effect_name}: {e}")
@@ -129,6 +152,7 @@ class AudioManager:
         try:
             ambient_path = Path(__file__).parent / "sounds" / "ambient" / f"{ambient_name}.wav"
             if ambient_path.exists():
+                # Use the music channel for ambient (separate from effects)
                 pygame.mixer.music.load(str(ambient_path))
                 volume = self.volumes['master'] * self.volumes['ambient']
                 pygame.mixer.music.set_volume(volume)

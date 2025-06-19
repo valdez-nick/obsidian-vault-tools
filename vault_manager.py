@@ -29,6 +29,7 @@ class Colors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
+    MAGENTA = '\033[95m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
@@ -334,6 +335,28 @@ class VaultManager:
         import shlex
         return shlex.quote(path)
     
+    def validate_dependencies(self):
+        """Validate that required scripts and dependencies exist"""
+        dependencies = {
+            'analyze_tags_simple.py': 'Tag analysis functionality',
+            'fix_vault_tags.py': 'Tag fixing functionality', 
+            'backup_vault.py': 'Backup functionality',
+            'quick_incremental_backup.sh': 'Incremental backup functionality'
+        }
+        
+        missing = []
+        for dep, description in dependencies.items():
+            if not os.path.exists(dep):
+                missing.append(f"{dep} ({description})")
+        
+        if missing:
+            print(f"\n{Colors.YELLOW}⚠️  Missing dependencies:{Colors.ENDC}")
+            for item in missing:
+                print(f"  • {item}")
+            print(f"\n{Colors.BLUE}Some features may not work correctly.{Colors.ENDC}")
+            return False
+        return True
+    
     def run_command(self, command, description=None):
         """Run a shell command and handle output"""
         if description:
@@ -370,6 +393,10 @@ class VaultManager:
         except FileNotFoundError as e:
             print(f"{Colors.RED}❌ Command not found: {str(e)}{Colors.ENDC}")
             print(f"{Colors.YELLOW}Make sure the required script/tool is in the same directory{Colors.ENDC}")
+            return False
+        except PermissionError as e:
+            print(f"{Colors.RED}❌ Permission denied: {str(e)}{Colors.ENDC}")
+            print(f"{Colors.YELLOW}Check file permissions for the command{Colors.ENDC}")
             return False
         except Exception as e:
             print(f"{Colors.RED}❌ Unexpected error: {str(e)}{Colors.ENDC}")
@@ -531,7 +558,7 @@ class VaultManager:
     def fix_quoted_tags(self):
         """Wrapper for fixing quoted tags"""
         self.run_command_with_progress(
-            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --fix-quoted-only',
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply --fix-quoted-only',
             'Fixing quoted tags',
             estimated_duration=6
         )
@@ -539,7 +566,7 @@ class VaultManager:
     def merge_similar_tags(self):
         """Wrapper for merging similar tags"""
         self.run_command_with_progress(
-            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --merge-similar',
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply --merge-similar',
             'Merging similar tags',
             estimated_duration=12
         )
@@ -547,7 +574,7 @@ class VaultManager:
     def remove_generic_tags(self):
         """Wrapper for removing generic tags"""
         self.run_command_with_progress(
-            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --remove-generic',
+            f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply --remove-generic',
             'Removing generic tags',
             estimated_duration=8
         )
@@ -770,21 +797,21 @@ class VaultManager:
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '3':
                 self.run_command_with_progress(
-                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --fix-quoted-only',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply --fix-quoted-only',
                     'Fixing quoted tags',
                     estimated_duration=6
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '4':
                 self.run_command_with_progress(
-                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --merge-similar',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply --merge-similar',
                     'Merging similar tags',
                     estimated_duration=12
                 )
                 input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.ENDC}")
             elif choice == '5':
                 self.run_command_with_progress(
-                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --remove-generic',
+                    f'python3 fix_vault_tags.py {self.quote_path(self.current_vault)} --apply --remove-generic',
                     'Removing generic tags',
                     estimated_duration=8
                 )
@@ -1460,8 +1487,19 @@ $ make install{Colors.ENDC}
                 print(f"export {env_var}='{api_key}'")
                 print(f"\n{Colors.GREEN}✓ Configuration saved{Colors.ENDC}")
     
+    def cleanup(self):
+        """Clean up resources when exiting (base implementation)"""
+        # Base cleanup - can be overridden by subclasses
+        pass
+    
     def run(self):
         """Main application loop"""
+        # Validate dependencies on first run
+        if not self.config.get('deps_checked', False):
+            self.validate_dependencies()
+            self.config['deps_checked'] = True
+            self.save_config()
+        
         # Show welcome on first run
         if not self.config.get('welcomed', False):
             self.clear_screen()

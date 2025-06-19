@@ -6,16 +6,45 @@ Manages Ollama and custom model integration for the vault query system
 
 import os
 import json
-import yaml
-import asyncio
-import aiohttp
 import re
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime
 import logging
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+
+# Handle optional dependencies with graceful fallback
+try:
+    import yaml
+    YAML_AVAILABLE = True
+except ImportError:
+    YAML_AVAILABLE = False
+    logger.warning("PyYAML not available - using JSON fallback for config files")
+    # Fallback for basic YAML operations - use JSON instead
+    class yaml:
+        @staticmethod
+        def safe_load(content):
+            try:
+                if content and isinstance(content, str):
+                    # Try to parse as JSON first
+                    return json.loads(content)
+                else:
+                    return content if content else {}
+            except json.JSONDecodeError:
+                logger.error("Cannot parse config without PyYAML - using empty config")
+                return {}
+        @staticmethod
+        def safe_dump(data, *args, **kwargs):
+            return json.dumps(data, indent=2)
+
+try:
+    import aiohttp
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    AIOHTTP_AVAILABLE = False
+    # This will cause graceful degradation - models won't work without aiohttp
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -50,6 +79,10 @@ class OllamaProvider(ModelProvider):
         self.base_url = base_url
         self.timeout = timeout
         self.session = None
+        
+        if not AIOHTTP_AVAILABLE:
+            logger.warning("aiohttp not available - Ollama provider will not work")
+            raise ImportError("aiohttp is required for Ollama provider")
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout))

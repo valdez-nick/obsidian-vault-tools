@@ -1,8 +1,20 @@
 #!/bin/bash
 # Quick incremental backup using rsync
 
-VAULT_DIR="/Users/nvaldez/Documents/repos/Obsidian"
-BACKUP_BASE="/Users/nvaldez/Documents/repos/obsidian_backups"
+# Check if vault directory is provided as argument
+if [ $# -eq 0 ]; then
+    echo "❌ Error: Please provide vault directory path"
+    echo "Usage: $0 <vault_directory_path>"
+    exit 1
+fi
+
+VAULT_DIR="$1"
+# Create backup directory next to the vault or in user's home
+if [ -w "$(dirname "$VAULT_DIR")" ]; then
+    BACKUP_BASE="$(dirname "$VAULT_DIR")/obsidian_backups"
+else
+    BACKUP_BASE="$HOME/ObsidianBackups/$(basename "$VAULT_DIR")"
+fi
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LATEST_LINK="$BACKUP_BASE/latest"
 BACKUP_DIR="$BACKUP_BASE/backup_$TIMESTAMP"
