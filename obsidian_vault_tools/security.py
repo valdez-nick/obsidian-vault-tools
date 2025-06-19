@@ -168,8 +168,8 @@ def sanitize_log_data(data: Any) -> Any:
         (r'api_key["\']?\s*[:=]\s*["\']?([^"\'\\s]+)', 'api_key=***'),
         (r'secret["\']?\s*[:=]\s*["\']?([^"\'\\s]+)', 'secret=***'),
         (r'Authorization:\s*Bearer\s+(\S+)', 'Authorization: Bearer ***'),
-        (r'/Users/[^/\\s]+/', '/Users/***/'),  # Hide username in paths
-        (r'\\Users\\[^\\\\s]+\\', '\\Users\\***\\'),  # Windows paths
+        (r'/Users/[^/\s]+/', '/Users/***/'),  # Hide username in paths
+        (r'\\\\Users\\\\[^\\\\\\s]+\\\\', '\\\\Users\\\\***\\\\'),  # Windows paths
     ]
     
     if isinstance(data, dict):
