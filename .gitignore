@@ -31,6 +31,26 @@ sensitive/
 **/mcp_credentials.json  
 **/config.local.json
 **/mcp_config.local.json
+**/.cred_key
+**/memory.json
+**/memory/**
+**/mcp_memory/**
+
+# Credential patterns (extra security)
+**/*token*
+**/*secret*
+**/*key*
+**/*password*
+**/config.personal.json
+**/personal_*
+**/local_*
+
+# IDE and editor files that might contain credentials
+.vscode/settings.json
+.idea/**/workspace.xml
+*.swp
+*.swo
+*~
 
 # Temporary files
 *.tmp

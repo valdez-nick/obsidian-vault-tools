@@ -16,9 +16,9 @@ This directory contains example configurations for MCP (Model Context Protocol) 
 
 3. **Set up credentials using environment variables:**
    ```bash
-   export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
-   export MEMORY_PATH="/path/to/memory/storage"
-   export VAULT_PATH="/path/to/your/obsidian/vault"
+   export YOUR_GITHUB_TOKEN="your_token_here"
+   export YOUR_MEMORY_PATH="/path/to/memory/storage"
+   export YOUR_VAULT_PATH="/path/to/your/obsidian/vault"
    ```
 
    Or use the credential manager (will prompt for values):
@@ -51,13 +51,13 @@ This directory contains example configurations for MCP (Model Context Protocol) 
 
 The configuration supports these placeholder variables that will be automatically substituted:
 
-- `[GITHUB_PERSONAL_ACCESS_TOKEN]` - Your GitHub personal access token
-- `[MEMORY_PATH]` - Path where memory files should be stored
-- `[VAULT_PATH]` - Path to your Obsidian vault
-- `[CONFLUENCE_CLOUD_ID]` - Your Atlassian Cloud ID
-- `[CONFLUENCE_EMAIL]` - Your Confluence email
-- `[CONFLUENCE_TOKEN]` - Your Confluence API token
-- `[JIRA_TOKEN]` - Your Jira API token
+- `[YOUR_GITHUB_TOKEN]` - Your GitHub personal access token
+- `[YOUR_MEMORY_PATH]` - Path where memory files should be stored
+- `[YOUR_VAULT_PATH]` - Path to your Obsidian vault
+- `[YOUR_CLOUD_ID]` - Your Atlassian Cloud ID
+- `[YOUR_EMAIL]` - Your email address
+- `[YOUR_CONFLUENCE_TOKEN]` - Your Confluence API token
+- `[YOUR_JIRA_TOKEN]` - Your Jira API token
 
 ## Security Notes
 
@@ -70,12 +70,12 @@ The configuration supports these placeholder variables that will be automaticall
 
 ### GitHub Server
 - **Purpose:** Access GitHub repositories, issues, PRs
-- **Required:** `GITHUB_PERSONAL_ACCESS_TOKEN`
+- **Required:** `YOUR_GITHUB_TOKEN`
 - **Example:** `ovt mcp add my-github github`
 
 ### Memory Server
 - **Purpose:** Persistent conversation memory
-- **Required:** `MEMORY_PATH`
+- **Required:** `YOUR_MEMORY_PATH`
 - **Example:** `ovt mcp add my-memory memory`
 
 ### Web Fetch Server
@@ -85,12 +85,12 @@ The configuration supports these placeholder variables that will be automaticall
 
 ### Confluence Server
 - **Purpose:** Access Confluence/Jira
-- **Required:** `CONFLUENCE_CLOUD_ID`, `CONFLUENCE_EMAIL`, `CONFLUENCE_TOKEN`, `JIRA_TOKEN`
+- **Required:** `YOUR_CLOUD_ID`, `YOUR_EMAIL`, `YOUR_CONFLUENCE_TOKEN`, `YOUR_JIRA_TOKEN`
 - **Example:** `ovt mcp add my-confluence confluence`
 
 ### Obsidian PM Intelligence
 - **Purpose:** Custom Obsidian PM intelligence server
-- **Required:** `VAULT_PATH`, `MEMORY_PATH`, script path
+- **Required:** `YOUR_VAULT_PATH`, `YOUR_MEMORY_PATH`, script path
 - **Example:** `ovt mcp add my-pm obsidian-pm --script-path /path/to/script.js`
 
 ## Troubleshooting

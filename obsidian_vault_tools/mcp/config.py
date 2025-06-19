@@ -33,7 +33,7 @@ class MCPConfig:
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-memory"],
                     "env": {
-                        "MEMORY_FILE_PATH": "[MEMORY_PATH]/memory.json"
+                        "MEMORY_FILE_PATH": "[YOUR_MEMORY_PATH]/memory.json"
                     }
                 },
                 "web-fetch": {
@@ -44,7 +44,7 @@ class MCPConfig:
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-github"],
                     "env": {
-                        "GITHUB_PERSONAL_ACCESS_TOKEN": "[GITHUB_PERSONAL_ACCESS_TOKEN]"
+                        "GITHUB_PERSONAL_ACCESS_TOKEN": "[YOUR_GITHUB_TOKEN]"
                     }
                 }
             }
@@ -163,14 +163,14 @@ class MCPConfig:
                 "command": "npx",
                 "args": ["-y", "@modelcontextprotocol/server-github"],
                 "env": {
-                    "GITHUB_PERSONAL_ACCESS_TOKEN": "[GITHUB_PERSONAL_ACCESS_TOKEN]"
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": "[YOUR_GITHUB_TOKEN]"
                 }
             },
             "memory": {
                 "command": "npx",
                 "args": ["-y", "@modelcontextprotocol/server-memory"],
                 "env": {
-                    "MEMORY_FILE_PATH": f"[MEMORY_PATH]/{name}_memory.json"
+                    "MEMORY_FILE_PATH": f"[YOUR_MEMORY_PATH]/{name}_memory.json"
                 }
             },
             "confluence": {
@@ -179,18 +179,21 @@ class MCPConfig:
                     "run", "-i", "--rm",
                     "--platform", "linux/amd64",
                     "ghcr.io/sooperset/mcp-atlassian:latest",
-                    "--confluence-url", "https://api.atlassian.com/ex/confluence/[CONFLUENCE_CLOUD_ID]",
-                    "--confluence-username", "[CONFLUENCE_EMAIL]",
-                    "--confluence-token", "[CONFLUENCE_TOKEN]"
+                    "--confluence-url", "https://api.atlassian.com/ex/confluence/[YOUR_CLOUD_ID]",
+                    "--confluence-username", "[YOUR_EMAIL]",
+                    "--confluence-token", "[YOUR_CONFLUENCE_TOKEN]",
+                "--jira-url", "https://api.atlassian.com/ex/jira/[YOUR_CLOUD_ID]",
+                "--jira-username", "[YOUR_EMAIL]",
+                "--jira-token", "[YOUR_JIRA_TOKEN]"
                 ]
             },
             "obsidian-pm": {
                 "command": "/opt/homebrew/bin/node",
                 "args": [kwargs.get("script_path", "/path/to/obsidian-pm-intelligence.js")],
                 "env": {
-                    "VAULT_PATH": "[VAULT_PATH]",
+                    "VAULT_PATH": "[YOUR_VAULT_PATH]",
                     "ENABLE_LEARNING": "true",
-                    "MEMORY_PATH": "[MEMORY_PATH]",
+                    "MEMORY_PATH": "[YOUR_MEMORY_PATH]",
                     "ENABLE_AGENT_ORCHESTRATION": "false",
                     "LOG_LEVEL": "info"
                 }

@@ -207,12 +207,18 @@ def list():
     """List configured MCP servers"""
     try:
         from .mcp import MCPConfig
+        from .mcp.setup_wizard import run_setup_wizard_if_needed
+        
+        # Run setup wizard if this is first time
+        if run_setup_wizard_if_needed():
+            console.print("\n" + "="*50)
+        
         config = MCPConfig()
         servers = config.get_server_status()
         
         if not servers:
             console.print("No MCP servers configured.")
-            console.print("Use 'ovt mcp add' to add a server.")
+            console.print("Use 'ovt mcp add' to add a server or run the setup wizard again.")
             return
         
         from rich.table import Table
@@ -348,6 +354,84 @@ def credentials():
         
     except ImportError:
         console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+
+@mcp.command()
+def audit():
+    """Audit repository for credential exposure"""
+    try:
+        import subprocess
+        import re
+        
+        console.print("🔍 Auditing repository for credential exposure...")
+        
+        # Patterns that might indicate credentials
+        credential_patterns = [
+            r'[a-zA-Z0-9]{20,}',  # Long alphanumeric strings
+            r'ghp_[a-zA-Z0-9]{36}',  # GitHub tokens
+            r'sk-[a-zA-Z0-9]{48}',  # OpenAI API keys  
+            r'xoxb-[a-zA-Z0-9-]{72}',  # Slack tokens
+            r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',  # Email addresses
+        ]
+        
+        # Files to check
+        result = subprocess.run(['git', 'ls-files'], capture_output=True, text=True)
+        if result.returncode != 0:
+            console.print("[red]Error: Not a git repository or git not available[/red]")
+            return
+        
+        files_to_check = [f for f in result.stdout.strip().split('\n') 
+                         if f and not f.startswith('.git') and f.endswith(('.py', '.json', '.md', '.txt', '.env'))]
+        
+        issues_found = []
+        
+        for file_path in files_to_check:
+            try:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    
+                for line_num, line in enumerate(content.split('\n'), 1):
+                    # Skip lines that are clearly examples or templates
+                    if any(marker in line.lower() for marker in ['[your_', '[example', 'placeholder', 'template', 'example.com']):
+                        continue
+                        
+                    for pattern in credential_patterns:
+                        matches = re.findall(pattern, line)
+                        for match in matches:
+                            if len(match) > 10:  # Only flag longer strings
+                                issues_found.append({
+                                    'file': file_path,
+                                    'line': line_num,
+                                    'match': match[:20] + '...' if len(match) > 20 else match,
+                                    'type': 'potential_credential'
+                                })
+            except Exception as e:
+                continue
+        
+        if issues_found:
+            console.print(f"[yellow]⚠️  Found {len(issues_found)} potential credential exposure(s):[/yellow]")
+            for issue in issues_found[:10]:  # Limit output
+                console.print(f"  {issue['file']}:{issue['line']} - {issue['match']}")
+            if len(issues_found) > 10:
+                console.print(f"  ... and {len(issues_found) - 10} more")
+        else:
+            console.print("[green]✅ No credential exposure detected in tracked files[/green]")
+        
+        # Check .gitignore effectiveness
+        gitignore_path = Path('.gitignore')
+        if gitignore_path.exists():
+            console.print("[green]✅ .gitignore file exists[/green]")
+        else:
+            console.print("[red]❌ No .gitignore file found[/red]")
+        
+        console.print("\n🔒 Security reminders:")
+        console.print("• Never commit actual credentials to version control")
+        console.print("• Use environment variables or encrypted credential storage")
+        console.print("• Review files before committing with 'git diff --cached'")
+        
+    except ImportError:
+        console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
+    except Exception as e:
+        console.print(f"[red]Audit failed: {e}[/red]")
 
 @cli.command()
 def version():

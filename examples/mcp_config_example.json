@@ -1,36 +1,32 @@
 {
   "mcpServers": {
+    "obsidian-pm-intelligence": {
+      "command": "/opt/homebrew/bin/node",
+      "args": ["/Users/nvaldez/Documents/repos/assistant-mcp/src/obsidian-pm-intelligence.js"],
+      "env": {
+        "VAULT_PATH": "[YOUR_VAULT_PATH]",
+        "ENABLE_LEARNING": "true",
+        "MEMORY_PATH": "[YOUR_MEMORY_PATH]",
+        "ENABLE_AGENT_ORCHESTRATION": "false",
+        "LOG_LEVEL": "info"
+      }
+    },
     "memory": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": {
-        "MEMORY_FILE_PATH": "[MEMORY_PATH]/memory.json"
-      }
-    },
-    "web-fetch": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"]
-    },
-    "github": {
-      "command": "npx", 
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "[GITHUB_PERSONAL_ACCESS_TOKEN]"
+        "MEMORY_FILE_PATH": "[YOUR_MEMORY_PATH]/memory.json"
       }
     },
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "mcp-server-sequential-thinking"]
     },
-    "obsidian-pm-intelligence": {
-      "command": "/opt/homebrew/bin/node",
-      "args": ["/path/to/your/obsidian-pm-intelligence.js"],
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "VAULT_PATH": "[VAULT_PATH]",
-        "ENABLE_LEARNING": "true",
-        "MEMORY_PATH": "[MEMORY_PATH]",
-        "ENABLE_AGENT_ORCHESTRATION": "false",
-        "LOG_LEVEL": "info"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "[YOUR_GITHUB_TOKEN]"
       }
     },
     "confluence": {
@@ -40,18 +36,22 @@
         "--platform", "linux/amd64",
         "ghcr.io/sooperset/mcp-atlassian:latest",
         "--confluence-url",
-        "https://api.atlassian.com/ex/confluence/[CONFLUENCE_CLOUD_ID]",
+        "https://api.atlassian.com/ex/confluence/[YOUR_CLOUD_ID]",
         "--confluence-username",
-        "[CONFLUENCE_EMAIL]",
+        "[YOUR_EMAIL]",
         "--confluence-token",
-        "[CONFLUENCE_TOKEN]",
+        "[YOUR_CONFLUENCE_TOKEN]",
         "--jira-url",
-        "https://api.atlassian.com/ex/jira/[CONFLUENCE_CLOUD_ID]", 
+        "https://api.atlassian.com/ex/jira/[YOUR_CLOUD_ID]",
         "--jira-username",
-        "[CONFLUENCE_EMAIL]",
+        "[YOUR_EMAIL]",
         "--jira-token",
-        "[JIRA_TOKEN]"
+        "[YOUR_JIRA_TOKEN]"
       ]
+    },
+    "web-fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
     }
   }
 }
