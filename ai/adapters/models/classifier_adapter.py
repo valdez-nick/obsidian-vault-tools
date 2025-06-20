@@ -6,7 +6,6 @@ Adapter for creating and using custom classifiers for vault-specific tasks
 
 import os
 import json
-import pickle
 import asyncio
 import numpy as np
 from typing import Dict, List, Any, Optional, Tuple, Union
@@ -14,6 +13,8 @@ from pathlib import Path
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+import hashlib
+import hmac
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,14 @@ try:
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
+
+# Check for joblib (safer alternative to pickle)
+try:
+    import joblib
+    JOBLIB_AVAILABLE = True
+except ImportError:
+    JOBLIB_AVAILABLE = False
+    logger.warning("joblib not available. Install with: pip install joblib")
     # Create dummy sklearn classes
     class DummySklearn:
         def __init__(self, *args, **kwargs): pass
@@ -60,13 +69,21 @@ class ClassifierConfig:
     max_df: float = 0.95
 
 class ClassifierAdapter:
-    """Adapter for custom classifiers"""
+    """Adapter for custom classifiers with secure model persistence"""
     
     def __init__(self, model_dir: str = "./classifier_models"):
         self.model_dir = Path(model_dir)
         self.model_dir.mkdir(exist_ok=True)
         self.classifiers = {}
         self.training_data = {}
+        
+    def _calculate_file_hash(self, file_path: Path) -> str:
+        """Calculate SHA256 hash of a file for integrity verification"""
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
         
     def _create_vectorizer(self, config: ClassifierConfig):
         """Create text vectorizer based on config"""
@@ -269,24 +286,62 @@ class ClassifierAdapter:
             raise
             
     async def save_classifier(self, classifier_name: str):
-        """Save classifier to disk"""
+        """Save classifier to disk securely"""
         if classifier_name not in self.classifiers:
             raise ValueError(f"Classifier {classifier_name} not found")
             
         classifier_data = self.classifiers[classifier_name]
-        save_path = self.model_dir / f"{classifier_name}.pkl"
         
-        # Save pipeline and metadata
-        save_data = {
-            'pipeline': classifier_data['pipeline'],
-            'config': classifier_data['config'],
-            'labels': list(classifier_data['labels']),
-            'performance': classifier_data['performance'],
-            'trained': classifier_data['trained']
-        }
-        
-        with open(save_path, 'wb') as f:
-            pickle.dump(save_data, f)
+        # Use joblib if available, with additional security measures
+        if JOBLIB_AVAILABLE and SKLEARN_AVAILABLE:
+            model_path = self.model_dir / f"{classifier_name}.joblib"
+            metadata_path = self.model_dir / f"{classifier_name}_metadata.json"
+            
+            # Save model with joblib (safer than pickle)
+            joblib.dump(classifier_data['pipeline'], model_path, compress=3)
+            
+            # Save metadata separately as JSON
+            metadata = {
+                'config': {
+                    'name': classifier_data['config'].name,
+                    'classifier_type': classifier_data['config'].classifier_type,
+                    'vectorizer_type': classifier_data['config'].vectorizer_type,
+                    'max_features': classifier_data['config'].max_features,
+                    'ngram_range': classifier_data['config'].ngram_range,
+                    'min_df': classifier_data['config'].min_df,
+                    'max_df': classifier_data['config'].max_df
+                },
+                'labels': list(classifier_data['labels']),
+                'performance': classifier_data['performance'],
+                'trained': classifier_data['trained'],
+                'saved_at': datetime.now().isoformat(),
+                'model_hash': self._calculate_file_hash(model_path)
+            }
+            
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
+        else:
+            # Fallback: Save only metadata if ML libraries not available
+            metadata_path = self.model_dir / f"{classifier_name}_metadata.json"
+            metadata = {
+                'config': {
+                    'name': classifier_data['config'].name,
+                    'classifier_type': classifier_data['config'].classifier_type,
+                    'vectorizer_type': classifier_data['config'].vectorizer_type,
+                    'max_features': classifier_data['config'].max_features,
+                    'ngram_range': classifier_data['config'].ngram_range,
+                    'min_df': classifier_data['config'].min_df,
+                    'max_df': classifier_data['config'].max_df
+                },
+                'labels': list(classifier_data['labels']),
+                'performance': classifier_data.get('performance', {}),
+                'trained': classifier_data.get('trained', False),
+                'saved_at': datetime.now().isoformat(),
+                'ml_libraries_available': False
+            }
+            
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
             
         # Save training data if exists
         if classifier_name in self.training_data:
@@ -305,21 +360,57 @@ class ClassifierAdapter:
         logger.info(f"Saved classifier '{classifier_name}' to {save_path}")
         
     async def load_classifier(self, classifier_name: str) -> bool:
-        """Load classifier from disk"""
+        """Load classifier from disk securely"""
         if not SKLEARN_AVAILABLE:
+            logger.error("scikit-learn not available for loading classifier")
             return False
             
-        save_path = self.model_dir / f"{classifier_name}.pkl"
+        # Try joblib format first (newer, safer)
+        joblib_path = self.model_dir / f"{classifier_name}.joblib"
+        metadata_path = self.model_dir / f"{classifier_name}_metadata.json"
         
-        if not save_path.exists():
-            logger.error(f"Classifier file {save_path} not found")
-            return False
-            
-        try:
-            with open(save_path, 'rb') as f:
-                save_data = pickle.load(f)
+        if joblib_path.exists() and metadata_path.exists() and JOBLIB_AVAILABLE:
+            try:
+                # Load metadata
+                with open(metadata_path, 'r') as f:
+                    metadata = json.load(f)
                 
-            self.classifiers[classifier_name] = save_data
+                # Verify model integrity
+                stored_hash = metadata.get('model_hash')
+                if stored_hash:
+                    current_hash = self._calculate_file_hash(joblib_path)
+                    if current_hash != stored_hash:
+                        logger.error(f"Model file integrity check failed for {classifier_name}")
+                        return False
+                
+                # Load model
+                pipeline = joblib.load(joblib_path)
+                
+                # Reconstruct classifier data
+                config = ClassifierConfig(**metadata['config'])
+                self.classifiers[classifier_name] = {
+                    'pipeline': pipeline,
+                    'config': config,
+                    'labels': set(metadata['labels']),
+                    'performance': metadata.get('performance', {}),
+                    'trained': metadata.get('trained', False)
+                }
+                
+                logger.info(f"Loaded classifier '{classifier_name}' from {joblib_path}")
+                return True
+                
+            except Exception as e:
+                logger.error(f"Failed to load classifier with joblib: {e}")
+                return False
+        
+        # Check for legacy pickle format (log warning)
+        legacy_path = self.model_dir / f"{classifier_name}.pkl"
+        if legacy_path.exists():
+            logger.warning(f"Found legacy pickle format for {classifier_name}. Please re-save the model for better security.")
+            return False
+        
+        logger.error(f"Classifier files for '{classifier_name}' not found")
+        return False
             
             # Load training data if exists
             training_path = self.model_dir / f"{classifier_name}_training.json"
