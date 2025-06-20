@@ -6,6 +6,21 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-beta-yellow)
 
+## 🚀 Quick Start - Unified Manager
+
+**NEW!** All tools are now available through one unified interface:
+
+```bash
+# Launch the unified interactive manager
+./obsidian_manager_unified
+
+# Or via the package CLI
+ovt              # Launches unified manager
+obsidian-tools   # Alternative command
+```
+
+The Unified Manager combines ALL features into one cohesive menu system. See [UNIFIED_MANAGER_README.md](UNIFIED_MANAGER_README.md) for details.
+
 ## ✨ Features
 
 ### 🤖 AI-Powered Intelligence
