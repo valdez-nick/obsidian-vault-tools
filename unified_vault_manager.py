@@ -714,6 +714,7 @@ class UnifiedVaultManager:
             options = [
                 ("Change Vault Path", self.change_vault_path),
                 ("Feature Status", self.show_feature_status),
+                ("MCP Server Configuration", self.handle_mcp_configuration),
                 ("Export Configuration", self.export_config),
                 ("Import Configuration", self.import_config),
                 ("Reset to Defaults", self.reset_defaults),
@@ -1510,6 +1511,20 @@ class UnifiedVaultManager:
             # Reset to defaults
             self._init_features()
             print(f"{Colors.GREEN}Settings reset to defaults{Colors.ENDC}")
+    
+    def handle_mcp_configuration(self):
+        """Handle MCP server configuration"""
+        if MCP_AVAILABLE:
+            try:
+                from obsidian_vault_tools.mcp_tools.interactive_config import MCPInteractiveConfig
+                config_manager = MCPInteractiveConfig()
+                config_manager.display_menu()
+            except ImportError as e:
+                print(f"{Colors.RED}Error loading MCP configuration: {e}{Colors.ENDC}")
+                input("\nPress Enter to continue...")
+        else:
+            print(f"{Colors.YELLOW}MCP tools not available. Install with: pip install mcp{Colors.ENDC}")
+            input("\nPress Enter to continue...")
     
     def run(self):
         """Main run loop"""
