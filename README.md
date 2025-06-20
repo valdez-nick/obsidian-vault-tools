@@ -55,6 +55,7 @@ The Unified Manager combines ALL features into one cohesive menu system. See [UN
 - **Dynamic Tool Discovery**: Automatically discover and integrate MCP tools
 - **Multi-Server Support**: Connect to multiple MCP servers simultaneously
 - **Interactive Tool Execution**: Execute tools with guided parameter input
+- **Interactive Configuration**: Configure MCP servers through the unified manager interface
 - **Server Management**: Start, stop, and manage MCP servers
 - **Tool Categorization**: Organize tools by function and server
 - **Execution History**: Track tool usage and performance statistics
@@ -167,6 +168,7 @@ ovt ascii gallery             # View ASCII art gallery
 
 ### MCP Integration
 ```bash
+ovt                           # Launch unified manager → Settings → MCP Server Configuration
 ovt interactive               # Access MCP tools via interactive menu
 ovt mcp start server-name     # Start MCP server
 ovt mcp stop server-name      # Stop MCP server
@@ -205,7 +207,21 @@ output_dirs:
 ```
 
 ### MCP Configuration
-MCP servers are configured in `~/.obsidian-tools/mcp_config.json`:
+
+#### Method 1: Interactive Configuration (Recommended)
+Launch the unified manager and navigate to:
+```
+Settings & Configuration → MCP Server Configuration
+```
+
+Features:
+- Add/edit/remove servers through guided interface
+- Test connections before saving
+- Secure credential management with masking
+- Real-time validation and status indicators
+
+#### Method 2: Manual Configuration
+MCP servers can also be configured manually in `~/.obsidian-tools/mcp_config.json`:
 
 ```json
 {
