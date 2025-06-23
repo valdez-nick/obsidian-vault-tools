@@ -1,0 +1,180 @@
+{
+  "bandit_scan": {
+    "status": "error",
+    "error": "Failed to parse output"
+  },
+  "custom_checks": {
+    "status": "warning",
+    "issues": [
+      {
+        "file": "./vault_manager.py",
+        "line": 1344,
+        "issue": "Potential hardcoded password",
+        "pattern": "password\\s*=\\s*[\"\\'][^\"\\']{3,}[\"\\']"
+      },
+      {
+        "file": "./obsidian-librarian-v2/python/tests/integration/test_research_workflow.py",
+        "line": 514,
+        "issue": "Potential hardcoded token",
+        "pattern": "token\\s*=\\s*[\"\\'][^\"\\']{10,}[\"\\']"
+      },
+      {
+        "file": "./obsidian-librarian-v2/python/tests/integration/test_backup_restore.py",
+        "line": 549,
+        "issue": "Potential hardcoded password",
+        "pattern": "password\\s*=\\s*[\"\\'][^\"\\']{3,}[\"\\']"
+      },
+      {
+        "file": "./obsidian-librarian-v2/python/tests/integration/test_backup_restore.py",
+        "line": 572,
+        "issue": "Potential hardcoded password",
+        "pattern": "password\\s*=\\s*[\"\\'][^\"\\']{3,}[\"\\']"
+      },
+      {
+        "file": "./obsidian-librarian-v2/python/tests/integration/test_backup_restore.py",
+        "line": 599,
+        "issue": "Potential hardcoded password",
+        "pattern": "password\\s*=\\s*[\"\\'][^\"\\']{3,}[\"\\']"
+      },
+      {
+        "file": "./manager/vault_manager.py",
+        "line": 1344,
+        "issue": "Potential hardcoded password",
+        "pattern": "password\\s*=\\s*[\"\\'][^\"\\']{3,}[\"\\']"
+      },
+      {
+        "file": "./obsidian_vault_tools/api_auth.py",
+        "line": 386,
+        "issue": "Potential hardcoded API key",
+        "pattern": "api_key\\s*=\\s*[\"\\'][^\"\\']{10,}[\"\\']"
+      },
+      {
+        "file": "./obsidian_vault_tools/api_auth.py",
+        "line": 351,
+        "issue": "Potential hardcoded secret",
+        "pattern": "secret\\s*=\\s*[\"\\'][^\"\\']{10,}[\"\\']"
+      },
+      {
+        "file": "./obsidian_vault_tools/mcp_tools/setup_wizard.py",
+        "line": 127,
+        "issue": "Potential hardcoded token",
+        "pattern": "token\\s*=\\s*[\"\\'][^\"\\']{10,}[\"\\']"
+      },
+      {
+        "file": "./obsidian_vault_tools/mcp_tools/setup_wizard.py",
+        "line": 164,
+        "issue": "Potential hardcoded token",
+        "pattern": "token\\s*=\\s*[\"\\'][^\"\\']{10,}[\"\\']"
+      },
+      {
+        "file": "./obsidian_vault_tools/mcp_tools/setup_wizard.py",
+        "line": 165,
+        "issue": "Potential hardcoded token",
+        "pattern": "token\\s*=\\s*[\"\\'][^\"\\']{10,}[\"\\']"
+      }
+    ]
+  },
+  "file_permissions": {
+    "status": "warning",
+    "issues": [
+      {
+        "file": "./ascii_flowchart_generator.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./better_ascii_converter.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./backup_vault.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./fix_vault_tags.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./ascii_magic_converter.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./demo_vault_manager.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./ascii_art_converter.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./vault_manager_enhanced.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./security_scan.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./organization/tag_fixer.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./manager/enhanced_manager.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./obsidian_vault_tools/backup.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./obsidian_vault_tools/organization.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./creative/ascii_magic_converter.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./creative/flowchart_generator.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./creative/ascii_art_converter.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./creative/advanced_ascii_converter.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      },
+      {
+        "file": "./backup/backup_manager.py",
+        "mode": "0o755",
+        "issue": "Unnecessary execute permission"
+      }
+    ]
+  },
+  "safety_check": {
+    "status": "error",
+    "error": "Failed to parse output"
+  },
+  "pip_audit": {
+    "status": "passed",
+    "vulnerabilities": []
+  }
+}

@@ -6,7 +6,28 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-beta-yellow)
 
+## 🚀 Quick Start - Unified Manager
+
+**NEW!** All tools are now available through one unified interface:
+
+```bash
+# Launch the unified interactive manager
+./obsidian_manager_unified
+
+# Or via the package CLI
+ovt              # Launches unified manager
+obsidian-tools   # Alternative command
+```
+
+The Unified Manager combines ALL features into one cohesive menu system. See [UNIFIED_MANAGER_README.md](UNIFIED_MANAGER_README.md) for details.
+
 ## ✨ Features
+
+### 🧠 Self-Learning Intelligence
+- **Adaptive Interface**: Learns your usage patterns and preferences
+- **Smart Predictions**: Suggests likely next actions based on your workflow
+- **Personalized Experience**: Adapts to your unique vault management style
+- **Privacy-First**: All learning happens locally, no data leaves your machine
 
 ### 🤖 AI-Powered Intelligence
 - **Natural Language Queries**: Ask questions about your vault in plain English
@@ -40,6 +61,7 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 - **Dynamic Tool Discovery**: Automatically discover and integrate MCP tools
 - **Multi-Server Support**: Connect to multiple MCP servers simultaneously
 - **Interactive Tool Execution**: Execute tools with guided parameter input
+- **Interactive Configuration**: Configure MCP servers through the unified manager interface
 - **Server Management**: Start, stop, and manage MCP servers
 - **Tool Categorization**: Organize tools by function and server
 - **Execution History**: Track tool usage and performance statistics
@@ -152,6 +174,7 @@ ovt ascii gallery             # View ASCII art gallery
 
 ### MCP Integration
 ```bash
+ovt                           # Launch unified manager → Settings → MCP Server Configuration
 ovt interactive               # Access MCP tools via interactive menu
 ovt mcp start server-name     # Start MCP server
 ovt mcp stop server-name      # Stop MCP server
@@ -187,10 +210,28 @@ backup_location: ~/Backups/obsidian
 output_dirs:
   ascii: ./ascii-output
   analysis: ./analysis-output
+memory:
+  enabled: true  # Enable self-learning features
+  max_events: 1000
+  prediction_confidence: 0.7
 ```
 
 ### MCP Configuration
-MCP servers are configured in `~/.obsidian-tools/mcp_config.json`:
+
+#### Method 1: Interactive Configuration (Recommended)
+Launch the unified manager and navigate to:
+```
+Settings & Configuration → MCP Server Configuration
+```
+
+Features:
+- Add/edit/remove servers through guided interface
+- Test connections before saving
+- Secure credential management with masking
+- Real-time validation and status indicators
+
+#### Method 2: Manual Configuration
+MCP servers can also be configured manually in `~/.obsidian-tools/mcp_config.json`:
 
 ```json
 {
@@ -255,6 +296,21 @@ ovt config set-theme scifi
 - `detailed`: High detail mode
 
 ## 📚 Advanced Usage
+
+### Self-Learning Features
+```bash
+# View memory statistics
+ovt memory stats
+
+# Clear learning data
+ovt memory clear
+
+# Export memory data
+ovt memory export my_preferences.json
+
+# Disable memory temporarily
+ovt --no-memory <command>
+```
 
 ### Batch Operations
 ```bash
@@ -324,6 +380,13 @@ pre-commit install
 ## 📝 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+## 📖 Documentation
+
+- [Memory Integration Guide](docs/MEMORY_INTEGRATION_GUIDE.md) - Learn about the self-learning features
+- [Unified Manager Guide](UNIFIED_MANAGER_README.md) - Comprehensive unified interface guide
+- [MCP Configuration Guide](MCP_CONFIG_GUIDE.md) - Model Context Protocol setup
+- [Development Guide](CLAUDE.md) - For contributors and developers
 
 ## 🙏 Acknowledgments
 

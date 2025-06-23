@@ -7,7 +7,7 @@ and session data with local fallback when Redis is unavailable.
 
 import asyncio
 import json
-import pickle
+# import pickle  # SECURITY: Removed pickle to prevent arbitrary code execution
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -240,29 +240,30 @@ class CacheDB(CacheDatabase):
         if data is None:
             return None
         
+        # SECURITY: Avoid pickle deserialization for security reasons
+        # Only use JSON for serialization to prevent arbitrary code execution
         try:
-            # Try to deserialize as pickle first (for complex objects)
-            return pickle.loads(data)
-        except (pickle.PickleError, TypeError):
+            # Primary: Try JSON deserialization
+            return json.loads(data.decode('utf-8'))
+        except (json.JSONDecodeError, UnicodeDecodeError):
             try:
-                # Fall back to JSON
-                return json.loads(data.decode('utf-8'))
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                # Return as string
+                # Fallback: Return as string
                 return data.decode('utf-8', errors='ignore')
+            except:
+                # Last resort: Return raw bytes
+                logger.warning("Failed to deserialize cache data, returning raw bytes")
+                return data
     
     async def _redis_set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """Set value in Redis."""
-        # Try to serialize as pickle first
+        # SECURITY: Use JSON serialization instead of pickle to prevent code injection
         try:
-            data = pickle.dumps(value)
-        except (pickle.PickleError, TypeError):
-            try:
-                # Fall back to JSON
-                data = json.dumps(value, default=str).encode('utf-8')
-            except (TypeError, ValueError):
-                # Fall back to string
-                data = str(value).encode('utf-8')
+            # Primary: Use JSON serialization
+            data = json.dumps(value, default=str).encode('utf-8')
+        except (TypeError, ValueError) as e:
+            # Fallback: Convert to string
+            logger.warning(f"Failed to JSON serialize value, using string representation: {e}")
+            data = str(value).encode('utf-8')
         
         ttl = ttl or self.config.cache_ttl_seconds
         await self.redis.setex(key, ttl, data)
@@ -293,14 +294,15 @@ class CacheDB(CacheDatabase):
                     self.sqlite_conn.commit()
                     return None
             
-            # Deserialize value
+            # SECURITY: Deserialize value using JSON only
             try:
-                return pickle.loads(value_blob)
-            except (pickle.PickleError, TypeError):
+                return json.loads(value_blob.decode('utf-8'))
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 try:
-                    return json.loads(value_blob.decode('utf-8'))
-                except (json.JSONDecodeError, UnicodeDecodeError):
                     return value_blob.decode('utf-8', errors='ignore')
+                except:
+                    logger.warning("Failed to deserialize SQLite cache data")
+                    return value_blob
         
         return await loop.run_in_executor(None, _get)
     
@@ -309,14 +311,12 @@ class CacheDB(CacheDatabase):
         loop = asyncio.get_event_loop()
         
         def _set():
-            # Serialize value
+            # SECURITY: Serialize value using JSON only
             try:
-                value_blob = pickle.dumps(value)
-            except (pickle.PickleError, TypeError):
-                try:
-                    value_blob = json.dumps(value, default=str).encode('utf-8')
-                except (TypeError, ValueError):
-                    value_blob = str(value).encode('utf-8')
+                value_blob = json.dumps(value, default=str).encode('utf-8')
+            except (TypeError, ValueError) as e:
+                logger.warning(f"Failed to JSON serialize for SQLite, using string: {e}")
+                value_blob = str(value).encode('utf-8')
             
             # Calculate expiry
             expiry = None

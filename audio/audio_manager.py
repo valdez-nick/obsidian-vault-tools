@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 from typing import Dict, Optional, Any, List
 import random
+from obsidian_vault_tools.memory import track_tool_usage, memory_cached
 
 # Try to import pygame for audio
 try:
@@ -66,6 +67,7 @@ class AudioManager:
             self.enabled = False
             return False
     
+    @track_tool_usage(category="audio")
     def play_effect(self, effect_name: str, volume_override: Optional[float] = None, stop_previous: bool = True) -> bool:
         """
         Play a sound effect
@@ -115,6 +117,7 @@ class AudioManager:
         
         return False
     
+    @track_tool_usage(category="audio")
     def start_ambient(self, ambient_name: str = "dungeon_base") -> bool:
         """
         Start ambient background music/atmosphere
@@ -172,6 +175,7 @@ class AudioManager:
         # For now, just play silence
         pass
     
+    @memory_cached(ttl=3600)  # Cache sounds for 1 hour
     def _get_sound(self, sound_name: str) -> Optional[Any]:
         """
         Get sound from cache or load it

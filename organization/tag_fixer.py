@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 from collections import defaultdict
 import argparse
+from obsidian_vault_tools.memory import track_tool_usage, track_action
 
 class TagFixer:
     def __init__(self, vault_path, dry_run=True, operations=None):
@@ -107,6 +108,7 @@ class TagFixer:
         
         return content
         
+    @track_action(action_type="tag_fix")
     def process_file(self, file_path):
         """Process a single markdown file"""
         try:
@@ -133,6 +135,7 @@ class TagFixer:
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
             
+    @track_tool_usage(category="organization")
     def process_vault(self):
         """Process all markdown files in the vault"""
         md_files = list(self.vault_path.rglob("*.md"))

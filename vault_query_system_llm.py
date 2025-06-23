@@ -148,6 +148,44 @@ class VaultQuerySystemLLM(BaseVaultQuerySystem):
             return self.llm_cache[cache_key]
             
         try:
+            # First, check if this is a vault-specific query that should be handled locally
+            from obsidian_vault_tools.intelligence import IntelligenceOrchestrator
+            
+            # Create intelligence orchestrator with vault context
+            orchestrator = IntelligenceOrchestrator(self)
+            
+            # Process through intelligence system first
+            intel_result = await orchestrator.process_input(query_text)
+            
+            # If intelligence system handled it successfully, return that result
+            if intel_result.success and intel_result.action_taken != "suggest_only":
+                logger.info(f"Query handled by Intelligence System: {intel_result.action_taken}")
+                
+                # Format result for query system
+                formatted_result = {
+                    'query': query_text,
+                    'response': intel_result.message,
+                    'data': intel_result.data,
+                    'action_taken': intel_result.action_taken,
+                    'intent': intel_result.intent.intent_type.value if hasattr(intel_result, 'intent') else 'unknown',
+                    'confidence': intel_result.confidence if hasattr(intel_result, 'confidence') else 1.0,
+                    'llm_powered': False,  # Handled by intelligence system
+                    'intelligence_handled': True
+                }
+                
+                # Add metadata
+                elapsed_time = (datetime.now() - start_time).total_seconds()
+                formatted_result['query_id'] = query_id
+                formatted_result['processing_time'] = elapsed_time
+                
+                # Cache result
+                self.llm_cache[cache_key] = formatted_result
+                
+                return formatted_result
+            
+            # If intelligence system couldn't handle it, fall back to LLM
+            logger.info("Falling back to LLM for general query processing")
+            
             # Get vault context
             vault_context = await self._prepare_vault_context(query_text)
             

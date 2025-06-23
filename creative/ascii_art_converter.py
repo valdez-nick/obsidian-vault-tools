@@ -15,7 +15,8 @@ try:
     import numpy as np
 except ImportError:
     print("Installing required packages...")
-    os.system(f"{sys.executable} -m pip install pillow numpy")
+    import subprocess
+    subprocess.run([sys.executable, "-m", "pip", "install", "pillow", "numpy"], check=True)
     from PIL import Image, ImageEnhance, ImageFilter
     import numpy as np
 

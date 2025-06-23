@@ -12,7 +12,8 @@ try:
     import ascii_magic
 except ImportError:
     print("Installing ascii-magic...")
-    os.system(f"{sys.executable} -m pip install ascii-magic")
+    import subprocess
+    subprocess.run([sys.executable, "-m", "pip", "install", "ascii-magic"], check=True)
     import ascii_magic
 
 def convert_to_ascii(image_path, columns=120, char_set=None, to_terminal=True):
