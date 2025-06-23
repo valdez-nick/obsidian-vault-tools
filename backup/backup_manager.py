@@ -4,13 +4,17 @@ Backup Obsidian Vault - Create timestamped backups before major changes
 """
 
 import os
+import sys
 import shutil
 import argparse
 from datetime import datetime
 from pathlib import Path
 import zipfile
 import json
+from obsidian_vault_tools.memory import track_tool_usage, track_action
 
+@track_tool_usage(category="backup")
+@track_action(action_type="backup_create")
 def create_backup(vault_path, backup_type="manual"):
     """Create a timestamped backup of the vault"""
     vault_path = Path(vault_path)
@@ -145,6 +149,7 @@ echo "Previous vault saved as: {vault_path}_before_restore_{timestamp}"
     
     return str(zip_path)
 
+@track_tool_usage(category="backup")
 def list_backups(vault_path):
     """List all available backups"""
     backup_dir = Path(vault_path).parent / "obsidian_backups"

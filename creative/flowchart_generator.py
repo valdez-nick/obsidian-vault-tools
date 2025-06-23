@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import List, Dict, Tuple, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
+from obsidian_vault_tools.memory import track_tool_usage, memory_cached
 
 # Try to import required libraries
 try:
@@ -55,6 +56,8 @@ class FlowchartAnalyzer:
         self.llm_provider = llm_provider
         self.api_key = api_key
         
+    @track_tool_usage(category="creative")
+    @memory_cached(ttl=600)  # Cache for 10 minutes
     def analyze_document(self, content: str) -> FlowchartData:
         """
         Analyze document content and extract flowchart structure
@@ -444,6 +447,7 @@ class ASCIIFlowchartBuilder:
         
         return '\n'.join(lines)
 
+@track_tool_usage(category="creative")
 def generate_flowchart_from_file(file_path: str, output_path: str = None) -> str:
     """
     Generate ASCII flowchart from a markdown file

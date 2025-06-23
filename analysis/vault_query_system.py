@@ -11,6 +11,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple
 from collections import defaultdict, Counter
+from obsidian_vault_tools.memory import track_tool_usage, memory_cached
 
 class VaultQuerySystem:
     """
@@ -22,6 +23,8 @@ class VaultQuerySystem:
         self.cache = {}
         self.last_scan = None
         
+    @track_tool_usage(category="analysis")
+    @memory_cached(ttl=3600)  # Cache for 1 hour
     def scan_vault(self, force_rescan: bool = False) -> Dict[str, Any]:
         """
         Scan vault and build searchable index
@@ -153,6 +156,7 @@ class VaultQuerySystem:
         
         return vault_data
     
+    @track_tool_usage(category="analysis")
     def query(self, query_text: str) -> Dict[str, Any]:
         """
         Process natural language query against vault content
@@ -199,6 +203,7 @@ class VaultQuerySystem:
         
         return results
     
+    @memory_cached(ttl=300)  # Cache for 5 minutes
     def _handle_count_query(self, query: str, vault_data: Dict) -> Dict:
         """Handle counting queries"""
         results = {'query_type': 'count'}
@@ -227,6 +232,7 @@ class VaultQuerySystem:
             
         return results
     
+    @memory_cached(ttl=300)  # Cache for 5 minutes
     def _handle_search_query(self, query_words: List[str], vault_data: Dict) -> Dict:
         """Handle search queries"""
         results = {'query_type': 'search', 'matching_files': []}
@@ -399,6 +405,7 @@ class VaultQuerySystem:
         """Handle general content search"""
         return self._handle_search_query(query_words, vault_data)
     
+    @track_tool_usage(category="analysis")
     def generate_summary_report(self) -> str:
         """Generate a comprehensive vault summary report"""
         vault_data = self.scan_vault()

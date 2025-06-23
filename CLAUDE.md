@@ -66,6 +66,17 @@ Key modules:
 - `creative/`: ASCII art and flowcharts
 - `organization/`: Tag and file organization
 
+#### 5. **Memory Service** (`obsidian_vault_tools/memory/`)
+- Self-learning system that adapts to user behavior
+- Tracks feature usage patterns and preferences
+- Provides predictive suggestions
+- Persistent memory across sessions
+
+Key components:
+- `memory_service.py`: Core memory management and persistence
+- `decorators.py`: Easy integration decorators
+- `predictions.py`: Predictive analytics engine
+
 ## Development Guidelines
 
 ### Adding New Features
@@ -118,6 +129,40 @@ Key modules:
    - Use `shlex.split()` for command parsing
    - Validate commands before execution
 
+### Memory Integration Guidelines
+
+1. **Using Memory Decorators**
+   ```python
+   from obsidian_vault_tools.memory.decorators import track_usage, learn_preferences
+   
+   @track_usage
+   def my_feature(vault_path, **kwargs):
+       # Feature implementation
+       pass
+   
+   @learn_preferences
+   def interactive_menu(options):
+       # Menu implementation
+       pass
+   ```
+
+2. **Accessing Predictions**
+   ```python
+   from obsidian_vault_tools.memory.predictions import get_suggestions
+   
+   # Get feature suggestions
+   suggestions = get_suggestions('menu_navigation')
+   
+   # Show most likely next action
+   next_action = suggestions[0] if suggestions else None
+   ```
+
+3. **Memory Best Practices**
+   - Always use decorators for user-facing features
+   - Track both successful and failed operations
+   - Include context metadata for better predictions
+   - Respect user privacy - no sensitive data in memory
+
 ### Testing Guidelines
 
 1. **Test Missing Dependencies**
@@ -137,6 +182,37 @@ Key modules:
    - Verify credential masking
    - Check input validation
 
+4. **Memory Service Testing**
+   ```bash
+   # Test memory persistence
+   python -m pytest obsidian_vault_tools/memory/test_memory_service.py
+   
+   # Test predictions
+   python -m pytest obsidian_vault_tools/memory/test_predictions.py
+   ```
+
+## Predictive Features Guide
+
+### How Predictions Work
+The memory service learns from user behavior to provide intelligent suggestions:
+
+1. **Feature Usage Tracking**: Automatically tracks which features users access most
+2. **Pattern Recognition**: Identifies common workflows and sequences
+3. **Context Awareness**: Considers time of day, recent actions, and vault state
+4. **Adaptive Learning**: Improves predictions over time based on feedback
+
+### Integration Points
+- **Menu Navigation**: Suggests likely next menu choices
+- **Command Completion**: Predicts command parameters
+- **File Organization**: Recommends organization strategies
+- **Tag Management**: Suggests tag fixes based on history
+
+### Privacy & Control
+- All data stored locally in user's config directory
+- No network calls or external data sharing
+- Users can clear memory at any time
+- Opt-out available via configuration
+
 ## Feature Roadmap
 
 ### High Priority
@@ -144,6 +220,7 @@ Key modules:
 - [ ] Add database connection pooling
 - [ ] Consolidate duplicate code directories
 - [ ] Implement missing AI features
+- [x] Add self-learning memory service
 
 ### Medium Priority
 - [ ] Enhanced error recovery

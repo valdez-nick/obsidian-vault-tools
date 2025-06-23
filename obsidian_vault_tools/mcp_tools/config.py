@@ -171,7 +171,13 @@ class MCPConfig:
                 "args": ["-y", "@modelcontextprotocol/server-memory"],
                 "env": {
                     "MEMORY_FILE_PATH": f"[YOUR_MEMORY_PATH]/{name}_memory.json"
-                }
+                },
+                "description": "Knowledge graph-based persistent memory system",
+                "capabilities": [
+                    "create_entities", "create_relations", "add_observations",
+                    "delete_entities", "delete_observations", "delete_relations",
+                    "read_graph", "search_nodes", "open_nodes"
+                ]
             },
             "confluence": {
                 "command": "docker",
@@ -213,4 +219,60 @@ class MCPConfig:
                 template["env"][key.upper()] = value
         
         self.add_server(name, template)
+        return True
+    
+    def validate_memory_server_config(self, server_config: Dict[str, Any]) -> Dict[str, bool]:
+        """Validate memory server specific configuration"""
+        validation = self.validate_server_config(server_config)
+        
+        # Memory-specific validations
+        env_vars = server_config.get("env", {})
+        memory_path = env_vars.get("MEMORY_FILE_PATH", "")
+        
+        # Check if memory path is configured
+        validation["has_memory_path"] = bool(memory_path and not memory_path.startswith('['))
+        
+        # Check if memory path directory exists (if specified)
+        validation["memory_path_accessible"] = True
+        if validation["has_memory_path"]:
+            try:
+                from pathlib import Path
+                memory_file = Path(memory_path)
+                memory_dir = memory_file.parent
+                
+                # Check if directory exists or can be created
+                validation["memory_path_accessible"] = (
+                    memory_dir.exists() or 
+                    memory_dir.parent.exists()  # Parent exists so we can create the directory
+                )
+            except Exception:
+                validation["memory_path_accessible"] = False
+        
+        return validation
+    
+    def setup_memory_server(self, name: str = "memory", memory_path: Optional[Path] = None) -> bool:
+        """Setup memory server with appropriate configuration"""
+        if not memory_path:
+            # Use default memory path in config directory
+            memory_path = self.config_dir / f"{name}_memory.json"
+        
+        # Ensure memory directory exists
+        memory_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Create memory server configuration
+        memory_config = {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-memory"],
+            "env": {
+                "MEMORY_FILE_PATH": str(memory_path)
+            },
+            "description": "Knowledge graph-based persistent memory system",
+            "capabilities": [
+                "create_entities", "create_relations", "add_observations",
+                "delete_entities", "delete_observations", "delete_relations", 
+                "read_graph", "search_nodes", "open_nodes"
+            ]
+        }
+        
+        self.add_server(name, memory_config)
         return True

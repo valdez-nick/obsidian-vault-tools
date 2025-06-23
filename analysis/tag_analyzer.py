@@ -6,7 +6,9 @@ import re
 from pathlib import Path
 from collections import Counter, defaultdict
 import json
+from obsidian_vault_tools.memory import track_tool_usage, memory_cached
 
+@memory_cached(ttl=300)  # Cache for 5 minutes
 def extract_tags_from_file(file_path):
     """Extract tags from a markdown file."""
     tags = set()
@@ -48,6 +50,7 @@ def extract_tags_from_file(file_path):
     
     return list(tags)
 
+@track_tool_usage(category="analysis")
 def analyze_vault_tags(vault_path):
     """Analyze all tags in an Obsidian vault."""
     vault_path = Path(vault_path)

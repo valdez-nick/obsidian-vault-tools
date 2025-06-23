@@ -23,6 +23,12 @@ The Unified Manager combines ALL features into one cohesive menu system. See [UN
 
 ## ✨ Features
 
+### 🧠 Self-Learning Intelligence
+- **Adaptive Interface**: Learns your usage patterns and preferences
+- **Smart Predictions**: Suggests likely next actions based on your workflow
+- **Personalized Experience**: Adapts to your unique vault management style
+- **Privacy-First**: All learning happens locally, no data leaves your machine
+
 ### 🤖 AI-Powered Intelligence
 - **Natural Language Queries**: Ask questions about your vault in plain English
 - **Smart Content Analysis**: AI-powered insights into your notes
@@ -204,6 +210,10 @@ backup_location: ~/Backups/obsidian
 output_dirs:
   ascii: ./ascii-output
   analysis: ./analysis-output
+memory:
+  enabled: true  # Enable self-learning features
+  max_events: 1000
+  prediction_confidence: 0.7
 ```
 
 ### MCP Configuration
@@ -287,6 +297,21 @@ ovt config set-theme scifi
 
 ## 📚 Advanced Usage
 
+### Self-Learning Features
+```bash
+# View memory statistics
+ovt memory stats
+
+# Clear learning data
+ovt memory clear
+
+# Export memory data
+ovt memory export my_preferences.json
+
+# Disable memory temporarily
+ovt --no-memory <command>
+```
+
 ### Batch Operations
 ```bash
 # Batch tag operations
@@ -355,6 +380,13 @@ pre-commit install
 ## 📝 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+## 📖 Documentation
+
+- [Memory Integration Guide](docs/MEMORY_INTEGRATION_GUIDE.md) - Learn about the self-learning features
+- [Unified Manager Guide](UNIFIED_MANAGER_README.md) - Comprehensive unified interface guide
+- [MCP Configuration Guide](MCP_CONFIG_GUIDE.md) - Model Context Protocol setup
+- [Development Guide](CLAUDE.md) - For contributors and developers
 
 ## 🙏 Acknowledgments
 

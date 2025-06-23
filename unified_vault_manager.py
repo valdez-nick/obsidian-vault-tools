@@ -1468,6 +1468,14 @@ class UnifiedVaultManager:
         for feature, enabled in self.features.items():
             status = f"{Colors.GREEN}✓ Enabled{Colors.ENDC}" if enabled else f"{Colors.RED}✗ Disabled{Colors.ENDC}"
             print(f"{feature.replace('_', ' ').title()}: {status}")
+        
+        # Show memory statistics if available
+        if self.memory_service:
+            print(f"\n{Colors.BOLD}Memory Service Statistics:{Colors.ENDC}")
+            stats = self.memory_service.get_statistics()
+            print(f"Total actions tracked: {stats['total_actions']}")
+            print(f"Unique patterns identified: {stats['unique_patterns']}")
+            print(f"Most common action: {stats['most_common_action']}")
     
     def export_config(self):
         """Export configuration"""
@@ -1593,6 +1601,14 @@ class UnifiedVaultManager:
             # Stop ambient sound
             if self.audio_manager:
                 stop_dungeon_ambiance()
+            
+            # Clean up memory service
+            if self.memory_service:
+                try:
+                    # Save any pending data
+                    self.memory_service.save_memory()
+                except:
+                    pass
             
             print(f"\n{Colors.CYAN}Thank you for using Obsidian Vault Manager!{Colors.ENDC}")
 
