@@ -14,19 +14,40 @@ Key Features:
 - Integration with Hugging Face transformers ecosystem
 """
 
-from .model_manager import ModelManager
-from .model_cache import ModelCache
-from .model_config import ModelConfig, TransformerModelConfig, EmbeddingModelConfig
-from .transformer_models import TransformerModelManager
+from .model_manager import ModelManager, ModelInfo, ModelLoadError
+from .model_cache import ModelCache, CacheEntry
+from .model_config import (
+    ModelConfig, 
+    TransformerModelConfig, 
+    EmbeddingModelConfig,
+    ModelType,
+    DeviceType,
+    QuantizationType
+)
+from .transformer_models import TransformerModelManager, GenerationResult
 
 __all__ = [
+    # Core classes
     'ModelManager',
     'ModelCache', 
     'ModelConfig',
     'TransformerModelConfig',
     'EmbeddingModelConfig',
-    'TransformerModelManager'
+    'TransformerModelManager',
+    
+    # Data classes
+    'ModelInfo',
+    'CacheEntry',
+    'GenerationResult',
+    
+    # Enums
+    'ModelType',
+    'DeviceType', 
+    'QuantizationType',
+    
+    # Exceptions
+    'ModelLoadError'
 ]
 
 # Version info
-__version__ = "1.0.0"
+__version__ = "2.0.0"
