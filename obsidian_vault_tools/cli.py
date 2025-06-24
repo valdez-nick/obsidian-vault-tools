@@ -32,19 +32,31 @@ def cli(ctx, vault, config):
     ctx.obj['vault'] = vault
     ctx.obj['config'] = config
     
-    # If no command provided, show help or interactive mode
+    # If no command provided, launch interactive mode
     if ctx.invoked_subcommand is None:
-        if vault:
-            # Basic vault info
-            console.print(f"Vault: {vault}")
-            # For now, just show help since interactive mode needs more setup
-            ctx.get_help()
-        else:
-            # Show help
-            console.print("Obsidian Vault Tools")
-            console.print("\nUse --vault to specify vault path or run 'ovt config set-vault' to set default vault.")
-            console.print("For commands: ovt [command] --help")
-            ctx.get_help()
+        # Launch the unified interactive manager
+        try:
+            import sys
+            import os
+            # Add parent directory to path to import unified_vault_manager
+            parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+            
+            from unified_vault_manager import UnifiedVaultManager
+            
+            # Create and run the unified manager
+            manager = UnifiedVaultManager(vault_path=vault)
+            manager.run()
+            
+        except ImportError as e:
+            # Fallback to showing help if unified manager not available
+            console.print(f"[yellow]Interactive mode not available: {e}[/yellow]")
+            console.print("\nAvailable commands:")
+            console.print(ctx.get_help())
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Interrupted by user[/yellow]")
+            sys.exit(0)
 
 @cli.command()
 @click.option('--vault', '-v', help='Path to Obsidian vault', type=click.Path(exists=True))

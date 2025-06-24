@@ -176,12 +176,22 @@ class MCPSetupWizard:
         """Set up Obsidian PM intelligence server"""
         print("  Custom Obsidian PM intelligence server.")
         
-        # Check if script exists at expected location
-        default_script = "/Users/nvaldez/Documents/repos/assistant-mcp/src/obsidian-pm-intelligence.js"
-        if os.path.exists(default_script):
-            script_path = default_script
-            print(f"  ✅ Found script at: {script_path}")
-        else:
+        # SECURITY: Use relative paths or environment variables instead of hardcoded paths
+        # Check common locations for the script
+        possible_locations = [
+            os.path.expanduser("~/Documents/repos/assistant-mcp/src/obsidian-pm-intelligence.js"),
+            os.path.join(os.path.dirname(__file__), "../../../assistant-mcp/src/obsidian-pm-intelligence.js"),
+            os.environ.get("OBSIDIAN_PM_SCRIPT_PATH", ""),
+        ]
+        
+        script_path = None
+        for location in possible_locations:
+            if location and os.path.exists(location):
+                script_path = location
+                print(f"  ✅ Found script at: {script_path}")
+                break
+        
+        if not script_path:
             script_path = input("  Path to obsidian-pm-intelligence.js: ").strip()
             if not script_path or not os.path.exists(script_path):
                 print("  ❌ Script not found. Skipping this server.")

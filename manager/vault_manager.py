@@ -385,17 +385,28 @@ class VaultManager:
     
     def run_command(self, command, description=None):
         """Run a shell command and handle output"""
+        import shlex
+        
         if description:
             print(f"\n{Colors.CYAN}{description}...{Colors.ENDC}")
+        
+        # Convert string command to list for security
+        if isinstance(command, str):
+            try:
+                command_list = shlex.split(command)
+            except ValueError as e:
+                print(f"{Colors.RED}Error parsing command: {e}{Colors.ENDC}")
+                return False
+        else:
+            command_list = command
         
         try:
             # Debug output for troubleshooting
             if self.config.get('debug', False):
-                print(f"{Colors.YELLOW}Debug - Running command: {command}{Colors.ENDC}")
+                print(f"{Colors.YELLOW}Debug - Running command: {' '.join(command_list)}{Colors.ENDC}")
             
             result = subprocess.run(
-                command,
-                shell=True,
+                command_list,
                 capture_output=True,
                 text=True,
                 cwd=os.path.dirname(os.path.abspath(__file__))

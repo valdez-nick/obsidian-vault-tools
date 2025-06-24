@@ -1,0 +1,89 @@
+# Security Configuration for Obsidian Vault Tools
+# This file contains security settings and policies
+
+# General Security Settings
+security:
+  # Enable/disable security features
+  enabled: true
+  
+  # Logging
+  logging:
+    sanitize_sensitive_data: true
+    log_security_events: true
+    max_log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    
+  # Input Validation
+  input_validation:
+    max_query_length: 1000
+    max_filename_length: 255
+    max_path_length: 4096
+    allowed_file_extensions: [".md", ".txt", ".json", ".yaml", ".yml", ".csv"]
+    
+  # Rate Limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    burst_limit: 10
+    
+  # File Operations
+  file_operations:
+    validate_paths: true
+    restrict_to_vault: true
+    backup_before_modify: true
+    max_file_size_mb: 100
+    
+  # API Security (for future web interface)
+  api:
+    require_authentication: false  # Set to true in production
+    api_key_length: 32
+    session_timeout_minutes: 60
+    cors_enabled: false
+    allowed_origins: []
+    
+  # Encryption
+  encryption:
+    algorithm: "Fernet"  # Symmetric encryption for credentials
+    key_rotation_days: 90
+    
+  # Subprocess Security
+  subprocess:
+    validate_commands: true
+    use_shell: false
+    timeout_seconds: 30
+    allowed_commands: ["ollama", "git", "python"]
+
+# Security Headers (for web interface)
+security_headers:
+  content_security_policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+  x_frame_options: "DENY"
+  x_content_type_options: "nosniff"
+  x_xss_protection: "1; mode=block"
+  strict_transport_security: "max-age=31536000; includeSubDomains"
+
+# Monitoring and Alerting
+monitoring:
+  enabled: true
+  alert_on_failed_auth: true
+  alert_on_suspicious_activity: true
+  max_failed_attempts: 5
+  lockout_duration_minutes: 15
+
+# Development vs Production Settings
+environment:
+  # Override security settings based on environment
+  development:
+    rate_limiting:
+      enabled: false
+    logging:
+      max_log_level: "DEBUG"
+    api:
+      cors_enabled: true
+      
+  production:
+    rate_limiting:
+      enabled: true
+    api:
+      require_authentication: true
+    logging:
+      max_log_level: "WARNING"
