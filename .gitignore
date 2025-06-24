@@ -59,3 +59,25 @@ sensitive/
 
 # Log files
 *.log
+
+# Personal PM Burnout Documents (Nick's private data)
+*-2025-06-23.md
+PM_Reports/
+PM Recovery Master Dashboard.md
+PM Burnout Recovery Command Center.md
+Focus Time Allocation Strategy.md
+Weekly PM Review Template.md
+PM_BURNOUT_SOLUTION_TRACKER.md
+
+# PM Analysis JSON files (contain personal task data)
+extracted_tasks.json
+wsjf_analysis.json
+eisenhower_analysis.json
+redundancy_analysis.json
+
+# Keep automation scripts public but ignore personal analysis results
+automation_scripts/*_results_*.json
+pm_automation.log
+security_hardening.log
+database_pool_config.log
+pm_burnout_prevention.log
