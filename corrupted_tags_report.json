@@ -1,0 +1,787 @@
+{
+  "corrupted_tags": {
+    "#initiativechargeback-uploader": [
+      {
+        "file": "tag_restoration_summary_20250624_103846.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 11
+      },
+      {
+        "file": "tag_restoration_summary_20250624_103924.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 11
+      },
+      {
+        "file": "tag_restoration_summary_20250624_103804.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 11
+      },
+      {
+        "file": "Tasks/Initiatives/2025/Q2/Chargeback Uploader Tasks.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 4
+      },
+      {
+        "file": "Products/API Platform/2025 Planning and Releases/2025/Q2/Chargeback Uploader.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 40
+      },
+      {
+        "file": "Products/API Platform/2025 Planning and Releases/2025/Q2/Chargeback Uploader.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 40
+      },
+      {
+        "file": "Products/API Platform/2025 Planning and Releases/2025/Q2/Chargeback Uploader.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 40
+      },
+      {
+        "file": "Notes/2025-06-10.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 143
+      },
+      {
+        "file": "Notes/2025-05-27.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 128
+      },
+      {
+        "file": "Notes/2025-05-27.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 128
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/chargeback-uploader",
+        "line": 8
+      }
+    ],
+    "#initiativelearnable-chargebacks": [
+      {
+        "file": "tag_restoration_summary_20250624_103924.md",
+        "suggested_fix": "#initiative/learnable-chargebacks",
+        "line": 13
+      },
+      {
+        "file": "tag_restoration_summary_20250624_103924.md",
+        "suggested_fix": "#initiative/learnable-chargebacks",
+        "line": 13
+      },
+      {
+        "file": "tag_restoration_summary_20250624_103924.md",
+        "suggested_fix": "#initiative/learnable-chargebacks",
+        "line": 13
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/learnable-chargebacks",
+        "line": 34
+      }
+    ],
+    "#todopayment": [
+      {
+        "file": "CLAUDE.md",
+        "suggested_fix": "#todo/payment",
+        "line": 47
+      }
+    ],
+    "#product-tag": [
+      {
+        "file": "CLAUDE.md",
+        "suggested_fix": "#product/-tag",
+        "line": 103
+      },
+      {
+        "file": "Scripts/README.md",
+        "suggested_fix": "#product/-tag",
+        "line": 33
+      }
+    ],
+    "#okr-updates": [
+      {
+        "file": "Templates 4/Sprint Status Template.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 2
+      },
+      {
+        "file": "Notes/2025-04-30.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 70
+      },
+      {
+        "file": "Notes/2025-04-25.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 32
+      },
+      {
+        "file": "Notes/2025-04-28.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 34
+      },
+      {
+        "file": "Notes/2025-04-29.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 152
+      },
+      {
+        "file": "Notes/2025-04-26.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 32
+      },
+      {
+        "file": "Templates/Sprint Status Template.md",
+        "suggested_fix": "#okr/-updates",
+        "line": 2
+      }
+    ],
+    "#todoapi-platform": [
+      {
+        "file": "Tasks/Initiatives/2025/Q2/Chargeback Uploader Tasks.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 10
+      },
+      {
+        "file": "Products/API Platform/2025 Planning and Releases/2025/Q2/Chargeback Uploader.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 49
+      },
+      {
+        "file": "Products/API Platform/2025 Planning and Releases/2025/Q2/Chargeback Uploader.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 49
+      },
+      {
+        "file": "Notes/2025-05-27.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 174
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 8
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/api-platform",
+        "line": 8
+      }
+    ],
+    "#initiativechargback-uploader": [
+      {
+        "file": "Tasks/Initiatives/2025/Q2/Chargeback Uploader Tasks.md",
+        "suggested_fix": "#initiative/chargback-uploader",
+        "line": 10
+      }
+    ],
+    "#initiativedfp-revamp": [
+      {
+        "file": "Products/API Platform/DFP Revamp - Initiative.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 41
+      },
+      {
+        "file": "Products/API Platform/DFP Revamp - Initiative.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 41
+      },
+      {
+        "file": "Products/API Platform/DFP Revamp - Initiative.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 41
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 171
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 171
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 171
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 171
+      },
+      {
+        "file": "Notes/2025-05-22.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 120
+      },
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 185
+      },
+      {
+        "file": "Notes/2025-06-02.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 163
+      },
+      {
+        "file": "Notes/2025-06-02.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 163
+      },
+      {
+        "file": "Notes/2025-06-02.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 163
+      },
+      {
+        "file": "Notes/2025-06-02.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 163
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 12
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/dfp-revamp",
+        "line": 12
+      }
+    ],
+    "#tododfp": [
+      {
+        "file": "Products/API Platform/DFP Revamp - Initiative.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 162
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 171
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 171
+      },
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 209
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 12
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 12
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/dfp",
+        "line": 12
+      }
+    ],
+    "#todocbbackfill": [
+      {
+        "file": "Products/API Platform/Feature Releases/Chargeback Upload Feature.md",
+        "suggested_fix": "#todo/cbbackfill",
+        "line": 13
+      },
+      {
+        "file": "Notes/2025-05-19.md",
+        "suggested_fix": "#todo/cbbackfill",
+        "line": 120
+      }
+    ],
+    "#product-advice": [
+      {
+        "file": "Tests/General Brain Dump .md",
+        "suggested_fix": "#product/-advice",
+        "line": 19
+      }
+    ],
+    "#product-knowledge": [
+      {
+        "file": "PM Life/Knowledge DB.md",
+        "suggested_fix": "#product/-knowledge",
+        "line": 4
+      },
+      {
+        "file": "Notes/2025-05-15.md",
+        "suggested_fix": "#product/-knowledge",
+        "line": 3
+      }
+    ],
+    "#product-research": [
+      {
+        "file": "Notes/2025-04-30.md",
+        "suggested_fix": "#product/-research",
+        "line": 66
+      },
+      {
+        "file": "Notes/2025-04-25.md",
+        "suggested_fix": "#product/-research",
+        "line": 28
+      },
+      {
+        "file": "Notes/2025-05-05.md",
+        "suggested_fix": "#product/-research",
+        "line": 81
+      },
+      {
+        "file": "Notes/2025-05-15.md",
+        "suggested_fix": "#product/-research",
+        "line": 211
+      },
+      {
+        "file": "Notes/2025-05-01.md",
+        "suggested_fix": "#product/-research",
+        "line": 66
+      },
+      {
+        "file": "Notes/2025-05-06.md",
+        "suggested_fix": "#product/-research",
+        "line": 43
+      },
+      {
+        "file": "Notes/2025-05-16.md",
+        "suggested_fix": "#product/-research",
+        "line": 117
+      },
+      {
+        "file": "Notes/2025-05-02.md",
+        "suggested_fix": "#product/-research",
+        "line": 181
+      },
+      {
+        "file": "Notes/2025-05-12.md",
+        "suggested_fix": "#product/-research",
+        "line": 64
+      },
+      {
+        "file": "Notes/2025-04-28.md",
+        "suggested_fix": "#product/-research",
+        "line": 30
+      },
+      {
+        "file": "Notes/2025-05-03.md",
+        "suggested_fix": "#product/-research",
+        "line": 43
+      },
+      {
+        "file": "Notes/2025-05-13.md",
+        "suggested_fix": "#product/-research",
+        "line": 63
+      },
+      {
+        "file": "Notes/2025-04-29.md",
+        "suggested_fix": "#product/-research",
+        "line": 148
+      },
+      {
+        "file": "Notes/2025-05-07.md",
+        "suggested_fix": "#product/-research",
+        "line": 52
+      },
+      {
+        "file": "Notes/2025-04-26.md",
+        "suggested_fix": "#product/-research",
+        "line": 28
+      },
+      {
+        "file": "Notes/2025-05-08.md",
+        "suggested_fix": "#product/-research",
+        "line": 92
+      },
+      {
+        "file": "Notes/2025-05-09.md",
+        "suggested_fix": "#product/-research",
+        "line": 57
+      }
+    ],
+    "#product-ideas": [
+      {
+        "file": "Notes/2025-04-30.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 90
+      },
+      {
+        "file": "Notes/2025-04-25.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 52
+      },
+      {
+        "file": "Notes/2025-05-01.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 78
+      },
+      {
+        "file": "Notes/2025-05-02.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 193
+      },
+      {
+        "file": "Notes/2025-04-28.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 54
+      },
+      {
+        "file": "Notes/2025-04-29.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 172
+      },
+      {
+        "file": "Notes/2025-04-26.md",
+        "suggested_fix": "#product/-ideas",
+        "line": 71
+      }
+    ],
+    "#product-management": [
+      {
+        "file": "Notes/2025-04-30.md",
+        "suggested_fix": "#product/-management",
+        "line": 116
+      },
+      {
+        "file": "Notes/2025-04-25.md",
+        "suggested_fix": "#product/-management",
+        "line": 78
+      },
+      {
+        "file": "Notes/2025-05-01.md",
+        "suggested_fix": "#product/-management",
+        "line": 97
+      },
+      {
+        "file": "Notes/2025-05-02.md",
+        "suggested_fix": "#product/-management",
+        "line": 212
+      },
+      {
+        "file": "Notes/2025-04-28.md",
+        "suggested_fix": "#product/-management",
+        "line": 83
+      },
+      {
+        "file": "Notes/2025-04-29.md",
+        "suggested_fix": "#product/-management",
+        "line": 198
+      },
+      {
+        "file": "Notes/2025-04-26.md",
+        "suggested_fix": "#product/-management",
+        "line": 97
+      }
+    ],
+    "#todopayments": [
+      {
+        "file": "Notes/2025-06-10.md",
+        "suggested_fix": "#todo/payments",
+        "line": 143
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#todo/payments",
+        "line": 172
+      },
+      {
+        "file": "Notes/2025-05-20.md",
+        "suggested_fix": "#todo/payments",
+        "line": 172
+      },
+      {
+        "file": "Notes/2025-05-27.md",
+        "suggested_fix": "#todo/payments",
+        "line": 22
+      },
+      {
+        "file": "Notes/2025-05-27.md",
+        "suggested_fix": "#todo/payments",
+        "line": 22
+      },
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#todo/payments",
+        "line": 210
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/payments",
+        "line": 5
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/payments",
+        "line": 5
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#todo/payments",
+        "line": 5
+      }
+    ],
+    "#projects": [
+      {
+        "file": "Notes/2024-12-09.md",
+        "suggested_fix": "#project/s",
+        "line": 17
+      }
+    ],
+    "#product-leadership": [
+      {
+        "file": "Notes/2025-06-04.md",
+        "suggested_fix": "#product/-leadership",
+        "line": 85
+      },
+      {
+        "file": "Notes/2025-06-04.md",
+        "suggested_fix": "#product/-leadership",
+        "line": 85
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#product/-leadership",
+        "line": 96
+      }
+    ],
+    "#product-design": [
+      {
+        "file": "Notes/2025-06-04.md",
+        "suggested_fix": "#product/-design",
+        "line": 114
+      },
+      {
+        "file": "Notes/2025-06-04.md",
+        "suggested_fix": "#product/-design",
+        "line": 114
+      },
+      {
+        "file": "Notes/2025-06-04.md",
+        "suggested_fix": "#product/-design",
+        "line": 114
+      },
+      {
+        "file": "Notes/2025-06-04.md",
+        "suggested_fix": "#product/-design",
+        "line": 114
+      }
+    ],
+    "#todooverdue": [
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      },
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#todo/overdue",
+        "line": 23
+      }
+    ],
+    "#product-team": [
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#product/-team",
+        "line": 97
+      },
+      {
+        "file": "Notes/2025-06-09.md",
+        "suggested_fix": "#product/-team",
+        "line": 107
+      },
+      {
+        "file": "Notes/2025-06-09.md",
+        "suggested_fix": "#product/-team",
+        "line": 107
+      }
+    ],
+    "#initiativefraudrulegenerator": [
+      {
+        "file": "Notes/2025-06-18.md",
+        "suggested_fix": "#initiative/fraudrulegenerator",
+        "line": 159
+      },
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#initiative/fraudrulegenerator",
+        "line": 106
+      },
+      {
+        "file": "Notes/2025-06-17.md",
+        "suggested_fix": "#initiative/fraudrulegenerator",
+        "line": 50
+      }
+    ],
+    "#initiativepayments": [
+      {
+        "file": "Notes/2025-05-27.md",
+        "suggested_fix": "#initiative/payments",
+        "line": 175
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/payments",
+        "line": 29
+      }
+    ],
+    "#initiativecbautolabel": [
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#initiative/cbautolabel",
+        "line": 35
+      }
+    ],
+    "#initiativesift-decisions": [
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#initiative/sift-decisions",
+        "line": 105
+      }
+    ],
+    "#initiativedoordash-dfp-rfp": [
+      {
+        "file": "Notes/2025-05-28.md",
+        "suggested_fix": "#initiative/doordash-dfp-rfp",
+        "line": 209
+      },
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/doordash-dfp-rfp",
+        "line": 30
+      }
+    ],
+    "#todoopen-question": [
+      {
+        "file": "Notes/2025-05-29.md",
+        "suggested_fix": "#todo/open-question",
+        "line": 11
+      }
+    ],
+    "#initiativename": [
+      {
+        "file": "Scripts/README.md",
+        "suggested_fix": "#initiative/name",
+        "line": 157
+      }
+    ],
+    "#todorecurring": [
+      {
+        "file": "Tasks Base Camp/Tasks Landing Page.md",
+        "suggested_fix": "#todo/recurring",
+        "line": 16
+      }
+    ],
+    "#tododaily": [
+      {
+        "file": "Tasks Base Camp/Tasks Landing Page.md",
+        "suggested_fix": "#todo/daily",
+        "line": 16
+      }
+    ],
+    "#initiativeneural-network-exploration": [
+      {
+        "file": "Tasks Base Camp/Initiative Task Dump.md",
+        "suggested_fix": "#initiative/neural-network-exploration",
+        "line": 5
+      }
+    ],
+    "#todoidentity": [
+      {
+        "file": "Tasks Base Camp/Brain Dump.md",
+        "suggested_fix": "#todo/identity",
+        "line": 12
+      }
+    ],
+    "#todofeature-relase": [
+      {
+        "file": "Tasks Base Camp/Brain Dump.md",
+        "suggested_fix": "#todo/feature-relase",
+        "line": 65
+      },
+      {
+        "file": "Tasks Base Camp/Brain Dump.md",
+        "suggested_fix": "#todo/feature-relase",
+        "line": 65
+      }
+    ]
+  },
+  "total_corrupted_tags": 33,
+  "total_occurrences": 143
+}

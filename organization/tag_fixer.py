@@ -42,42 +42,46 @@ class TagFixer:
         
     def standardize_similar_tags(self, content, file_path):
         """Standardize similar tags to consistent format"""
-        tag_mappings = {
-            # Standardize to singular forms
-            '#daily-notes': '#daily-note',
-            '#1on1-notes': '#1on1',
-            '"#1on1-notes"': '#1on1',
+        # Use regex patterns for safe replacements
+        tag_patterns = [
+            # Fix trailing slashes only (not hierarchical tags)
+            (r'#todo/(?=\s|$)', '#todo'),
+            (r'#initiative/(?=\s|$)', '#initiative'),
+            (r'#identity/(?=\s|$)', '#identity'),
             
-            # Fix incomplete tags
-            '#todo/': '#todo',
-            '#initiative/': '#initiative',
+            # Standardize to singular forms
+            (r'#daily-notes\b', '#daily-note'),
+            (r'#1on1-notes\b', '#1on1'),
+            (r'"#1on1-notes"', '#1on1'),
             
             # Standardize payment tags
-            '#payment-q1-okr': '#payments/okr/q1',
-            '#payment-q2-okr': '#payments/okr/q2',
-            '#okr-q2-payment': '#payments/okr/q2',
+            (r'#payment-q1-okr\b', '#payments/okr/q1'),
+            (r'#payment-q2-okr\b', '#payments/okr/q2'),
+            (r'#okr-q2-payment\b', '#payments/okr/q2'),
             
-            # Fix identity tags
-            '#identity-': '#identity/',
-            '#device-intellignece': '#identity/device-intelligence',
-            '#device_fingerprinting': '#identity/device-fingerprinting',
-            '#device-fingerprint': '#identity/device-fingerprinting',
+            # Fix identity tags (but not valid hierarchical ones)
+            (r'#identity-(?=\s|$)', '#identity'),
+            (r'#device-intellignece\b', '#identity/device-intelligence'),
+            (r'#device_fingerprinting\b', '#identity/device-fingerprinting'),
+            (r'#device-fingerprint\b', '#identity/device-fingerprinting'),
             
             # Standardize various tags
-            '#braindump': '#brain-dump',
-            '#productresearch': '#product-research',
-            '#customerfeedback': '#customer-feedback',
-            '#mlperformance': '#ml-performance',
-            '#offlineLLM': '#offline-llm',
-            '#doordashdash': '#doordash',
-            '#todo-urgent': '#todo/urgent',
-        }
+            (r'#braindump\b', '#brain-dump'),
+            (r'#productresearch\b', '#product-research'),
+            (r'#customerfeedback\b', '#customer-feedback'),
+            (r'#mlperformance\b', '#ml-performance'),
+            (r'#offlineLLM\b', '#offline-llm'),
+            (r'#doordashdash\b', '#doordash'),
+            (r'#todo-urgent\b', '#todo/urgent'),
+        ]
         
         new_content = content
-        for old_tag, new_tag in tag_mappings.items():
-            if old_tag in content:
-                new_content = new_content.replace(old_tag, new_tag)
-                self.log_change(file_path, 'standardized_tags', old_tag, new_tag)
+        for pattern, replacement in tag_patterns:
+            matches = list(re.finditer(pattern, new_content))
+            if matches:
+                new_content = re.sub(pattern, replacement, new_content)
+                for match in matches:
+                    self.log_change(file_path, 'standardized_tags', match.group(0), replacement)
                 
         return new_content
         
