@@ -126,6 +126,15 @@ try:
 except ImportError:
     V2_AVAILABLE = False
 
+# PM Tools
+try:
+    from obsidian_vault_tools.pm_tools.task_extractor import TaskExtractor
+    from obsidian_vault_tools.pm_tools.wsjf_analyzer import WSJFAnalyzer
+    from obsidian_vault_tools.pm_tools.eisenhower_matrix import EisenhowerMatrixClassifier
+    PM_TOOLS_AVAILABLE = True
+except ImportError:
+    PM_TOOLS_AVAILABLE = False
+
 
 class UnifiedVaultManager:
     """
@@ -135,7 +144,7 @@ class UnifiedVaultManager:
     def __init__(self, vault_path: Optional[str] = None):
         """Initialize the unified vault manager"""
         self.vault_path = vault_path or self._get_vault_path()
-        self.vault_manager = VaultManager(self.vault_path)
+        self.vault_manager = VaultManager()
         self.audio_manager = get_audio_manager() if AUDIO_AVAILABLE else None
         self.navigator = MenuNavigator() if MENU_NAVIGATOR_AVAILABLE else None
         
@@ -156,7 +165,8 @@ class UnifiedVaultManager:
             'backup': BACKUP_AVAILABLE,
             'creative': CREATIVE_AVAILABLE,
             'organization': ORGANIZATION_AVAILABLE,
-            'v2': V2_AVAILABLE
+            'v2': V2_AVAILABLE,
+            'pm_tools': PM_TOOLS_AVAILABLE
         }
         
     def _init_features(self):
@@ -235,6 +245,18 @@ class UnifiedVaultManager:
                 self.librarian = ObsidianLibrarian(self.vault_path)
             except:
                 pass
+        
+        # PM Tools
+        self.task_extractor = None
+        self.wsjf_analyzer = None
+        self.eisenhower_classifier = None
+        if PM_TOOLS_AVAILABLE:
+            try:
+                self.task_extractor = TaskExtractor(self.vault_path)
+                self.wsjf_analyzer = WSJFAnalyzer()
+                self.eisenhower_classifier = EisenhowerMatrixClassifier()
+            except:
+                pass
     
     def _get_vault_path(self) -> str:
         """Get vault path from environment or prompt user"""
@@ -289,6 +311,7 @@ class UnifiedVaultManager:
             ("🏷️ Tag Management & Organization", "tags"),
             ("🔍 Search & Query Vault", "search"),
             ("🤖 AI & Intelligence Features", "ai"),
+            ("📋 PM Tools & Task Management", "pm_tools"),
             ("🛠️ MCP Tools & Integrations", "mcp"),
             ("💾 Backup & Version Control", "backup"),
             ("🎨 Creative Tools & ASCII Art", "creative"),
@@ -439,6 +462,42 @@ class UnifiedVaultManager:
                 print("No AI features available. Install required dependencies.")
                 input("\nPress Enter to continue...")
                 break
+            
+            for i, (label, _) in enumerate(options, 1):
+                print(f"{i}. {label}")
+            
+            choice = input("\nSelect option: ").strip()
+            
+            if choice == str(len(options)) or choice.lower() == 'b':
+                break
+            
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(options) - 1:
+                    func = options[idx][1]
+                    if func:
+                        func()
+            except (ValueError, IndexError):
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+    
+    def handle_pm_tools_menu(self):
+        """Handle PM tools submenu"""
+        if not PM_TOOLS_AVAILABLE:
+            print(f"{Colors.YELLOW}PM tools not available. Install required dependencies.{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+            
+        while True:
+            print(f"\n{Colors.BOLD}📋 PM Tools & Task Management{Colors.ENDC}")
+            
+            options = [
+                ("Extract Tasks from Vault", self.extract_tasks),
+                ("WSJF Priority Analysis", self.run_wsjf_analysis),  
+                ("Eisenhower Matrix Classification", self.run_eisenhower_analysis),
+                ("Combined PM Dashboard", self.run_pm_dashboard),
+                ("Export PM Reports", self.export_pm_reports),
+                ("Back to Main Menu", None)
+            ]
             
             for i, (label, _) in enumerate(options, 1):
                 print(f"{i}. {label}")
@@ -1566,6 +1625,8 @@ class UnifiedVaultManager:
                             self.handle_search_menu()
                         elif action == 'ai':
                             self.handle_ai_menu()
+                        elif action == 'pm_tools':
+                            self.handle_pm_tools_menu()
                         elif action == 'mcp':
                             self.handle_mcp_menu()
                         elif action == 'backup':
@@ -1595,6 +1656,248 @@ class UnifiedVaultManager:
                 stop_dungeon_ambiance()
             
             print(f"\n{Colors.CYAN}Thank you for using Obsidian Vault Manager!{Colors.ENDC}")
+    
+    # PM Tools Methods
+    def extract_tasks(self):
+        """Extract tasks from vault using TaskExtractor"""
+        if not self.task_extractor:
+            print(f"{Colors.RED}Task extractor not available{Colors.ENDC}")
+            return
+        
+        print(f"{Colors.CYAN}Extracting tasks from vault...{Colors.ENDC}")
+        try:
+            tasks = self.task_extractor.extract_all_tasks()
+            
+            if not tasks:
+                print(f"{Colors.YELLOW}No tasks found in vault{Colors.ENDC}")
+                return
+            
+            print(f"\n{Colors.GREEN}Found {len(tasks)} tasks:{Colors.ENDC}")
+            for i, task in enumerate(tasks[:10], 1):  # Show first 10
+                print(f"{i}. {task.content[:80]}...")
+                if task.product_area:
+                    print(f"   Product: {task.product_area}")
+                if task.task_type:
+                    print(f"   Type: {task.task_type}")
+                print()
+            
+            if len(tasks) > 10:
+                print(f"{Colors.YELLOW}... and {len(tasks) - 10} more tasks{Colors.ENDC}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Error extracting tasks: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_wsjf_analysis(self):
+        """Run WSJF analysis on vault tasks"""
+        if not self.task_extractor or not self.wsjf_analyzer:
+            print(f"{Colors.RED}WSJF tools not available{Colors.ENDC}")
+            return
+        
+        print(f"{Colors.CYAN}Running WSJF analysis...{Colors.ENDC}")
+        try:
+            # Extract tasks
+            tasks = self.task_extractor.extract_all_tasks()
+            if not tasks:
+                print(f"{Colors.YELLOW}No tasks found for analysis{Colors.ENDC}")
+                return
+            
+            # Generate WSJF report
+            report = self.wsjf_analyzer.generate_wsjf_report(tasks)
+            
+            # Display results
+            print(f"\n{Colors.BOLD}WSJF Analysis Results:{Colors.ENDC}")
+            print(f"Total tasks analyzed: {report['summary']['total_tasks']}")
+            print(f"Average WSJF score: {report['summary']['average_wsjf_score']:.2f}")
+            print(f"High priority tasks: {report['summary']['high_priority_count']}")
+            
+            print(f"\n{Colors.BOLD}Top 10 Priority Tasks:{Colors.ENDC}")
+            for item in report['top_10_recommendations']:
+                print(f"{item['rank']}. {item['task_content'][:80]}...")
+                print(f"   WSJF Score: {item['wsjf_score']:.2f}")
+                print(f"   Business Value: {item['business_value']}, "
+                      f"Time Criticality: {item['time_criticality']}, "
+                      f"Risk Reduction: {item['risk_reduction']}, "
+                      f"Job Size: {item['job_size']}")
+                if item['product_area']:
+                    print(f"   Product: {item['product_area']}")
+                print()
+                
+        except Exception as e:
+            print(f"{Colors.RED}Error running WSJF analysis: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_eisenhower_analysis(self):
+        """Run Eisenhower Matrix analysis on vault tasks"""
+        if not self.task_extractor or not self.eisenhower_classifier:
+            print(f"{Colors.RED}Eisenhower Matrix tools not available{Colors.ENDC}")
+            return
+        
+        print(f"{Colors.CYAN}Running Eisenhower Matrix analysis...{Colors.ENDC}")
+        try:
+            # Extract tasks
+            tasks = self.task_extractor.extract_all_tasks()
+            if not tasks:
+                print(f"{Colors.YELLOW}No tasks found for analysis{Colors.ENDC}")
+                return
+            
+            # Generate matrix report
+            report = self.eisenhower_classifier.generate_matrix_report(tasks)
+            
+            # Display results
+            print(f"\n{Colors.BOLD}Eisenhower Matrix Results:{Colors.ENDC}")
+            print(f"Total tasks analyzed: {report['summary']['total_tasks']}")
+            
+            # Show quadrant distribution
+            print(f"\n{Colors.BOLD}Task Distribution:{Colors.ENDC}")
+            for quadrant, count in report['summary']['quadrant_distribution'].items():
+                print(f"  {quadrant}: {count} tasks")
+            
+            # Show each quadrant
+            for quadrant_name, task_list in report['quadrants'].items():
+                if task_list:
+                    print(f"\n{Colors.BOLD}{quadrant_name} ({len(task_list)} tasks):{Colors.ENDC}")
+                    for item in task_list[:5]:  # Show first 5 in each quadrant
+                        print(f"  • {item['content'][:60]}...")
+                        print(f"    Confidence: {item['confidence']:.2f}")
+                    if len(task_list) > 5:
+                        print(f"    ... and {len(task_list) - 5} more")
+            
+            # Show recommendations
+            print(f"\n{Colors.BOLD}Action Recommendations:{Colors.ENDC}")
+            for action, recommendation in report['recommendations'].items():
+                print(f"  {action.replace('_', ' ').title()}: {recommendation}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Error running Eisenhower analysis: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_pm_dashboard(self):
+        """Run combined PM analysis dashboard"""
+        if not self.task_extractor or not self.wsjf_analyzer or not self.eisenhower_classifier:
+            print(f"{Colors.RED}PM tools not fully available{Colors.ENDC}")
+            return
+        
+        print(f"{Colors.CYAN}Generating PM Dashboard...{Colors.ENDC}")
+        try:
+            # Extract tasks
+            tasks = self.task_extractor.extract_all_tasks()
+            if not tasks:
+                print(f"{Colors.YELLOW}No tasks found for analysis{Colors.ENDC}")
+                return
+            
+            # Run both analyses
+            wsjf_report = self.wsjf_analyzer.generate_wsjf_report(tasks)
+            eisenhower_report = self.eisenhower_classifier.generate_matrix_report(tasks)
+            
+            # Combined dashboard
+            print(f"\n{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}")
+            print(f"{Colors.BOLD}📋 PM DASHBOARD - COMPREHENSIVE TASK ANALYSIS{Colors.ENDC}")
+            print(f"{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}")
+            
+            print(f"\n{Colors.BOLD}📊 OVERVIEW:{Colors.ENDC}")
+            print(f"  Total Tasks: {len(tasks)}")
+            print(f"  Average WSJF Score: {wsjf_report['summary']['average_wsjf_score']:.2f}")
+            print(f"  High Priority (WSJF): {wsjf_report['summary']['high_priority_count']}")
+            print(f"  Immediate Action Required: {eisenhower_report['action_priorities']['immediate_action']}")
+            
+            print(f"\n{Colors.BOLD}🎯 TOP PRIORITY ACTIONS (WSJF + Eisenhower):{Colors.ENDC}")
+            
+            # Find tasks that are both high WSJF and "Do First" quadrant
+            high_wsjf_tasks = {item['task'].content: item for item in wsjf_report['all_tasks'][:10]}
+            do_first_tasks = {item['content']: item for item in eisenhower_report['quadrants']['Do First']}
+            
+            critical_tasks = []
+            for content in high_wsjf_tasks:
+                if content in do_first_tasks:
+                    critical_tasks.append((high_wsjf_tasks[content], do_first_tasks[content]))
+            
+            if critical_tasks:
+                print(f"  {Colors.RED}CRITICAL: {len(critical_tasks)} tasks need immediate attention{Colors.ENDC}")
+                for i, (wsjf_item, eis_item) in enumerate(critical_tasks[:3], 1):
+                    print(f"    {i}. {wsjf_item['task'].content[:60]}...")
+                    print(f"       WSJF: {wsjf_item['wsjf_score'].total_score:.2f} | "
+                          f"Confidence: {eis_item['confidence']:.2f}")
+            
+            print(f"\n{Colors.BOLD}📈 WSJF TOP 5:{Colors.ENDC}")
+            for item in wsjf_report['top_10_recommendations'][:5]:
+                print(f"  {item['rank']}. {item['task_content'][:50]}... (Score: {item['wsjf_score']:.2f})")
+            
+            print(f"\n{Colors.BOLD}🎯 EISENHOWER QUADRANTS:{Colors.ENDC}")
+            for quadrant, count in eisenhower_report['summary']['quadrant_distribution'].items():
+                if count > 0:
+                    print(f"  {quadrant}: {count} tasks")
+                    
+        except Exception as e:
+            print(f"{Colors.RED}Error generating PM dashboard: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def export_pm_reports(self):
+        """Export PM analysis reports to files"""
+        if not self.task_extractor or not self.wsjf_analyzer or not self.eisenhower_classifier:
+            print(f"{Colors.RED}PM tools not fully available{Colors.ENDC}")
+            return
+        
+        print(f"{Colors.CYAN}Exporting PM reports...{Colors.ENDC}")
+        try:
+            # Extract tasks
+            tasks = self.task_extractor.extract_all_tasks()
+            if not tasks:
+                print(f"{Colors.YELLOW}No tasks found for export{Colors.ENDC}")
+                return
+            
+            # Generate reports
+            wsjf_report = self.wsjf_analyzer.generate_wsjf_report(tasks)
+            eisenhower_report = self.eisenhower_classifier.generate_matrix_report(tasks)
+            
+            # Create reports directory
+            reports_dir = Path(self.vault_path) / "PM_Reports"
+            reports_dir.mkdir(exist_ok=True)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            # Export WSJF report
+            wsjf_file = reports_dir / f"WSJF_Analysis_{timestamp}.json"
+            with open(wsjf_file, 'w') as f:
+                json.dump(wsjf_report, f, indent=2, default=str)
+            
+            # Export Eisenhower report
+            eisenhower_file = reports_dir / f"Eisenhower_Matrix_{timestamp}.json"
+            with open(eisenhower_file, 'w') as f:
+                json.dump(eisenhower_report, f, indent=2, default=str)
+            
+            # Create markdown summary
+            summary_file = reports_dir / f"PM_Summary_{timestamp}.md"
+            with open(summary_file, 'w') as f:
+                f.write(f"# PM Analysis Report - {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+                f.write(f"## Overview\n")
+                f.write(f"- Total Tasks: {len(tasks)}\n")
+                f.write(f"- Average WSJF Score: {wsjf_report['summary']['average_wsjf_score']:.2f}\n")
+                f.write(f"- High Priority Tasks: {wsjf_report['summary']['high_priority_count']}\n\n")
+                
+                f.write(f"## Top 10 WSJF Priority Tasks\n")
+                for item in wsjf_report['top_10_recommendations']:
+                    f.write(f"{item['rank']}. {item['task_content']}\n")
+                    f.write(f"   - WSJF Score: {item['wsjf_score']:.2f}\n")
+                    f.write(f"   - File: {item['file_path']}\n\n")
+                
+                f.write(f"## Eisenhower Matrix Distribution\n")
+                for quadrant, count in eisenhower_report['summary']['quadrant_distribution'].items():
+                    f.write(f"- **{quadrant}**: {count} tasks\n")
+            
+            print(f"{Colors.GREEN}Reports exported successfully:{Colors.ENDC}")
+            print(f"  - WSJF Analysis: {wsjf_file}")
+            print(f"  - Eisenhower Matrix: {eisenhower_file}")
+            print(f"  - Summary: {summary_file}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error exporting reports: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
 
 
 def main():

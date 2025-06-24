@@ -56,6 +56,7 @@ setup(
             "sentence-transformers>=2.0",
             "numpy>=1.21",
             "torch>=1.9",
+            "chromadb>=0.4.0",
         ],
         "mcp": [
             "mcp>=0.9.0",
