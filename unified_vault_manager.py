@@ -149,6 +149,13 @@ try:
 except ImportError:
     DAILY_TEMPLATE_AVAILABLE = False
 
+# Model Management
+try:
+    from obsidian_vault_tools.model_management import InteractiveModelManager
+    MODEL_MANAGEMENT_AVAILABLE = True
+except ImportError:
+    MODEL_MANAGEMENT_AVAILABLE = False
+
 
 class UnifiedVaultManager:
     """
@@ -182,7 +189,8 @@ class UnifiedVaultManager:
             'v2': V2_AVAILABLE,
             'pm_tools': PM_TOOLS_AVAILABLE,
             'content_quality': CONTENT_QUALITY_AVAILABLE,
-            'daily_template': DAILY_TEMPLATE_AVAILABLE
+            'daily_template': DAILY_TEMPLATE_AVAILABLE,
+            'model_management': MODEL_MANAGEMENT_AVAILABLE
         }
         
     def _init_features(self):
@@ -289,6 +297,14 @@ class UnifiedVaultManager:
         if DAILY_TEMPLATE_AVAILABLE:
             try:
                 self.daily_template_gen = daily_template_generator
+            except:
+                pass
+        
+        # Model Management
+        self.model_manager = None
+        if MODEL_MANAGEMENT_AVAILABLE:
+            try:
+                self.model_manager = InteractiveModelManager()
             except:
                 pass
     
@@ -814,6 +830,7 @@ class UnifiedVaultManager:
                 ("Change Vault Path", self.change_vault_path),
                 ("Feature Status", self.show_feature_status),
                 ("MCP Server Configuration", self.handle_mcp_configuration),
+                ("AI Model Management", self.handle_model_management),
                 ("Export Configuration", self.export_config),
                 ("Import Configuration", self.import_config),
                 ("Reset to Defaults", self.reset_defaults),
@@ -1623,6 +1640,26 @@ class UnifiedVaultManager:
                 input("\nPress Enter to continue...")
         else:
             print(f"{Colors.YELLOW}MCP tools not available. Install with: pip install mcp{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+    
+    def handle_model_management(self):
+        """Handle AI model management configuration"""
+        if MODEL_MANAGEMENT_AVAILABLE and self.model_manager:
+            # Check if this is first time setup
+            if not self.model_manager.models.get("active_model"):
+                print(f"{Colors.YELLOW}No models configured yet.{Colors.ENDC}")
+                if input("Would you like to run the setup wizard? (y/n): ").lower() == 'y':
+                    self.model_manager.interactive_setup()
+                else:
+                    self.model_manager.show_model_menu()
+            else:
+                self.model_manager.show_model_menu()
+        else:
+            print(f"{Colors.YELLOW}Model management not available.{Colors.ENDC}")
+            print("This feature helps you manage AI models for your vault.")
+            print("\nTo enable:")
+            print("1. Ensure all dependencies are installed")
+            print("2. Restart the application")
             input("\nPress Enter to continue...")
     
     def run(self):
