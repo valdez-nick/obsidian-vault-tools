@@ -22,6 +22,17 @@ Obsidian Vault Tools is a comprehensive toolkit for managing Obsidian vaults wit
 - Connection testing and validation
 - Single example template for demonstration
 
+### v2.2.0 - PM Tools Integration (2025-06-24)
+- Integrated PM burnout prevention tools into unified manager
+- Added Burnout Detection Analysis to PM Tools menu
+- Added Content Quality Analysis to Analysis menu (placeholder for future ContentQualityEngine)
+- Added Generate Enhanced Daily Note to AI & LLM Features menu
+- Implemented basic PM daily note generation with WSJF priorities
+- Full support for TaskExtractor, WSJFAnalyzer, EisenhowerMatrixClassifier, and BurnoutDetector
+- Graceful fallback for planned features (ContentQualityEngine, daily_template_generator)
+- Integrated with existing burnout detection system
+- Completes the PM burnout prevention toolkit
+
 ## Architecture
 
 ### Core Components
@@ -65,6 +76,7 @@ Key modules:
 - `backup/`: Backup management
 - `creative/`: ASCII art and flowcharts
 - `organization/`: Tag and file organization
+- `pm_tools/`: PM-specific burnout prevention tools (NEW)
 
 ## Development Guidelines
 
@@ -240,6 +252,55 @@ export DEBUG=true  # Enable debug logging
 - Discussions: General questions and ideas
 - Wiki: Extended documentation and guides
 
+## PM Tools Usage Examples
+
+### Content Quality Engine
+The Content Quality Engine helps maintain consistency across PM notes:
+
+```python
+from obsidian_vault_tools.pm_tools import ContentQualityEngine
+
+# Initialize and run quality checks
+quality_engine = ContentQualityEngine(vault_path)
+report = quality_engine.analyze_vault()
+
+# Get specific quality metrics
+quality_score = report['overall_score']
+naming_issues = report['naming_inconsistencies']
+incomplete_notes = report['incomplete_content']
+```
+
+Key features:
+- Detects naming inconsistencies (e.g., "DFP" vs "Device Fingerprinting")
+- Identifies incomplete thoughts and sentences
+- Finds duplicate content across files
+- Provides standardization suggestions
+- Generates quality scores for prioritization
+
+### Daily Template Generator
+The Daily Template Generator creates PM-optimized daily notes:
+
+```python
+from obsidian_vault_tools.pm_tools import DailyTemplateGenerator
+
+# Generate today's template
+generator = DailyTemplateGenerator(vault_path)
+template = generator.generate_template()
+
+# Generate with custom date
+template = generator.generate_template(date="2025-06-25")
+```
+
+Template includes:
+- Top 3 WSJF priorities for the day
+- Product area focus rotation
+- Energy and context tracking sections
+- Completion rate monitoring
+- Meeting notes structure
+- End-of-day reflection prompts
+
+Both tools integrate seamlessly with the existing PM burnout prevention suite, working alongside the WSJF prioritizer, Eisenhower matrix, and burnout detection system.
+
 ---
 
-*Last updated: After v2.1.0 MCP Interactive Configuration feature*
+*Last updated: After v2.2.0 PM Burnout Prevention Suite*
