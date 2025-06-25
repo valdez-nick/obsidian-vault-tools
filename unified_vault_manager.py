@@ -131,9 +131,30 @@ try:
     from obsidian_vault_tools.pm_tools.task_extractor import TaskExtractor
     from obsidian_vault_tools.pm_tools.wsjf_analyzer import WSJFAnalyzer
     from obsidian_vault_tools.pm_tools.eisenhower_matrix import EisenhowerMatrixClassifier
+    from obsidian_vault_tools.pm_tools.burnout_detector import BurnoutDetector
     PM_TOOLS_AVAILABLE = True
 except ImportError:
     PM_TOOLS_AVAILABLE = False
+
+# PM Tools - Planned features (placeholders for now)
+try:
+    from obsidian_vault_tools.pm_tools import ContentQualityEngine
+    CONTENT_QUALITY_AVAILABLE = True
+except ImportError:
+    CONTENT_QUALITY_AVAILABLE = False
+
+try:
+    from obsidian_vault_tools.pm_tools import daily_template_generator
+    DAILY_TEMPLATE_AVAILABLE = True
+except ImportError:
+    DAILY_TEMPLATE_AVAILABLE = False
+
+# Model Management
+try:
+    from obsidian_vault_tools.model_management import InteractiveModelManager
+    MODEL_MANAGEMENT_AVAILABLE = True
+except ImportError:
+    MODEL_MANAGEMENT_AVAILABLE = False
 
 
 class UnifiedVaultManager:
@@ -166,7 +187,10 @@ class UnifiedVaultManager:
             'creative': CREATIVE_AVAILABLE,
             'organization': ORGANIZATION_AVAILABLE,
             'v2': V2_AVAILABLE,
-            'pm_tools': PM_TOOLS_AVAILABLE
+            'pm_tools': PM_TOOLS_AVAILABLE,
+            'content_quality': CONTENT_QUALITY_AVAILABLE,
+            'daily_template': DAILY_TEMPLATE_AVAILABLE,
+            'model_management': MODEL_MANAGEMENT_AVAILABLE
         }
         
     def _init_features(self):
@@ -250,11 +274,37 @@ class UnifiedVaultManager:
         self.task_extractor = None
         self.wsjf_analyzer = None
         self.eisenhower_classifier = None
+        self.burnout_detector = None
+        self.content_quality_engine = None
+        self.daily_template_gen = None
+        
         if PM_TOOLS_AVAILABLE:
             try:
                 self.task_extractor = TaskExtractor(self.vault_path)
                 self.wsjf_analyzer = WSJFAnalyzer()
                 self.eisenhower_classifier = EisenhowerMatrixClassifier()
+                self.burnout_detector = BurnoutDetector(self.vault_path)
+            except:
+                pass
+        
+        # Initialize planned features if available
+        if CONTENT_QUALITY_AVAILABLE:
+            try:
+                self.content_quality_engine = ContentQualityEngine(self.vault_path)
+            except:
+                pass
+                
+        if DAILY_TEMPLATE_AVAILABLE:
+            try:
+                self.daily_template_gen = daily_template_generator
+            except:
+                pass
+        
+        # Model Management
+        self.model_manager = None
+        if MODEL_MANAGEMENT_AVAILABLE:
+            try:
+                self.model_manager = InteractiveModelManager()
             except:
                 pass
     
@@ -340,6 +390,7 @@ class UnifiedVaultManager:
                 ("Vault Growth Metrics", self.show_growth_metrics),
                 ("Link Analysis", self.analyze_links),
                 ("Content Quality Scoring", self.analyze_content_quality),
+                ("Content Quality Analysis", self.content_quality_analysis),
                 ("Export Analysis Report", self.export_analysis_report),
                 ("Back to Main Menu", None)
             ]
@@ -458,6 +509,10 @@ class UnifiedVaultManager:
                 options.insert(0, ("Auto-organize with AI", self.auto_organize_ai))
                 options.insert(1, ("AI Writing Assistant", self.ai_writing_assistant))
             
+            # Add Generate Enhanced Daily Note if available
+            if DAILY_TEMPLATE_AVAILABLE or PM_TOOLS_AVAILABLE:
+                options.insert(0, ("Generate Enhanced Daily Note", self.generate_enhanced_daily_note))
+            
             if len(options) == 1:
                 print("No AI features available. Install required dependencies.")
                 input("\nPress Enter to continue...")
@@ -494,6 +549,7 @@ class UnifiedVaultManager:
                 ("Extract Tasks from Vault", self.extract_tasks),
                 ("WSJF Priority Analysis", self.run_wsjf_analysis),  
                 ("Eisenhower Matrix Classification", self.run_eisenhower_analysis),
+                ("Burnout Detection Analysis", self.run_burnout_detection),
                 ("Combined PM Dashboard", self.run_pm_dashboard),
                 ("Export PM Reports", self.export_pm_reports),
                 ("Back to Main Menu", None)
@@ -774,6 +830,7 @@ class UnifiedVaultManager:
                 ("Change Vault Path", self.change_vault_path),
                 ("Feature Status", self.show_feature_status),
                 ("MCP Server Configuration", self.handle_mcp_configuration),
+                ("AI Model Management", self.handle_model_management),
                 ("Export Configuration", self.export_config),
                 ("Import Configuration", self.import_config),
                 ("Reset to Defaults", self.reset_defaults),
@@ -1585,6 +1642,26 @@ class UnifiedVaultManager:
             print(f"{Colors.YELLOW}MCP tools not available. Install with: pip install mcp{Colors.ENDC}")
             input("\nPress Enter to continue...")
     
+    def handle_model_management(self):
+        """Handle AI model management configuration"""
+        if MODEL_MANAGEMENT_AVAILABLE and self.model_manager:
+            # Check if this is first time setup
+            if not self.model_manager.models.get("active_model"):
+                print(f"{Colors.YELLOW}No models configured yet.{Colors.ENDC}")
+                if input("Would you like to run the setup wizard? (y/n): ").lower() == 'y':
+                    self.model_manager.interactive_setup()
+                else:
+                    self.model_manager.show_model_menu()
+            else:
+                self.model_manager.show_model_menu()
+        else:
+            print(f"{Colors.YELLOW}Model management not available.{Colors.ENDC}")
+            print("This feature helps you manage AI models for your vault.")
+            print("\nTo enable:")
+            print("1. Ensure all dependencies are installed")
+            print("2. Restart the application")
+            input("\nPress Enter to continue...")
+    
     def run(self):
         """Main run loop"""
         self.display_banner()
@@ -1898,6 +1975,162 @@ class UnifiedVaultManager:
             print(f"{Colors.RED}Error exporting reports: {e}{Colors.ENDC}")
         
         input("\nPress Enter to continue...")
+    
+    def run_burnout_detection(self):
+        """Run burnout detection analysis on vault"""
+        if not self.burnout_detector:
+            print(f"{Colors.RED}Burnout detector not available{Colors.ENDC}")
+            return
+        
+        print(f"{Colors.CYAN}Running burnout detection analysis...{Colors.ENDC}")
+        try:
+            # Run burnout analysis
+            results = self.burnout_detector.analyze_burnout()
+            
+            # Display results
+            print(f"\n{Colors.BOLD}Burnout Detection Results:{Colors.ENDC}")
+            print(f"Overall Risk Score: {results['overall_risk_score']:.1f}/10")
+            
+            if results['overall_risk_score'] >= 7:
+                print(f"{Colors.RED}⚠️ HIGH BURNOUT RISK DETECTED{Colors.ENDC}")
+            elif results['overall_risk_score'] >= 4:
+                print(f"{Colors.YELLOW}⚠️ MODERATE BURNOUT RISK{Colors.ENDC}")
+            else:
+                print(f"{Colors.GREEN}✓ LOW BURNOUT RISK{Colors.ENDC}")
+            
+            print(f"\n{Colors.BOLD}Risk Factors:{Colors.ENDC}")
+            for factor, details in results['risk_factors'].items():
+                print(f"  {factor.replace('_', ' ').title()}: {details['score']:.1f}/10")
+                if details.get('details'):
+                    print(f"    Details: {details['details']}")
+            
+            print(f"\n{Colors.BOLD}Recommendations:{Colors.ENDC}")
+            for rec in results.get('recommendations', []):
+                print(f"  • {rec}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Error running burnout detection: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def content_quality_analysis(self):
+        """Run content quality analysis on vault"""
+        if self.content_quality_engine:
+            print(f"{Colors.CYAN}Running content quality analysis...{Colors.ENDC}")
+            try:
+                # Run the analysis
+                results = self.content_quality_engine.analyze_vault()
+                
+                # Display results
+                print(f"\n{Colors.BOLD}Content Quality Analysis Results:{Colors.ENDC}")
+                print(f"Files analyzed: {results['files_analyzed']}")
+                print(f"Quality score: {results['average_quality_score']:.1f}/10")
+                
+                print(f"\n{Colors.BOLD}Issues Found:{Colors.ENDC}")
+                for issue_type, issues in results['issues'].items():
+                    if issues:
+                        print(f"  {issue_type}: {len(issues)} issues")
+                
+                print(f"\n{Colors.BOLD}Recommendations:{Colors.ENDC}")
+                for rec in results.get('recommendations', []):
+                    print(f"  • {rec}")
+                    
+            except Exception as e:
+                print(f"{Colors.RED}Error running content quality analysis: {e}{Colors.ENDC}")
+        else:
+            print(f"\n{Colors.BOLD}Content Quality Analysis{Colors.ENDC}")
+            print("This feature analyzes note quality based on:")
+            print("- Note completeness and structure")
+            print("- Naming consistency")
+            print("- Duplicate content detection")
+            print("- Missing context identification")
+            print(f"\n{Colors.YELLOW}Feature in development - ContentQualityEngine not yet available{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def generate_enhanced_daily_note(self):
+        """Generate an enhanced daily note using PM-optimized template"""
+        if self.daily_template_gen:
+            print(f"{Colors.CYAN}Generating enhanced daily note...{Colors.ENDC}")
+            try:
+                # Generate the daily note
+                note_path = self.daily_template_gen.generate_daily_note(
+                    self.vault_path,
+                    self.task_extractor,
+                    self.wsjf_analyzer
+                )
+                
+                print(f"{Colors.GREEN}Enhanced daily note created: {note_path}{Colors.ENDC}")
+                
+            except Exception as e:
+                print(f"{Colors.RED}Error generating daily note: {e}{Colors.ENDC}")
+        else:
+            print(f"\n{Colors.BOLD}Generate Enhanced Daily Note{Colors.ENDC}")
+            print("This feature creates a PM-optimized daily note with:")
+            print("- Top 3 WSJF priorities for today")
+            print("- Product area focus rotation")
+            print("- Energy and context switching tracking")
+            print("- Completion rate monitoring")
+            print("- Burnout prevention indicators")
+            
+            # Offer to create a basic daily note if PM tools are available
+            if self.task_extractor and self.wsjf_analyzer:
+                if input("\nCreate basic daily note with top priorities? (y/n): ").lower() == 'y':
+                    self._create_basic_pm_daily_note()
+            else:
+                print(f"\n{Colors.YELLOW}Feature in development - daily_template_generator not yet available{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def _create_basic_pm_daily_note(self):
+        """Create a basic PM-optimized daily note"""
+        try:
+            today = datetime.now().strftime('%Y-%m-%d')
+            daily_path = os.path.join(self.vault_path, 'Daily Notes', f"{today}_PM.md")
+            
+            if os.path.exists(daily_path):
+                print(f"{Colors.YELLOW}PM daily note already exists{Colors.ENDC}")
+                return
+                
+            os.makedirs(os.path.dirname(daily_path), exist_ok=True)
+            
+            # Extract and prioritize tasks
+            tasks = self.task_extractor.extract_all_tasks()
+            wsjf_report = self.wsjf_analyzer.generate_wsjf_report(tasks)
+            
+            with open(daily_path, 'w') as f:
+                f.write(f"# PM Daily Note - {today}\n\n")
+                f.write("## 🎯 Today's Top 3 Priorities (WSJF)\n\n")
+                
+                # Add top 3 WSJF priorities
+                for i, item in enumerate(wsjf_report['top_10_recommendations'][:3], 1):
+                    f.write(f"{i}. [ ] {item['task_content']}\n")
+                    f.write(f"   - WSJF Score: {item['wsjf_score']:.1f}\n")
+                    f.write(f"   - Product: {item.get('product_area', 'N/A')}\n\n")
+                
+                f.write("## 📊 Focus Area\n")
+                f.write("Today's product focus: _________\n\n")
+                
+                f.write("## 🔋 Energy & Context\n")
+                f.write("- Energy level (1-10): \n")
+                f.write("- Context switches: \n")
+                f.write("- Deep work blocks: \n\n")
+                
+                f.write("## ✅ Completed\n\n")
+                
+                f.write("## 📝 Notes\n\n")
+                
+                f.write("## 🙏 Gratitude\n- \n\n")
+                
+                f.write("## 📈 Metrics\n")
+                f.write(f"- Tasks started: 0\n")
+                f.write(f"- Tasks completed: 0\n")
+                f.write(f"- Completion rate: 0%\n")
+            
+            print(f"{Colors.GREEN}Created PM daily note: {daily_path}{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error creating PM daily note: {e}{Colors.ENDC}")
 
 
 def main():

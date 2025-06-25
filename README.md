@@ -51,6 +51,13 @@ The Unified Manager combines ALL features into one cohesive menu system. See [UN
 - **File Organization**: Organize files by content, date, or custom rules
 - **Intelligent Cleanup**: AI-powered file cleanup suggestions
 
+### 💼 PM Tools (Product Manager Burnout Prevention)
+- **WSJF Task Prioritizer**: Weighted Shortest Job First scoring for all tasks
+- **Eisenhower Matrix Classifier**: Automatic urgent/important categorization
+- **Burnout Detection System**: Early warning system for overwhelm patterns
+- **Content Quality Engine**: Standardize naming and fix incomplete notes
+- **Daily Template Generator**: PM-optimized daily planning templates
+
 ### 🌐 MCP Integration (Model Context Protocol)
 - **Dynamic Tool Discovery**: Automatically discover and integrate MCP tools
 - **Multi-Server Support**: Connect to multiple MCP servers simultaneously
@@ -182,6 +189,15 @@ ovt backup                    # Create backup
 ovt clean --analyze           # Analyze for cleanup
 ovt clean --safe              # Safe cleanup
 ovt version                   # File versioning
+```
+
+### PM Tools
+```bash
+ovt pm quality                # Run content quality analysis
+ovt pm template               # Generate daily PM template
+ovt pm burnout                # Check burnout risk score
+ovt pm prioritize             # Run WSJF prioritization
+ovt pm eisenhower             # Classify tasks by urgency/importance
 ```
 
 ## ⚙️ Configuration
