@@ -1686,10 +1686,14 @@ class UnifiedVaultManager:
                 if self.navigator:
                     try:
                         # Use arrow key navigation
-                        choice_idx = self.navigator.navigate_menu([opt[0] for opt in options])
-                        if choice_idx == -1:  # Cancelled
-                            continue
-                        choice = str(choice_idx + 1)
+                        # Convert options to format expected by MenuNavigator: (key, description)
+                        menu_options = [(str(i+1), label) for i, (label, _) in enumerate(options)]
+                        selected_key = self.navigator.navigate_menu("Main Menu", menu_options)
+                        
+                        if selected_key == '0' or selected_key == 'quit':  # Cancelled/Quit
+                            choice = 'q'
+                        else:
+                            choice = selected_key
                     except Exception as e:
                         # Fallback to number input if navigation fails
                         logger.warning(f"Navigation error: {e}")

@@ -33,6 +33,14 @@ Obsidian Vault Tools is a comprehensive toolkit for managing Obsidian vaults wit
 - Integrated with existing burnout detection system
 - Completes the PM burnout prevention toolkit
 
+### v2.2.1 - Menu Navigation Fix (2025-06-26)
+- Fixed critical MenuNavigator error that prevented the interactive menu from loading
+- Issue: `navigate_menu()` was missing required positional argument 'options'
+- Root cause: Method was being called with incorrect parameters format
+- Solution: Properly format menu options as tuples of (key, description) before passing to MenuNavigator
+- Feature status improved from 11/17 to 13/17 enabled features
+- Missing features identified: analysis, backup, v2, and content_quality modules
+
 ## Architecture
 
 ### Core Components
@@ -176,6 +184,11 @@ See `TECHNICAL_DEBT_REPORT.md` for comprehensive analysis. Key areas:
 - Duplicate code in `/ai/` and `/models/`
 - Generic exception handling needs specificity
 - Database performance optimization needed
+- Missing feature modules (as of v2.2.1):
+  - `analysis/` module components not fully available
+  - `backup/` module components missing
+  - `obsidian_librarian_v2` module not found
+  - `ContentQualityEngine` from pm_tools not yet implemented
 
 ## Contributing
 
