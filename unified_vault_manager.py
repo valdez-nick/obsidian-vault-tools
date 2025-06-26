@@ -406,6 +406,7 @@ class UnifiedVaultManager:
         print(f"\n{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}")
         print(f"{Colors.CYAN}🏰 Unified Obsidian Vault Manager - Complete Toolsuite{Colors.ENDC}")
         print(f"{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}")
+        print(f"Version: {Colors.YELLOW}v2.2.1{Colors.ENDC}")
         print(f"Vault: {Colors.GREEN}{self.vault_path}{Colors.ENDC}")
         
         # Show feature status

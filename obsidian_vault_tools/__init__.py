@@ -2,9 +2,9 @@
 Obsidian Vault Tools - Comprehensive toolkit for managing Obsidian vaults
 """
 
-__version__ = "1.0.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+__version__ = "2.2.1"
+__author__ = "Nick Valdez"
+__email__ = "nvaldez@siftscience.com"
 
 # Core modules
 from .manager import VaultManager, EnhancedVaultManager

@@ -11,13 +11,13 @@ long_description = (this_directory / "README.md").read_text() if (this_directory
 
 setup(
     name="obsidian-vault-tools",
-    version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="Comprehensive toolkit for managing Obsidian vaults",
+    version="2.2.1",
+    author="Nick Valdez",
+    author_email="nvaldez@siftscience.com",
+    description="Comprehensive toolkit for managing Obsidian vaults with AI-powered features",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/obsidian-vault-tools",
+    url="https://github.com/valdez-nick/obsidian-vault-tools",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
