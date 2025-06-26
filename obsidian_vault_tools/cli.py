@@ -383,6 +383,70 @@ def credentials():
     except ImportError:
         console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
 
+@mcp.command(name='check-requirements')
+def check_requirements():
+    """Check system requirements for MCP servers"""
+    try:
+        import shutil
+        from rich.table import Table
+        
+        table = Table(title="MCP Server Requirements")
+        table.add_column("Requirement", style="cyan")
+        table.add_column("Status", style="bold")
+        table.add_column("Details", style="dim")
+        
+        # Check Node.js
+        node_available = shutil.which('node') is not None
+        node_status = "✓ Installed" if node_available else "✗ Not Found"
+        node_details = "Required for most MCP servers" if not node_available else ""
+        table.add_row("Node.js", node_status, node_details)
+        
+        # Check NPX
+        npx_available = shutil.which('npx') is not None
+        npx_status = "✓ Installed" if npx_available else "✗ Not Found"
+        npx_details = "Required for NPM-based servers" if not npx_available else ""
+        table.add_row("NPX", npx_status, npx_details)
+        
+        # Check Docker
+        docker_available = shutil.which('docker') is not None
+        docker_status = "✓ Installed" if docker_available else "✗ Not Found"
+        docker_details = "Required for Atlassian servers" if not docker_available else ""
+        table.add_row("Docker", docker_status, docker_details)
+        
+        # Check Git
+        git_available = shutil.which('git') is not None
+        git_status = "✓ Installed" if git_available else "✗ Not Found"
+        git_details = "Required for GitHub server" if not git_available else ""
+        table.add_row("Git", git_status, git_details)
+        
+        console.print(table)
+        
+        # Installation instructions
+        if not all([node_available, npx_available]):
+            console.print("\n[yellow]To install Node.js and NPX:[/yellow]")
+            console.print("  • macOS: brew install node")
+            console.print("  • Ubuntu: sudo apt install nodejs npm")
+            console.print("  • Windows: Download from https://nodejs.org")
+        
+        if not docker_available:
+            console.print("\n[yellow]To install Docker:[/yellow]")
+            console.print("  • Visit https://www.docker.com/get-started")
+            console.print("  • Download Docker Desktop for your platform")
+        
+        # Check MCP config
+        from .mcp_tools import MCPConfig
+        config = MCPConfig()
+        servers = config.list_servers()
+        
+        if servers:
+            console.print(f"\n[green]✓ {len(servers)} MCP server(s) configured[/green]")
+        else:
+            console.print("\n[yellow]No MCP servers configured yet[/yellow]")
+            console.print("Run 'ovt mcp add' to configure servers")
+            
+    except Exception as e:
+        console.print(f"[red]Error checking requirements: {e}[/red]")
+
 @mcp.command()
 def audit():
     """Audit repository for credential exposure"""
@@ -460,6 +524,73 @@ def audit():
         console.print("[red]MCP features require additional dependencies: pip install mcp cryptography[/red]")
     except Exception as e:
         console.print(f"[red]Audit failed: {e}[/red]")
+
+@cli.group()
+def config():
+    """Configuration management commands"""
+    pass
+
+@config.command(name='set-vault')
+@click.argument('vault_path', type=click.Path(exists=True))
+def set_vault(vault_path):
+    """Set the default vault path"""
+    from .utils import Config
+    config = Config()
+    
+    # Validate the vault path
+    from .utils import validate_vault_path
+    valid, message = validate_vault_path(vault_path)
+    
+    if not valid:
+        console.print(f"[red]Invalid vault path: {message}[/red]")
+        return
+    
+    # Save the vault path
+    if config.set_vault_path(vault_path):
+        console.print(f"[green]✓ Default vault path set to: {vault_path}[/green]")
+    else:
+        console.print(f"[red]Failed to set vault path[/red]")
+
+@config.command(name='show')
+def show_config():
+    """Show current configuration"""
+    from .utils import Config
+    config = Config()
+    
+    # Display configuration
+    console.print("\n[bold]Current Configuration:[/bold]")
+    
+    vault_path = config.get_vault_path()
+    if vault_path:
+        console.print(f"Default Vault: [green]{vault_path}[/green]")
+    else:
+        console.print("Default Vault: [yellow]Not set[/yellow]")
+    
+    # Show config file location
+    console.print(f"\nConfig File: [dim]{config.config_file}[/dim]")
+    
+    # Show other settings if available
+    if config.config.get("output_directory"):
+        console.print(f"Output Directory: {config.config['output_directory']}")
+    
+    if config.config.get("backup_settings"):
+        backup = config.config["backup_settings"]
+        console.print(f"\nBackup Settings:")
+        console.print(f"  Auto Backup: {backup.get('auto_backup', False)}")
+        console.print(f"  Backup Count: {backup.get('backup_count', 5)}")
+
+@config.command(name='reset')
+@click.confirmation_option(prompt='Are you sure you want to reset all configuration?')
+def reset_config():
+    """Reset configuration to defaults"""
+    from .utils import Config
+    config = Config()
+    
+    # Reset to default configuration
+    config.config = config._default_config()
+    config.save_config()
+    
+    console.print("[green]✓ Configuration reset to defaults[/green]")
 
 @cli.command()
 def version():

@@ -41,6 +41,14 @@ Obsidian Vault Tools is a comprehensive toolkit for managing Obsidian vaults wit
 - Feature status improved from 11/17 to 13/17 enabled features
 - Missing features identified: analysis, backup, v2, and content_quality modules
 
+### v2.2.2 - Path Resolution & Configuration Fixes (2025-06-26)
+- **Fixed vault path resolution bug**: Paths like "Users/nvaldez/Documents/Obsidian Vault" no longer get appended to current working directory
+- **Added persistent vault path configuration**: Tool now remembers vault paths between sessions
+- **Enhanced MCP setup experience**: Added Docker requirement checks and detailed Atlassian setup guide
+- **New configuration commands**: Added `ovt config set-vault`, `ovt config show`, and `ovt config reset`
+- **MCP requirements checker**: Added `ovt mcp check-requirements` to verify system dependencies
+- **Smart path resolution**: Automatically detects and fixes common path input issues
+
 ## Architecture
 
 ### Core Components
@@ -176,6 +184,43 @@ Key modules:
 - [ ] Mobile companion app
 - [ ] Cloud sync capabilities
 - [ ] Collaborative features
+
+## Recent Technical Implementations
+
+### v2.2.2 Technical Details
+
+#### Path Resolution Fix
+**Problem**: `Path.resolve()` in `security.py` was resolving relative paths against current working directory.
+**Solution**: Added smart path detection in `unified_vault_manager.py:332-334`
+```python
+if vault_path and not vault_path.startswith(('/', '~', '.')) and vault_path.startswith('Users/'):
+    vault_path = '/' + vault_path
+```
+
+#### Configuration Persistence
+**Implementation**: Enhanced `_get_vault_path()` method with Config integration
+- Priority order: Environment Variable → Saved Config → User Prompt
+- Automatic saving of validated paths: `unified_vault_manager.py:359-362`
+- Config file location: `~/.obsidian_vault_tools.json`
+
+#### CLI Command Extensions
+**Added commands**: `obsidian_vault_tools/cli.py:464-529`
+- `ovt config set-vault <path>` - Set default vault path
+- `ovt config show` - Display current configuration
+- `ovt config reset` - Reset to defaults
+- `ovt mcp check-requirements` - Verify system dependencies
+
+#### MCP Setup Improvements
+**Enhanced Atlassian setup**: `mcp_tools/setup_wizard.py:152-214`
+- Docker availability checking using `shutil.which('docker')`
+- Detailed setup instructions with URLs for API token creation
+- Credential storage with masking
+- Connection readiness verification
+
+#### Security Enhancements
+- Maintained existing security validation in `validate_path()`
+- Added input sanitization before path processing
+- Preserved credential masking in MCP configuration
 
 ## Technical Debt
 
