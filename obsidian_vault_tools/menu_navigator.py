@@ -95,7 +95,8 @@ class MenuNavigator:
         # Instructions
         print(f"\n{Colors.GREEN}Navigation:{Colors.ENDC}")
         print(f"  {Colors.CYAN}↑/↓{Colors.ENDC} Move selection")
-        print(f"  {Colors.CYAN}Enter{Colors.ENDC} Select option")
+        print(f"  {Colors.CYAN}1-9{Colors.ENDC} Quick select (no Enter needed)")
+        print(f"  {Colors.CYAN}Enter{Colors.ENDC} Select highlighted option")
         print(f"  {Colors.CYAN}0 or ESC{Colors.ENDC} Back/Exit")
         print(f"  {Colors.CYAN}Q{Colors.ENDC} Quit")
     

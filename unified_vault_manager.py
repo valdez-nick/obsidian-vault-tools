@@ -446,11 +446,87 @@ class UnifiedVaultManager:
         
         return options
     
+    def get_menu_choice(self, prompt="Select option: ", max_options=9) -> str:
+        """Get menu choice using single keypress if available, fallback to input()"""
+        if self.navigator:
+            # Show prompt indicating single keypress mode
+            print(f"\n{Colors.YELLOW}Press a number key (no Enter needed):{Colors.ENDC}", end='', flush=True)
+            
+            while True:
+                key = self.navigator.get_key()
+                
+                # Handle special keys
+                if key in ['ESC', 'ZERO']:
+                    return '0'  # Back
+                elif key == 'QUIT' or key == 'CTRL_C':
+                    return 'q'  # Quit
+                elif key == 'b' or key == 'B':
+                    return 'b'  # Back
+                elif key.isdigit():
+                    # Direct number selection
+                    if 1 <= int(key) <= max_options:
+                        print(f" {key}")  # Echo the selection
+                        return key
+                    else:
+                        # Invalid number - play error sound if available
+                        if self.audio_manager:
+                            play_sound('error_chord')
+        else:
+            # Fallback to traditional input
+            return input(f"\n{prompt}").strip()
+    
+    def handle_menu(self, title: str, options: List[Tuple[str, Any]], back_option: bool = True) -> Optional[Any]:
+        """Unified menu handler with single keypress support
+        
+        Args:
+            title: Menu title
+            options: List of (label, function/value) tuples
+            back_option: Whether to add a back option
+            
+        Returns:
+            Selected function/value or None if cancelled
+        """
+        if back_option:
+            options = options + [("Back to Previous Menu", None)]
+        
+        if self.navigator and len(options) <= 9:
+            # Use MenuNavigator for instant selection
+            menu_options = [(str(i+1), label) for i, (label, _) in enumerate(options)]
+            selected_key = self.navigator.navigate_menu(title, menu_options)
+            
+            if selected_key == '0' or selected_key == 'quit':
+                return None
+            
+            try:
+                idx = int(selected_key) - 1
+                if 0 <= idx < len(options):
+                    return options[idx][1]
+            except (ValueError, IndexError):
+                return None
+        else:
+            # Fallback to traditional menu display
+            print(f"\n{Colors.BOLD}{title}{Colors.ENDC}")
+            for i, (label, _) in enumerate(options, 1):
+                print(f"{i}. {label}")
+            
+            choice = self.get_menu_choice(max_options=len(options))
+            
+            if choice == '0' or choice.lower() in ['b', 'back']:
+                return None
+            elif choice.lower() == 'q':
+                return 'quit'
+            
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(options):
+                    return options[idx][1]
+            except (ValueError, IndexError):
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+                return None
+    
     def handle_analysis_menu(self):
         """Handle vault analysis submenu"""
         while True:
-            print(f"\n{Colors.BOLD}📊 Vault Analysis & Insights{Colors.ENDC}")
-            
             options = [
                 ("Tag Statistics", self.vault_manager.analyze_tags),
                 ("Folder Structure Analysis", self.analyze_folder_structure),
@@ -459,76 +535,53 @@ class UnifiedVaultManager:
                 ("Link Analysis", self.analyze_links),
                 ("Content Quality Scoring", self.analyze_content_quality),
                 ("Content Quality Analysis", self.content_quality_analysis),
-                ("Export Analysis Report", self.export_analysis_report),
-                ("Back to Main Menu", None)
+                ("Export Analysis Report", self.export_analysis_report)
             ]
             
-            for i, (label, _) in enumerate(options, 1):
-                print(f"{i}. {label}")
+            result = self.handle_menu("📊 Vault Analysis & Insights", options)
             
-            choice = input("\nSelect option: ").strip()
-            
-            if choice == str(len(options)) or choice.lower() == 'b':
+            if result is None:  # Back option selected
                 break
-            
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < len(options) - 1:
-                    func = options[idx][1]
-                    if func:
-                        func()
-                        if self.audio_manager:
-                            magical_success()
-            except (ValueError, IndexError):
-                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+            elif result == 'quit':  # Quit selected
+                return 'quit'
+            elif callable(result):  # Function selected
+                result()
+                if self.audio_manager:
+                    magical_success()
     
     def handle_tag_menu(self):
         """Handle tag management submenu"""
         while True:
-            print(f"\n{Colors.BOLD}🏷️ Tag Management & Organization{Colors.ENDC}")
-            
             options = [
                 ("Analyze All Tags", self.vault_manager.analyze_tags),
                 ("Fix Tag Issues", self.fix_tag_issues),
                 ("Merge Similar Tags", self.merge_similar_tags),
                 ("Remove Generic Tags", self.remove_generic_tags),
                 ("Bulk Tag Operations", self.bulk_tag_operations),
-                ("Tag Hierarchy Report", self.tag_hierarchy_report),
-                ("Back to Main Menu", None)
+                ("Tag Hierarchy Report", self.tag_hierarchy_report)
             ]
             
             if V2_AVAILABLE and self.librarian:
                 options.insert(5, ("Auto-tag with AI", self.auto_tag_with_ai))
             
-            for i, (label, _) in enumerate(options, 1):
-                print(f"{i}. {label}")
+            result = self.handle_menu("🏷️ Tag Management & Organization", options)
             
-            choice = input("\nSelect option: ").strip()
-            
-            if choice == str(len(options)) or choice.lower() == 'b':
+            if result is None:  # Back option selected
                 break
-            
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < len(options) - 1:
-                    func = options[idx][1]
-                    if func:
-                        func()
-                        if self.audio_manager:
-                            magical_success()
-            except (ValueError, IndexError):
-                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+            elif result == 'quit':  # Quit selected
+                return 'quit'
+            elif callable(result):  # Function selected
+                result()
+                if self.audio_manager:
+                    magical_success()
     
     def handle_search_menu(self):
         """Handle search and query submenu"""
         while True:
-            print(f"\n{Colors.BOLD}🔍 Search & Query Vault{Colors.ENDC}")
-            
             options = [
                 ("Simple Text Search", self.simple_search),
                 ("Search with Filters", self.search_with_filters),
-                ("Recent Files", self.show_recent_files),
-                ("Back to Main Menu", None)
+                ("Recent Files", self.show_recent_files)
             ]
             
             # Add advanced search options if available
@@ -539,22 +592,14 @@ class UnifiedVaultManager:
                 options.insert(3, ("AI-Powered Semantic Search", self.semantic_search))
                 options.insert(4, ("Natural Language Query", self.natural_language_query))
             
-            for i, (label, _) in enumerate(options, 1):
-                print(f"{i}. {label}")
+            result = self.handle_menu("🔍 Search & Query Vault", options)
             
-            choice = input("\nSelect option: ").strip()
-            
-            if choice == str(len(options)) or choice.lower() == 'b':
+            if result is None:  # Back option selected
                 break
-            
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < len(options) - 1:
-                    func = options[idx][1]
-                    if func:
-                        func()
-            except (ValueError, IndexError):
-                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+            elif result == 'quit':  # Quit selected
+                return 'quit'
+            elif callable(result):  # Function selected
+                result()
     
     def handle_ai_menu(self):
         """Handle AI and intelligence features submenu"""
@@ -951,39 +996,26 @@ class UnifiedVaultManager:
     def handle_quick_menu(self):
         """Handle quick actions submenu"""
         while True:
-            print(f"\n{Colors.BOLD}⚡ Quick Actions{Colors.ENDC}")
-            
             options = [
                 ("Daily Note", self.create_daily_note),
                 ("Quick Capture", self.quick_capture),
                 ("Random Note", self.open_random_note),
                 ("Today's Stats", self.todays_stats),
-                ("Quick Search", self.quick_search),
-                ("Back to Main Menu", None)
+                ("Quick Search", self.quick_search)
             ]
             
-            for i, (label, _) in enumerate(options, 1):
-                print(f"{i}. {label}")
+            result = self.handle_menu("⚡ Quick Actions", options)
             
-            choice = input("\nSelect option: ").strip()
-            
-            if choice == str(len(options)) or choice.lower() == 'b':
+            if result is None:  # Back option selected
                 break
-            
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < len(options) - 1:
-                    func = options[idx][1]
-                    if func:
-                        func()
-            except (ValueError, IndexError):
-                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+            elif result == 'quit':  # Quit selected
+                return 'quit'
+            elif callable(result):  # Function selected
+                result()
     
     def handle_settings_menu(self):
         """Handle settings and configuration submenu"""
         while True:
-            print(f"\n{Colors.BOLD}⚙️ Settings & Configuration{Colors.ENDC}")
-            
             options = [
                 ("Change Vault Path", self.change_vault_path),
                 ("Feature Status", self.show_feature_status),
@@ -991,26 +1023,17 @@ class UnifiedVaultManager:
                 ("AI Model Management", self.handle_model_management),
                 ("Export Configuration", self.export_config),
                 ("Import Configuration", self.import_config),
-                ("Reset to Defaults", self.reset_defaults),
-                ("Back to Main Menu", None)
+                ("Reset to Defaults", self.reset_defaults)
             ]
             
-            for i, (label, _) in enumerate(options, 1):
-                print(f"{i}. {label}")
+            result = self.handle_menu("⚙️ Settings & Configuration", options)
             
-            choice = input("\nSelect option: ").strip()
-            
-            if choice == str(len(options)) or choice.lower() == 'b':
+            if result is None:  # Back option selected
                 break
-            
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < len(options) - 1:
-                    func = options[idx][1]
-                    if func:
-                        func()
-            except (ValueError, IndexError):
-                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+            elif result == 'quit':  # Quit selected
+                return 'quit'
+            elif callable(result):  # Function selected
+                result()
     
     # Implementation of all feature methods
     def analyze_folder_structure(self):
