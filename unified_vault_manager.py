@@ -29,6 +29,7 @@ from obsidian_vault_tools.security import (
     validate_path, sanitize_filename, validate_json_input,
     InputValidationError, rate_limit, sanitize_log_data
 )
+from obsidian_vault_tools.utils import Config
 
 # Feature imports with availability checks
 # Audio System
@@ -318,14 +319,33 @@ class UnifiedVaultManager:
                 pass
     
     def _get_vault_path(self) -> str:
-        """Get vault path from environment or prompt user"""
+        """Get vault path from environment, config, or prompt user"""
+        # Priority: Environment Variable > Saved Config > User Prompt
         vault_path = os.environ.get('OBSIDIAN_VAULT_PATH')
         
         if not vault_path:
+            # Check saved configuration
+            config = Config()
+            saved_path = config.get_vault_path()
+            
+            if saved_path and os.path.exists(saved_path):
+                print(f"{Colors.GREEN}Using saved vault path: {saved_path}{Colors.ENDC}")
+                return saved_path
+            
+            # Prompt user for path
             default_path = os.path.expanduser("~/Documents/ObsidianVault")
             vault_path = input(f"Enter vault path [{default_path}]: ").strip()
             if not vault_path:
                 vault_path = default_path
+        
+        # Fix common path input issues
+        # If path looks like an absolute path without leading slash, add it
+        if vault_path and not vault_path.startswith(('/', '~', '.')) and vault_path.startswith('Users/'):
+            vault_path = '/' + vault_path
+            print(f"{Colors.CYAN}Interpreting path as: {vault_path}{Colors.ENDC}")
+        
+        # Expand user path (handles ~)
+        vault_path = os.path.expanduser(vault_path)
         
         # Validate path
         try:
@@ -334,6 +354,13 @@ class UnifiedVaultManager:
                 print(f"{Colors.YELLOW}Warning: Vault path does not exist: {validated_path}{Colors.ENDC}")
                 if input("Create it? (y/n): ").lower() == 'y':
                     validated_path.mkdir(parents=True)
+            
+            # Save valid path to config for future use
+            if not os.environ.get('OBSIDIAN_VAULT_PATH'):  # Only save if not from env
+                config = Config()
+                config.set_vault_path(str(validated_path))
+                print(f"{Colors.GREEN}✓ Vault path saved for future use{Colors.ENDC}")
+            
             return str(validated_path)
         except Exception as e:
             print(f"{Colors.RED}Error: Invalid vault path: {e}{Colors.ENDC}")

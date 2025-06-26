@@ -50,6 +50,8 @@ The Unified Manager combines ALL features into one cohesive menu system. See [UN
 - **Incremental Backups**: Efficient backup system
 - **File Organization**: Organize files by content, date, or custom rules
 - **Intelligent Cleanup**: AI-powered file cleanup suggestions
+- **Persistent Configuration**: Automatically remembers vault paths and settings
+- **Smart Path Resolution**: Handles common path input issues automatically
 
 ### 💼 PM Tools (Product Manager Burnout Prevention)
 - **WSJF Task Prioritizer**: Weighted Shortest Job First scoring for all tasks
@@ -66,6 +68,8 @@ The Unified Manager combines ALL features into one cohesive menu system. See [UN
 - **Server Management**: Start, stop, and manage MCP servers
 - **Tool Categorization**: Organize tools by function and server
 - **Execution History**: Track tool usage and performance statistics
+- **System Requirements Check**: Verify all dependencies for MCP servers are installed
+- **Enhanced Atlassian Setup**: Guided Docker-based setup for Confluence/Jira integration
 
 Supported MCP Servers:
 - 🧠 **Obsidian PM Intelligence**: Custom vault intelligence and analysis
@@ -204,22 +208,30 @@ ovt pm eisenhower             # Classify tasks by urgency/importance
 
 ### Initial Setup
 ```bash
-ovt config init               # Interactive setup
-ovt config set-vault PATH     # Set default vault
-ovt config show               # Show configuration
+ovt config set-vault PATH     # Set default vault path
+ovt config show               # Show current configuration
+ovt config reset              # Reset to defaults
+
+# MCP System Requirements
+ovt mcp check-requirements    # Check Docker, Node.js, etc.
 ```
 
 ### Configuration File
-Configuration is stored in `~/.obsidian-tools/config.yaml`:
+Configuration is stored in `~/.obsidian_vault_tools.json`:
 
-```yaml
-vault_path: ~/Documents/MyVault
-theme: dungeon  # Audio theme
-ai_model: gpt-3.5-turbo
-backup_location: ~/Backups/obsidian
-output_dirs:
-  ascii: ./ascii-output
-  analysis: ./analysis-output
+```json
+{
+  "vault_path": "/Users/username/Documents/MyVault",
+  "output_directory": "",
+  "backup_settings": {
+    "auto_backup": false,
+    "backup_count": 5
+  },
+  "ui_settings": {
+    "use_colors": true,
+    "show_progress": true
+  }
+}
 ```
 
 ### MCP Configuration

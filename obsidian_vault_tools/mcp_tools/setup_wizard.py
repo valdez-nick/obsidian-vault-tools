@@ -151,24 +151,65 @@ class MCPSetupWizard:
     
     def _setup_confluence_server(self, server_name: str) -> bool:
         """Set up Confluence/Jira server"""
-        print("  Confluence server requires Atlassian Cloud credentials.")
-        print("  You'll need:")
-        print("  • Cloud ID (from your Atlassian URL)")
-        print("  • Email address")  
-        print("  • API tokens for Confluence and Jira")
+        # Check if Docker is available
+        try:
+            import shutil
+            docker_available = shutil.which('docker') is not None
+        except:
+            docker_available = False
         
-        print("  You'll be prompted for credentials when starting the server.")
-        print("  Or set environment variables:")
-        print("    export YOUR_CLOUD_ID='your_cloud_id'")
-        print("    export YOUR_EMAIL='your@email.com'")
-        print("    export YOUR_CONFLUENCE_TOKEN='your_token'")
-        print("    export YOUR_JIRA_TOKEN='your_token'")
+        if not docker_available:
+            print("  ⚠️  Docker is required for Atlassian integration but not found!")
+            print("  Please install Docker from https://www.docker.com/get-started")
+            setup_anyway = input("  Set up anyway for later use? (y/N): ").lower().strip()
+            if setup_anyway not in ['y', 'yes']:
+                return False
+        
+        print("\n  📋 Confluence/Jira server setup requires:")
+        print("  1. Atlassian Cloud account")
+        print("  2. API tokens for both Confluence and Jira")
+        print("\n  🔑 To create API tokens:")
+        print("  1. Go to https://id.atlassian.com/manage-profile/security/api-tokens")
+        print("  2. Click 'Create API token'")
+        print("  3. Name it (e.g., 'OVT-Confluence' and 'OVT-Jira')")
+        print("  4. Copy the token immediately (you can't see it again!)")
+        
+        print("\n  🌐 To find your Cloud ID:")
+        print("  1. Go to your Atlassian site (e.g., yoursite.atlassian.net)")
+        print("  2. Click Settings → System → About")
+        print("  3. Look for 'Site URL' - the ID is the part after 'https://'")
+        
+        # Offer to test connection
+        test_now = input("\n  Would you like to enter credentials now for testing? (y/N): ").lower().strip()
+        
+        if test_now in ['y', 'yes']:
+            cloud_id = input("  Cloud ID: ").strip()
+            email = input("  Email: ").strip()
+            
+            if cloud_id and email:
+                # Store credentials
+                self.credential_manager.set_credential('YOUR_CLOUD_ID', cloud_id)
+                self.credential_manager.set_credential('YOUR_EMAIL', email)
+                print("  ✓ Credentials saved securely")
+            
+            print("\n  Note: API tokens will be requested when you start the server")
+        else:
+            print("\n  You'll be prompted for credentials when starting the server.")
+            print("  Or set environment variables:")
+            print("    export YOUR_CLOUD_ID='your_cloud_id'")
+            print("    export YOUR_EMAIL='your@email.com'")
+            print("    export YOUR_CONFLUENCE_TOKEN='your_token'")
+            print("    export YOUR_JIRA_TOKEN='your_token'")
         
         # Create server config
         success = self.config.create_server_from_template(server_name, 'confluence')
         
         if success:
-            print(f"  ✅ Confluence server '{server_name}' configured!")
+            print(f"\n  ✅ Confluence server '{server_name}' configured!")
+            if docker_available:
+                print("  📦 Docker is available - you're ready to start the server")
+            else:
+                print("  ⚠️  Remember to install Docker before starting the server")
         
         return success
     
