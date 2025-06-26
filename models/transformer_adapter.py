@@ -36,7 +36,16 @@ except ImportError:
         def __enter__(self): return self
         def __exit__(self, *args): pass
     torch = DummyTorch()
-    logger.warning("transformers/torch library not available. Install with: pip install transformers torch")
+    
+# Global flag to control warning display
+_warning_shown = False
+
+def _show_import_warning():
+    """Show import warning only once when feature is actually used"""
+    global _warning_shown
+    if not _warning_shown and not TRANSFORMERS_AVAILABLE:
+        logger.warning("transformers/torch library not available. Install with: pip install transformers torch")
+        _warning_shown = True
 
 @dataclass
 class ModelConfig:
@@ -70,6 +79,7 @@ class TransformerAdapter:
     async def load_model(self, config: ModelConfig) -> bool:
         """Load a transformer model"""
         if not TRANSFORMERS_AVAILABLE:
+            _show_import_warning()
             logger.error("Transformers library not available")
             return False
             

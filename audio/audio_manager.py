@@ -11,6 +11,10 @@ import time
 from pathlib import Path
 from typing import Dict, Optional, Any, List
 import random
+import warnings
+
+# Suppress pygame deprecation warning
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
 
 # Try to import pygame for audio
 try:

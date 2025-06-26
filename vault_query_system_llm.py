@@ -19,10 +19,20 @@ import logging
 from llm_model_manager import LLMModelManager
 from query_router import QueryRouter
 from feedback_collector import FeedbackCollector, QueryFeedback
-from models.embedding_adapter import EmbeddingAdapter, Document
 
 # Import original vault query system for backward compatibility
 from vault_query_system import VaultQuerySystem as BaseVaultQuerySystem
+
+# Lazy import for embedding adapter to avoid startup warnings
+EmbeddingAdapter = None
+Document = None
+
+def _lazy_import_embedding():
+    """Lazy import embedding adapter when needed"""
+    global EmbeddingAdapter, Document
+    if EmbeddingAdapter is None:
+        from models.embedding_adapter import EmbeddingAdapter, Document
+    return EmbeddingAdapter, Document
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +49,9 @@ class VaultQuerySystemLLM(BaseVaultQuerySystem):
         self.model_manager = LLMModelManager(config_path)
         self.query_router = QueryRouter(self.model_manager)
         self.feedback_collector = FeedbackCollector()
-        self.embedding_adapter = EmbeddingAdapter()
+        
+        # Lazy initialization of embedding adapter
+        self.embedding_adapter = None
         
         # Enhanced caching
         self.embedding_cache = {}
@@ -80,6 +92,11 @@ class VaultQuerySystemLLM(BaseVaultQuerySystem):
                     "3. Required models are pulled: 'ollama pull llama2'"
                 )
                 
+            # Initialize embedding adapter if needed
+            if self.embedding_adapter is None:
+                EmbeddingAdapter, _ = _lazy_import_embedding()
+                self.embedding_adapter = EmbeddingAdapter()
+            
             # Load embedding model
             await self.embedding_adapter.load_model()
             

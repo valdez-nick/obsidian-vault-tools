@@ -4,15 +4,24 @@ Unified Obsidian Vault Manager - Complete Feature Integration
 Combines all vault management tools into one cohesive interactive menu system
 """
 
+# Import configuration to suppress startup warnings
+try:
+    import ovt_config
+except ImportError:
+    pass
+
 import os
 import sys
 import json
 import time
 import shlex
 import subprocess
+import logging
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 # Core imports from existing managers
 from vault_manager import Colors, VaultManager
@@ -1675,11 +1684,17 @@ class UnifiedVaultManager:
                 options = self.display_main_menu()
                 
                 if self.navigator:
-                    # Use arrow key navigation
-                    choice_idx = self.navigator.navigate_menu([opt[0] for opt in options])
-                    if choice_idx == -1:  # Cancelled
-                        continue
-                    choice = str(choice_idx + 1)
+                    try:
+                        # Use arrow key navigation
+                        choice_idx = self.navigator.navigate_menu([opt[0] for opt in options])
+                        if choice_idx == -1:  # Cancelled
+                            continue
+                        choice = str(choice_idx + 1)
+                    except Exception as e:
+                        # Fallback to number input if navigation fails
+                        logger.warning(f"Navigation error: {e}")
+                        self.navigator = None  # Disable for rest of session
+                        choice = input("\nSelect option (or 'q' to quit): ").strip().lower()
                 else:
                     # Use number input
                     choice = input("\nSelect option (or 'q' to quit): ").strip().lower()
