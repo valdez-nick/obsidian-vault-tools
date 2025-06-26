@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .config import MCPConfig
 from .credentials import get_credential_manager
-from .client_manager import MCPClientManager
+from .client_manager import get_client_manager
 
 # ANSI color codes for terminal output
 class Colors:
@@ -44,7 +44,7 @@ class MCPInteractiveConfig:
     def __init__(self):
         self.config = MCPConfig()
         self.credential_manager = get_credential_manager()
-        self.client_manager = MCPClientManager()
+        self.client_manager = get_client_manager()
     
     def display_menu(self):
         """Main MCP configuration menu"""
