@@ -535,14 +535,15 @@ class EnhancedVaultManager(VaultManager):
         screenshot_path = f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
         
         if sys.platform == 'darwin':  # macOS
-            cmd = f'screencapture -i "{screenshot_path}"'
+            cmd = ['screencapture', '-i', screenshot_path]
+            subprocess.run(cmd)
         elif sys.platform == 'win32':  # Windows
-            cmd = f'snippingtool /clip'  # Will need manual save
+            cmd = ['snippingtool', '/clip']  # Will need manual save
             print(f"{Colors.YELLOW}Please save the screenshot as: {screenshot_path}{Colors.ENDC}")
+            subprocess.run(cmd)
         else:  # Linux
-            cmd = f'gnome-screenshot -a -f "{screenshot_path}"'
-        
-        subprocess.run(cmd, shell=True)
+            cmd = ['gnome-screenshot', '-a', '-f', screenshot_path]
+            subprocess.run(cmd)
         
         if os.path.exists(screenshot_path):
             width = 100

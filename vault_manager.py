@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import subprocess
+import shlex
 import re
 from pathlib import Path
 from datetime import datetime
@@ -228,9 +229,14 @@ class VaultManager:
         
         def run_process():
             try:
+                # Parse command safely
+                if isinstance(command, str):
+                    cmd_list = shlex.split(command)
+                else:
+                    cmd_list = command
+                
                 proc = subprocess.run(
-                    command,
-                    shell=True,
+                    cmd_list,
                     capture_output=True,
                     text=True,
                     cwd=os.path.dirname(os.path.abspath(__file__))
@@ -393,9 +399,14 @@ class VaultManager:
             if self.config.get('debug', False):
                 print(f"{Colors.YELLOW}Debug - Running command: {command}{Colors.ENDC}")
             
+            # Parse command safely
+            if isinstance(command, str):
+                cmd_list = shlex.split(command)
+            else:
+                cmd_list = command
+            
             result = subprocess.run(
-                command,
-                shell=True,
+                cmd_list,
                 capture_output=True,
                 text=True,
                 cwd=os.path.dirname(os.path.abspath(__file__))
