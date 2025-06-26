@@ -7,6 +7,9 @@ import os
 import warnings
 import logging
 
+# Suppress pygame startup message
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
 # Suppress optional dependency warnings on startup
 SUPPRESS_OPTIONAL_WARNINGS = os.environ.get('OVT_SUPPRESS_WARNINGS', 'true').lower() == 'true'
 

@@ -13,8 +13,9 @@ from typing import Dict, Optional, Any, List
 import random
 import warnings
 
-# Suppress pygame deprecation warning
+# Suppress pygame deprecation warning and startup message
 warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
+os.environ.setdefault('PYGAME_HIDE_SUPPORT_PROMPT', '1')
 
 # Try to import pygame for audio
 try:
