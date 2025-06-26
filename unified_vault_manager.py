@@ -648,43 +648,61 @@ class UnifiedVaultManager:
         
         # Use the MCP menu system
         try:
+            from obsidian_vault_tools.mcp_tools import MCPConfig
+            
             discovery = get_discovery_service()
             menu_builder = get_menu_builder()
             executor = get_executor()
             client_manager = get_client_manager()
+            config = MCPConfig()
             
-            # Get available servers from client manager
-            server_status = client_manager.get_all_server_status()
-            servers = [name for name, status in server_status.items() if status.get('running', False)]
+            # Get all configured servers (not just running ones)
+            servers = config.list_servers()
             
             if not servers:
-                print(f"{Colors.YELLOW}No MCP servers found.{Colors.ENDC}")
+                print(f"{Colors.YELLOW}No MCP servers configured.{Colors.ENDC}")
+                print("Use Settings → MCP Server Configuration to add servers.")
                 input("\nPress Enter to continue...")
                 return
             
-            # Build and display MCP menu
-            menu_structure = menu_builder.build_menu(servers)
+            # Check which servers are actually running
+            server_status = client_manager.get_all_server_status()
+            running_servers = [name for name, status in server_status.items() if status.get('running', False)]
             
+            # Display server status
+            print(f"\n{Colors.BOLD}MCP Server Status:{Colors.ENDC}")
+            for server in servers:
+                if server in running_servers:
+                    print(f"  {server}: {Colors.GREEN}● Running{Colors.ENDC}")
+                else:
+                    print(f"  {server}: {Colors.YELLOW}○ Configured (not running){Colors.ENDC}")
+            
+            # For now, we'll try to work with all configured servers
+            # The menu builder and discovery service will handle servers that aren't running
+            
+            # Simple server selection menu
             while True:
                 print(f"\n{Colors.BOLD}🛠️ MCP Tools & Integrations{Colors.ENDC}")
-                print(f"Available servers: {len(servers)}")
+                print(f"Available servers: {len(servers)}\n")
                 
-                # Display server categories
-                for i, (category, items) in enumerate(menu_structure.items(), 1):
-                    print(f"{i}. {category} ({len(items)} tools)")
+                # Display servers
+                for i, server in enumerate(servers, 1):
+                    status = "● Running" if server in running_servers else "○ Configured"
+                    color = Colors.GREEN if server in running_servers else Colors.YELLOW
+                    print(f"{i}. {server} ({color}{status}{Colors.ENDC})")
                 
-                print(f"{len(menu_structure) + 1}. Back to Main Menu")
+                print(f"\n{len(servers) + 1}. Back to Main Menu")
                 
-                choice = input("\nSelect server category: ").strip()
+                choice = input("\nSelect server: ").strip()
                 
-                if choice == str(len(menu_structure) + 1) or choice.lower() == 'b':
+                if choice == str(len(servers) + 1) or choice.lower() == 'b':
                     break
                 
                 try:
                     idx = int(choice) - 1
-                    if 0 <= idx < len(menu_structure):
-                        category = list(menu_structure.keys())[idx]
-                        self._handle_mcp_category(category, menu_structure[category], executor)
+                    if 0 <= idx < len(servers):
+                        server_name = servers[idx]
+                        self._handle_mcp_server(server_name, executor, client_manager)
                 except (ValueError, IndexError):
                     print(f"{Colors.RED}Invalid option{Colors.ENDC}")
                     
@@ -692,6 +710,76 @@ class UnifiedVaultManager:
             print(f"{Colors.RED}Error loading MCP tools: {e}{Colors.ENDC}")
             input("\nPress Enter to continue...")
     
+    def _handle_mcp_server(self, server_name: str, executor, client_manager):
+        """Handle specific MCP server operations"""
+        import asyncio
+        
+        while True:
+            print(f"\n{Colors.BOLD}🛠️ {server_name} Server{Colors.ENDC}")
+            print(f"{'='*50}")
+            
+            # Get server status
+            status = client_manager.get_all_server_status().get(server_name, {})
+            is_running = status.get('running', False)
+            
+            print(f"Status: {Colors.GREEN if is_running else Colors.YELLOW}{'Running' if is_running else 'Configured (not running)'}{Colors.ENDC}")
+            
+            print(f"\nOptions:")
+            if not is_running:
+                print(f"1. Start Server")
+            else:
+                print(f"1. Stop Server")
+                print(f"2. Show Available Tools")
+            print(f"3. Show Server Configuration")
+            print(f"4. Back to MCP Menu")
+            
+            choice = input("\nSelect option: ").strip()
+            
+            if choice == '4' or choice.lower() == 'b':
+                break
+            elif choice == '1':
+                if not is_running:
+                    print(f"{Colors.YELLOW}Starting {server_name}...{Colors.ENDC}")
+                    try:
+                        success = asyncio.run(client_manager.start_server(server_name))
+                        if success:
+                            print(f"{Colors.GREEN}✓ Server started successfully{Colors.ENDC}")
+                        else:
+                            print(f"{Colors.RED}✗ Failed to start server{Colors.ENDC}")
+                    except Exception as e:
+                        print(f"{Colors.RED}Error starting server: {e}{Colors.ENDC}")
+                else:
+                    print(f"{Colors.YELLOW}Stopping {server_name}...{Colors.ENDC}")
+                    try:
+                        success = asyncio.run(client_manager.stop_server(server_name))
+                        if success:
+                            print(f"{Colors.GREEN}✓ Server stopped successfully{Colors.ENDC}")
+                        else:
+                            print(f"{Colors.RED}✗ Failed to stop server{Colors.ENDC}")
+                    except Exception as e:
+                        print(f"{Colors.RED}Error stopping server: {e}{Colors.ENDC}")
+                input("\nPress Enter to continue...")
+            elif choice == '2' and is_running:
+                print(f"{Colors.YELLOW}Loading tools for {server_name}...{Colors.ENDC}")
+                # This would show available tools - simplified for now
+                print(f"{Colors.CYAN}Tool discovery would be implemented here{Colors.ENDC}")
+                input("\nPress Enter to continue...")
+            elif choice == '3':
+                from obsidian_vault_tools.mcp_tools import MCPConfig
+                config = MCPConfig()
+                server_config = config.get_server_config(server_name)
+                if server_config:
+                    print(f"\n{Colors.BOLD}Server Configuration:{Colors.ENDC}")
+                    print(f"Command: {server_config.get('command', 'N/A')}")
+                    print(f"Args: {server_config.get('args', [])}")
+                    if server_config.get('env'):
+                        print(f"Environment: {list(server_config['env'].keys())}")
+                else:
+                    print(f"{Colors.RED}No configuration found for {server_name}{Colors.ENDC}")
+                input("\nPress Enter to continue...")
+            else:
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+
     def _handle_mcp_category(self, category: str, tools: List[Dict], executor):
         """Handle specific MCP tool category"""
         while True:
