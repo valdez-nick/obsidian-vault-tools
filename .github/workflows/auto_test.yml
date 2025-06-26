@@ -1,0 +1,211 @@
+name: Auto-Discovering Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC to catch any issues
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        dependencies: ['minimal', 'full']
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install minimal dependencies
+      if: matrix.dependencies == 'minimal'
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest pytest-cov
+    
+    - name: Install full dependencies
+      if: matrix.dependencies == 'full'
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[all]"
+        pip install pytest pytest-cov
+    
+    - name: Run auto-discovering tests
+      run: |
+        cd tests
+        python run_all_tests.py
+      env:
+        DISABLE_AUDIO: "1"  # Disable audio in CI
+    
+    - name: Upload test report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report-${{ matrix.os }}-py${{ matrix.python-version }}-${{ matrix.dependencies }}
+        path: |
+          tests/test_report.html
+          tests/test_report.json
+          tests/e2e/coverage_report.json
+    
+    - name: Check for new untested features
+      if: matrix.dependencies == 'full' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      run: |
+        # This would compare current coverage against baseline
+        # and alert if new features are discovered but not tested
+        echo "Checking for new untested features..."
+        if [ -f tests/e2e/coverage_report.json ]; then
+          python -c "
+import json
+report = json.load(open('tests/e2e/coverage_report.json'))
+print(f'Total features discovered: {report[\"totals\"][\"features\"]}')
+print(f'Features available: {report[\"totals\"][\"features_available\"]}')
+print(f'CLI commands: {report[\"totals\"][\"cli_commands\"]}')
+print(f'Menu options: {report[\"totals\"][\"total_menu_options\"]}')
+"
+        fi
+
+  coverage-report:
+    name: Generate Coverage Report
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all test reports
+      uses: actions/download-artifact@v3
+      with:
+        path: test-reports
+    
+    - name: Combine coverage reports
+      run: |
+        python -c "
+import json
+import glob
+from pathlib import Path
+
+# Find all test reports
+reports = glob.glob('test-reports/**/test_report.json', recursive=True)
+print(f'Found {len(reports)} test reports')
+
+# Combine results
+combined = {
+    'total_runs': len(reports),
+    'all_passed': 0,
+    'any_failed': 0,
+    'configurations': []
+}
+
+for report_path in reports:
+    with open(report_path) as f:
+        data = json.load(f)
+        
+    config = Path(report_path).parent.name
+    summary = data.get('summary', {})
+    
+    combined['configurations'].append({
+        'name': config,
+        'passed': summary.get('passed', 0),
+        'failed': summary.get('failed', 0),
+        'total': summary.get('total', 0)
+    })
+    
+    if summary.get('failed', 0) == 0:
+        combined['all_passed'] += 1
+    else:
+        combined['any_failed'] += 1
+
+# Save combined report
+with open('combined_report.json', 'w') as f:
+    json.dump(combined, f, indent=2)
+
+# Print summary
+print('\\n=== COMBINED TEST RESULTS ===')
+print(f'Total test runs: {combined[\"total_runs\"]}')
+print(f'All tests passed: {combined[\"all_passed\"]}')
+print(f'Had failures: {combined[\"any_failed\"]}')
+"
+    
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('combined_report.json', 'utf8'));
+          
+          let comment = '## 🧪 Automated Test Results\n\n';
+          comment += `✅ **${report.all_passed}** configurations passed all tests\n`;
+          if (report.any_failed > 0) {
+            comment += `❌ **${report.any_failed}** configurations had failures\n`;
+          }
+          
+          comment += '\n### Test Matrix Results:\n';
+          comment += '| Configuration | Passed | Failed | Total |\n';
+          comment += '|--------------|--------|--------|-------|\n';
+          
+          for (const config of report.configurations) {
+            const icon = config.failed === 0 ? '✅' : '❌';
+            comment += `| ${icon} ${config.name} | ${config.passed} | ${config.failed} | ${config.total} |\n`;
+          }
+          
+          comment += '\n*This is an automated test report. New features are automatically discovered and tested.*';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  alert-on-failure:
+    name: Alert on Test Failure
+    needs: test
+    runs-on: ubuntu-latest
+    if: failure()
+    
+    steps:
+    - name: Create issue for test failure
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const title = `🚨 Automated tests failed on ${context.ref}`;
+          const body = `The automated test suite has detected failures.
+          
+          **Branch:** ${context.ref}
+          **Commit:** ${context.sha}
+          **Workflow:** ${context.workflow}
+          
+          Please check the [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.
+          
+          This is an automated issue created by the test suite.`;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['bug', 'automated-test-failure']
+          });
