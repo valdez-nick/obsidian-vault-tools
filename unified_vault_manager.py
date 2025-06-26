@@ -360,8 +360,8 @@ class UnifiedVaultManager:
         print(f"{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}\n")
         
         # Play greeting if audio available
-        if self.audio_manager:
-            wizard_greeting()
+        # if self.audio_manager:
+        #     wizard_greeting()  # Removed background sound
     
     def display_main_menu(self) -> List[Tuple[str, str]]:
         """Display main menu and return options"""
@@ -1676,8 +1676,8 @@ class UnifiedVaultManager:
         self.display_banner()
         
         # Start ambient sound if available
-        if self.audio_manager:
-            start_dungeon_ambiance()
+        # if self.audio_manager:
+        #     start_dungeon_ambiance()  # Removed background sound
         
         try:
             while True:
