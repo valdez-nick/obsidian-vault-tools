@@ -22,7 +22,6 @@ try:
     FAISS_AVAILABLE = True
 except ImportError:
     FAISS_AVAILABLE = False
-    logger.warning("FAISS not available. Install with: pip install faiss-cpu")
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -34,7 +33,24 @@ except ImportError:
         def __init__(self, *args, **kwargs): pass
         def encode(self, *args, **kwargs): return None
     SentenceTransformer = DummySentenceTransformer
-    logger.warning("sentence-transformers not available. Install with: pip install sentence-transformers")
+
+# Global flags to control warning display
+_faiss_warning_shown = False
+_sentence_transformers_warning_shown = False
+
+def _show_faiss_warning():
+    """Show FAISS warning only once when feature is actually used"""
+    global _faiss_warning_shown
+    if not _faiss_warning_shown and not FAISS_AVAILABLE:
+        logger.warning("FAISS not available. Install with: pip install faiss-cpu")
+        _faiss_warning_shown = True
+
+def _show_sentence_transformers_warning():
+    """Show sentence-transformers warning only once when feature is actually used"""
+    global _sentence_transformers_warning_shown
+    if not _sentence_transformers_warning_shown and not SENTENCE_TRANSFORMERS_AVAILABLE:
+        logger.warning("sentence-transformers not available. Install with: pip install sentence-transformers")
+        _sentence_transformers_warning_shown = True
 
 @dataclass
 class Document:
@@ -57,6 +73,7 @@ class EmbeddingAdapter:
     async def load_model(self, model_name: str = "all-MiniLM-L6-v2") -> bool:
         """Load an embedding model"""
         if not SENTENCE_TRANSFORMERS_AVAILABLE:
+            _show_sentence_transformers_warning()
             logger.error("sentence-transformers not available")
             return False
             
@@ -120,6 +137,7 @@ class EmbeddingAdapter:
                          index_type: str = "flat") -> bool:
         """Create a FAISS index for similarity search"""
         if not FAISS_AVAILABLE:
+            _show_faiss_warning()
             logger.error("FAISS not available")
             return False
             

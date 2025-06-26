@@ -2,6 +2,13 @@
 """
 Main CLI entry point for Obsidian Vault Tools
 """
+
+# Import configuration to suppress startup warnings
+try:
+    import ovt_config
+except ImportError:
+    pass
+
 import click
 import sys
 import os
