@@ -417,9 +417,9 @@ class UnifiedVaultManager:
         # if self.audio_manager:
         #     wizard_greeting()  # Removed background sound
     
-    def display_main_menu(self) -> List[Tuple[str, str]]:
-        """Display main menu and return options"""
-        options = [
+    def get_main_menu_options(self) -> List[Tuple[str, str]]:
+        """Get main menu options without displaying them"""
+        return [
             ("📊 Vault Analysis & Insights", "analysis"),
             ("🏷️ Tag Management & Organization", "tags"),
             ("🔍 Search & Query Vault", "search"),
@@ -434,6 +434,10 @@ class UnifiedVaultManager:
             ("⚙️ Settings & Configuration", "settings"),
             ("❌ Exit", "exit")
         ]
+    
+    def display_main_menu(self) -> List[Tuple[str, str]]:
+        """Display main menu and return options (fallback mode)"""
+        options = self.get_main_menu_options()
         
         print(f"\n{Colors.BOLD}Main Menu:{Colors.ENDC}")
         for i, (label, _) in enumerate(options, 1):
@@ -1735,7 +1739,7 @@ class UnifiedVaultManager:
         
         try:
             while True:
-                options = self.display_main_menu()
+                options = self.get_main_menu_options()
                 
                 if self.navigator:
                     try:
@@ -1749,12 +1753,18 @@ class UnifiedVaultManager:
                         else:
                             choice = selected_key
                     except Exception as e:
-                        # Fallback to number input if navigation fails
+                        # Fallback to number input if navigation fails - disable navigator completely
                         logger.warning(f"Navigation error: {e}")
                         self.navigator = None  # Disable for rest of session
+                        # Clear screen and show fallback menu
+                        print("\n" + "="*60)
+                        print("Falling back to number-based menu navigation")
+                        print("="*60)
+                        self.display_main_menu()
                         choice = input("\nSelect option (or 'q' to quit): ").strip().lower()
                 else:
-                    # Use number input
+                    # Use number input - show the text menu
+                    self.display_main_menu()
                     choice = input("\nSelect option (or 'q' to quit): ").strip().lower()
                 
                 if choice == 'q' or choice == str(len(options)):
