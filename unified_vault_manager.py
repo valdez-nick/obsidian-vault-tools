@@ -85,7 +85,7 @@ except ImportError:
 # MCP Tools System
 try:
     from obsidian_vault_tools.mcp_tools import (
-        get_menu_builder, get_executor, get_discovery_service
+        get_menu_builder, get_executor, get_discovery_service, get_client_manager
     )
     MCP_AVAILABLE = True
 except ImportError:
@@ -651,9 +651,11 @@ class UnifiedVaultManager:
             discovery = get_discovery_service()
             menu_builder = get_menu_builder()
             executor = get_executor()
+            client_manager = get_client_manager()
             
-            # Discover available servers
-            servers = discovery.discover_servers()
+            # Get available servers from client manager
+            server_status = client_manager.get_all_server_status()
+            servers = [name for name, status in server_status.items() if status.get('running', False)]
             
             if not servers:
                 print(f"{Colors.YELLOW}No MCP servers found.{Colors.ENDC}")
