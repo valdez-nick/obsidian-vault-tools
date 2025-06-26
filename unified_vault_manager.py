@@ -673,9 +673,9 @@ class UnifiedVaultManager:
             print(f"\n{Colors.BOLD}MCP Server Status:{Colors.ENDC}")
             for server in servers:
                 if server in running_servers:
-                    print(f"  {server}: {Colors.GREEN}● Running{Colors.ENDC}")
+                    print(f"  {server}: {Colors.GREEN}[RUNNING]{Colors.ENDC}")
                 else:
-                    print(f"  {server}: {Colors.YELLOW}○ Configured (not running){Colors.ENDC}")
+                    print(f"  {server}: {Colors.YELLOW}[READY]{Colors.ENDC}")
             
             # For now, we'll try to work with all configured servers
             # The menu builder and discovery service will handle servers that aren't running
@@ -687,9 +687,9 @@ class UnifiedVaultManager:
                 
                 # Display servers
                 for i, server in enumerate(servers, 1):
-                    status = "● Running" if server in running_servers else "○ Configured"
+                    status = "[RUNNING]" if server in running_servers else "[READY]"
                     color = Colors.GREEN if server in running_servers else Colors.YELLOW
-                    print(f"{i}. {server} ({color}{status}{Colors.ENDC})")
+                    print(f"{i}. {server} {color}{status}{Colors.ENDC}")
                 
                 print(f"\n{len(servers) + 1}. Back to Main Menu")
                 
@@ -722,7 +722,7 @@ class UnifiedVaultManager:
             status = client_manager.get_all_server_status().get(server_name, {})
             is_running = status.get('running', False)
             
-            print(f"Status: {Colors.GREEN if is_running else Colors.YELLOW}{'Running' if is_running else 'Configured (not running)'}{Colors.ENDC}")
+            print(f"Status: {Colors.GREEN if is_running else Colors.YELLOW}{'[RUNNING]' if is_running else '[READY]'}{Colors.ENDC}")
             
             print(f"\nOptions:")
             if not is_running:
