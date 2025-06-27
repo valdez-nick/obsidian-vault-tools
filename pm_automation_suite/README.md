@@ -4,6 +4,7 @@ A comprehensive automation suite for Product Management workflows, integrating w
 
 ## 🚀 Features
 
+### Core Capabilities
 - **Multi-Source Data Integration**: Connect to Jira, Confluence, Google Suite, and Snowflake
 - **OAuth 2.0 Authentication**: Secure OAuth flows for Google, Atlassian, and Microsoft with automatic token refresh
 - **Multi-Tenant Support**: Manage credentials and connections for multiple workspaces/tenants
@@ -11,6 +12,32 @@ A comprehensive automation suite for Product Management workflows, integrating w
 - **Workflow Orchestration**: Event-driven automation with scheduling capabilities
 - **Flexible Architecture**: Modular design for easy extension and customization
 - **Security First**: Built-in credential management with keyring integration and encryption at rest
+
+### Major Components
+
+#### 🤖 WBR/QBR Automation
+- Extract data from multiple sources (Jira, Snowflake, Google Sheets)
+- Generate AI-powered insights and trend analysis
+- Create PowerPoint presentations automatically
+- Schedule and distribute reports
+
+#### 📝 Feature Development Pipeline
+- Parse PRD documents to extract requirements
+- Generate user stories with AI assistance
+- Create Jira epics and stories in bulk
+- Maintain traceability from PRD to implementation
+
+#### 📊 Analytics Hub
+- ETL pipelines for data warehouse integration
+- ML models for PM performance prediction
+- Burnout risk detection and prevention
+- Interactive dashboards and visualizations
+
+#### 🚨 Real-time Monitoring
+- Track PM metrics in real-time
+- Anomaly detection and alerting
+- Prometheus integration support
+- Custom alert rules and thresholds
 
 ## 📋 Prerequisites
 

@@ -18,7 +18,7 @@ except ImportError:
     GOOGLE_API_AVAILABLE = False
 
 from .google_connector import GoogleConnector
-from ..authentication import AuthenticationManager
+from authentication.auth_manager import AuthenticationManager
 
 logger = logging.getLogger(__name__)
 
