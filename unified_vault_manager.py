@@ -159,6 +159,13 @@ try:
 except ImportError:
     DAILY_TEMPLATE_AVAILABLE = False
 
+# AI Meeting Notes Organizer
+try:
+    from obsidian_vault_tools.ai.meeting_notes_organizer import MeetingNotesOrganizer
+    MEETING_ORGANIZER_AVAILABLE = True
+except ImportError:
+    MEETING_ORGANIZER_AVAILABLE = False
+
 # Model Management
 try:
     from obsidian_vault_tools.model_management import InteractiveModelManager
@@ -200,6 +207,7 @@ class UnifiedVaultManager:
             'pm_tools': PM_TOOLS_AVAILABLE,
             'content_quality': CONTENT_QUALITY_AVAILABLE,
             'daily_template': DAILY_TEMPLATE_AVAILABLE,
+            'meeting_organizer': MEETING_ORGANIZER_AVAILABLE,
             'model_management': MODEL_MANAGEMENT_AVAILABLE
         }
         
@@ -307,6 +315,14 @@ class UnifiedVaultManager:
         if DAILY_TEMPLATE_AVAILABLE:
             try:
                 self.daily_template_gen = daily_template_generator
+            except:
+                pass
+        
+        # Meeting Notes Organizer
+        self.meeting_organizer = None
+        if MEETING_ORGANIZER_AVAILABLE:
+            try:
+                self.meeting_organizer = MeetingNotesOrganizer(self.vault_path)
             except:
                 pass
         
@@ -621,6 +637,10 @@ class UnifiedVaultManager:
             if V2_AVAILABLE and self.librarian:
                 options.insert(0, ("Auto-organize with AI", self.auto_organize_ai))
                 options.insert(1, ("AI Writing Assistant", self.ai_writing_assistant))
+            
+            # Add Meeting Notes Organizer if available
+            if MEETING_ORGANIZER_AVAILABLE:
+                options.insert(0, ("Organize Meeting Notes", self.organize_meeting_notes))
             
             # Add Generate Enhanced Daily Note if available
             if DAILY_TEMPLATE_AVAILABLE or PM_TOOLS_AVAILABLE:
@@ -1358,6 +1378,135 @@ class UnifiedVaultManager:
         print(f"\n{Colors.BOLD}AI Writing Assistant{Colors.ENDC}")
         print("Get AI help with writing and editing")
         print(f"{Colors.YELLOW}Feature in development{Colors.ENDC}")
+        input("\nPress Enter to continue...")
+    
+    def organize_meeting_notes(self):
+        """AI-powered meeting notes organization"""
+        if not self.meeting_organizer:
+            print(f"\n{Colors.BOLD}Organize Meeting Notes{Colors.ENDC}")
+            print("This feature automatically organizes unstructured meeting notes into proper template sections using AI.")
+            print("Features:")
+            print("- Reads your QuickAdd templates automatically")
+            print("- Categorizes content into appropriate sections")
+            print("- Supports both 1:1 and general meeting formats")
+            print("- Smart backup system with instant undo capability")
+            print(f"\n{Colors.YELLOW}Meeting Notes Organizer not available{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+        
+        print(f"\n{Colors.BOLD}🤖 AI Meeting Notes Organizer{Colors.ENDC}")
+        print("Automatically organize your rapid meeting notes into proper template sections!")
+        print()
+        
+        # Display current daily note info
+        daily_note = self.meeting_organizer.find_current_daily_note()
+        if daily_note:
+            print(f"📅 Found daily note: {daily_note.name}")
+        else:
+            print("⚠️  No daily note found for today")
+            
+            # Ask user for file path
+            file_path = input("\nEnter path to file to organize (or Enter to cancel): ").strip()
+            if not file_path:
+                return
+            
+            if not os.path.exists(file_path):
+                print(f"{Colors.RED}File not found: {file_path}{Colors.ENDC}")
+                input("\nPress Enter to continue...")
+                return
+        
+        print("\nTemplate Types:")
+        print("1. Auto-detect (recommended)")
+        print("2. General Meeting")
+        print("3. 1:1 Meeting")
+        print("4. Cancel")
+        
+        template_choice = input("\nSelect template type: ").strip()
+        
+        template_type_map = {
+            '1': 'auto',
+            '2': 'meeting', 
+            '3': 'one_on_one'
+        }
+        
+        if template_choice == '4' or template_choice.lower() == 'c':
+            return
+        
+        template_type = template_type_map.get(template_choice, 'auto')
+        
+        print(f"\n{Colors.CYAN}Analyzing and organizing meeting notes...{Colors.ENDC}")
+        
+        try:
+            # Organize the notes
+            file_path_to_use = file_path if 'file_path' in locals() else str(daily_note)
+            result = self.meeting_organizer.organize_meeting_notes(
+                file_path_to_use, 
+                template_type
+            )
+            
+            if not result['success']:
+                print(f"{Colors.RED}Organization failed: {result['error']}{Colors.ENDC}")
+                if result.get('suggestions'):
+                    print("\nSuggestions:")
+                    for suggestion in result['suggestions']:
+                        print(f"  • {suggestion}")
+                input("\nPress Enter to continue...")
+                return
+            
+            # Show preview
+            print(f"\n{Colors.BOLD}Preview of organized content:{Colors.ENDC}")
+            print(f"Template Type: {result['template_type'].replace('_', ' ').title()}")
+            print(f"Session ID: {result['session_id']}")
+            
+            # Show categorized content summary
+            print(f"\n{Colors.BOLD}Content Categorization:{Colors.ENDC}")
+            for section, items in result['categorized_content'].items():
+                if items:
+                    print(f"  📝 {section}: {len(items)} items")
+            
+            print(f"\n{result['preview']}")
+            
+            # Ask user to apply changes
+            print(f"\n{Colors.BOLD}Options:{Colors.ENDC}")
+            print("1. Apply changes")
+            print("2. Cancel (no changes)")
+            
+            choice = input("\nWhat would you like to do? ").strip()
+            
+            if choice == '1':
+                # Apply the organization
+                success = self.meeting_organizer.apply_organization(
+                    result['organized_content'],
+                    result['file_path']
+                )
+                
+                if success:
+                    print(f"\n{Colors.GREEN}✅ Meeting notes organized successfully!{Colors.ENDC}")
+                    print(f"File updated: {result['file_path']}")
+                    print(f"\n{Colors.CYAN}💡 Pro tip: If you need to undo, run this feature again and select 'Undo last organization'{Colors.ENDC}")
+                    
+                    # Complete the session successfully
+                    self.meeting_organizer.complete_organization(success=True)
+                else:
+                    print(f"{Colors.RED}Failed to apply organization{Colors.ENDC}")
+                    print("Your original content is safely backed up and can be restored.")
+            else:
+                # Cancel - restore original content
+                print(f"\n{Colors.YELLOW}Organization cancelled{Colors.ENDC}")
+                self.meeting_organizer.complete_organization(success=False)
+                
+        except Exception as e:
+            print(f"{Colors.RED}Error during organization: {e}{Colors.ENDC}")
+            print("Your original content is safely backed up.")
+            
+            # Offer to undo
+            if hasattr(self.meeting_organizer, 'current_session') and self.meeting_organizer.current_session:
+                if input("\nAttempt to restore original content? (y/n): ").lower() == 'y':
+                    if self.meeting_organizer.undo_organization():
+                        print(f"{Colors.GREEN}Original content restored{Colors.ENDC}")
+                    else:
+                        print(f"{Colors.RED}Could not restore automatically{Colors.ENDC}")
+        
         input("\nPress Enter to continue...")
     
     def create_backup(self):
