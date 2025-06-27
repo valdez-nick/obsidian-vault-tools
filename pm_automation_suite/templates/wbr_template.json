@@ -1,0 +1,166 @@
+{
+  "template_name": "Weekly Business Review",
+  "version": "1.0.0",
+  "description": "Standard template for weekly business review presentations",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "title",
+      "layout": "title_slide",
+      "content": {
+        "title": "Weekly Business Review",
+        "subtitle": "Week of {{week_start_date}}",
+        "presenter": "{{presenter_name}}",
+        "date": "{{presentation_date}}"
+      }
+    },
+    {
+      "slide_number": 2,
+      "type": "agenda",
+      "layout": "bullet_list",
+      "content": {
+        "title": "Agenda",
+        "items": [
+          "Key Metrics & Performance",
+          "Weekly Highlights & Achievements",
+          "Challenges & Blockers",
+          "Customer Insights",
+          "Upcoming Priorities",
+          "Q&A"
+        ]
+      }
+    },
+    {
+      "slide_number": 3,
+      "type": "metrics_overview",
+      "layout": "metrics_grid",
+      "content": {
+        "title": "Key Metrics Overview",
+        "metrics": [
+          {
+            "name": "Monthly Active Users",
+            "value": "{{mau_current}}",
+            "change": "{{mau_change}}",
+            "target": "{{mau_target}}",
+            "trend": "{{mau_trend_chart}}"
+          },
+          {
+            "name": "Revenue",
+            "value": "{{revenue_current}}",
+            "change": "{{revenue_change}}",
+            "target": "{{revenue_target}}",
+            "trend": "{{revenue_trend_chart}}"
+          },
+          {
+            "name": "Conversion Rate",
+            "value": "{{conversion_current}}",
+            "change": "{{conversion_change}}",
+            "target": "{{conversion_target}}",
+            "trend": "{{conversion_trend_chart}}"
+          },
+          {
+            "name": "Customer Satisfaction",
+            "value": "{{nps_current}}",
+            "change": "{{nps_change}}",
+            "target": "{{nps_target}}",
+            "trend": "{{nps_trend_chart}}"
+          }
+        ]
+      }
+    },
+    {
+      "slide_number": 4,
+      "type": "highlights",
+      "layout": "two_column",
+      "content": {
+        "title": "Weekly Highlights",
+        "left_column": {
+          "heading": "Achievements",
+          "items": "{{achievements_list}}"
+        },
+        "right_column": {
+          "heading": "Key Wins",
+          "items": "{{key_wins_list}}"
+        }
+      }
+    },
+    {
+      "slide_number": 5,
+      "type": "feature_performance",
+      "layout": "chart_with_bullets",
+      "content": {
+        "title": "Feature Performance",
+        "chart": "{{feature_adoption_chart}}",
+        "insights": "{{feature_insights}}"
+      }
+    },
+    {
+      "slide_number": 6,
+      "type": "challenges",
+      "layout": "problem_solution",
+      "content": {
+        "title": "Challenges & Mitigation",
+        "challenges": [
+          {
+            "issue": "{{challenge_1}}",
+            "impact": "{{impact_1}}",
+            "mitigation": "{{mitigation_1}}",
+            "owner": "{{owner_1}}",
+            "eta": "{{eta_1}}"
+          }
+        ]
+      }
+    },
+    {
+      "slide_number": 7,
+      "type": "customer_insights",
+      "layout": "insights_grid",
+      "content": {
+        "title": "Customer Insights",
+        "feedback_summary": "{{customer_feedback}}",
+        "sentiment_chart": "{{sentiment_analysis_chart}}",
+        "top_requests": "{{top_feature_requests}}"
+      }
+    },
+    {
+      "slide_number": 8,
+      "type": "upcoming_priorities",
+      "layout": "timeline",
+      "content": {
+        "title": "Next Week Priorities",
+        "priorities": "{{next_week_priorities}}",
+        "dependencies": "{{key_dependencies}}",
+        "risks": "{{identified_risks}}"
+      }
+    },
+    {
+      "slide_number": 9,
+      "type": "questions",
+      "layout": "title_only",
+      "content": {
+        "title": "Questions & Discussion",
+        "subtitle": "Thank you!"
+      }
+    }
+  ],
+  "data_sources": [
+    "snowflake_metrics",
+    "jira_sprint_data",
+    "product_analytics",
+    "customer_feedback"
+  ],
+  "styling": {
+    "theme": "corporate",
+    "color_scheme": {
+      "primary": "#1E3A8A",
+      "secondary": "#3B82F6",
+      "accent": "#10B981",
+      "background": "#FFFFFF",
+      "text": "#1F2937"
+    },
+    "fonts": {
+      "heading": "Arial",
+      "body": "Calibri"
+    }
+  }
+}

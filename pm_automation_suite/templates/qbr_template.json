@@ -1,0 +1,280 @@
+{
+  "template_name": "Quarterly Business Review",
+  "version": "1.0.0",
+  "description": "Comprehensive template for quarterly business review presentations",
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "title",
+      "layout": "title_slide",
+      "content": {
+        "title": "Quarterly Business Review",
+        "subtitle": "Q{{quarter}} {{year}}",
+        "presenter": "{{presenter_name}}",
+        "date": "{{presentation_date}}"
+      }
+    },
+    {
+      "slide_number": 2,
+      "type": "executive_summary",
+      "layout": "key_messages",
+      "content": {
+        "title": "Executive Summary",
+        "key_messages": [
+          "{{key_message_1}}",
+          "{{key_message_2}}",
+          "{{key_message_3}}"
+        ],
+        "quarter_theme": "{{quarter_theme}}"
+      }
+    },
+    {
+      "slide_number": 3,
+      "type": "agenda",
+      "layout": "numbered_list",
+      "content": {
+        "title": "Agenda",
+        "sections": [
+          "Quarterly Performance Overview",
+          "Strategic Initiatives Progress",
+          "Product & Feature Updates",
+          "Market & Competitive Analysis",
+          "Customer Success Stories",
+          "Financial Review",
+          "Challenges & Learnings",
+          "Next Quarter Roadmap",
+          "Resource Requirements",
+          "Q&A"
+        ]
+      }
+    },
+    {
+      "slide_number": 4,
+      "type": "performance_dashboard",
+      "layout": "executive_dashboard",
+      "content": {
+        "title": "Q{{quarter}} Performance Dashboard",
+        "kpis": [
+          {
+            "metric": "Revenue",
+            "actual": "{{revenue_actual}}",
+            "target": "{{revenue_target}}",
+            "yoy_growth": "{{revenue_yoy}}",
+            "status": "{{revenue_status}}"
+          },
+          {
+            "metric": "Customer Growth",
+            "actual": "{{customers_actual}}",
+            "target": "{{customers_target}}",
+            "yoy_growth": "{{customers_yoy}}",
+            "status": "{{customers_status}}"
+          },
+          {
+            "metric": "Market Share",
+            "actual": "{{market_share_actual}}",
+            "target": "{{market_share_target}}",
+            "yoy_growth": "{{market_share_yoy}}",
+            "status": "{{market_share_status}}"
+          },
+          {
+            "metric": "NPS Score",
+            "actual": "{{nps_actual}}",
+            "target": "{{nps_target}}",
+            "yoy_growth": "{{nps_yoy}}",
+            "status": "{{nps_status}}"
+          }
+        ],
+        "trend_chart": "{{quarterly_trend_chart}}"
+      }
+    },
+    {
+      "slide_number": 5,
+      "type": "strategic_initiatives",
+      "layout": "initiative_tracker",
+      "content": {
+        "title": "Strategic Initiatives Progress",
+        "initiatives": [
+          {
+            "name": "{{initiative_1_name}}",
+            "status": "{{initiative_1_status}}",
+            "progress": "{{initiative_1_progress}}",
+            "impact": "{{initiative_1_impact}}",
+            "next_steps": "{{initiative_1_next_steps}}"
+          }
+        ],
+        "overall_health": "{{initiatives_health_score}}"
+      }
+    },
+    {
+      "slide_number": 6,
+      "type": "product_updates",
+      "layout": "feature_showcase",
+      "content": {
+        "title": "Product & Feature Launches",
+        "launched_features": "{{launched_features_list}}",
+        "adoption_metrics": "{{feature_adoption_chart}}",
+        "customer_impact": "{{customer_impact_stories}}"
+      }
+    },
+    {
+      "slide_number": 7,
+      "type": "market_analysis",
+      "layout": "competitive_landscape",
+      "content": {
+        "title": "Market & Competitive Analysis",
+        "market_trends": "{{market_trends_summary}}",
+        "competitive_positioning": "{{competitive_matrix}}",
+        "opportunities": "{{market_opportunities}}",
+        "threats": "{{market_threats}}"
+      }
+    },
+    {
+      "slide_number": 8,
+      "type": "customer_success",
+      "layout": "case_studies",
+      "content": {
+        "title": "Customer Success Stories",
+        "case_studies": [
+          {
+            "customer": "{{customer_1_name}}",
+            "challenge": "{{customer_1_challenge}}",
+            "solution": "{{customer_1_solution}}",
+            "results": "{{customer_1_results}}",
+            "testimonial": "{{customer_1_quote}}"
+          }
+        ],
+        "retention_metrics": "{{customer_retention_chart}}"
+      }
+    },
+    {
+      "slide_number": 9,
+      "type": "financial_review",
+      "layout": "financial_summary",
+      "content": {
+        "title": "Financial Performance",
+        "revenue_breakdown": "{{revenue_breakdown_chart}}",
+        "cost_analysis": "{{cost_structure_chart}}",
+        "profitability": "{{profitability_metrics}}",
+        "cash_flow": "{{cash_flow_summary}}",
+        "forecast_accuracy": "{{forecast_vs_actual}}"
+      }
+    },
+    {
+      "slide_number": 10,
+      "type": "challenges_learnings",
+      "layout": "lessons_learned",
+      "content": {
+        "title": "Challenges & Key Learnings",
+        "challenges_faced": [
+          {
+            "challenge": "{{challenge_1}}",
+            "root_cause": "{{root_cause_1}}",
+            "resolution": "{{resolution_1}}",
+            "learning": "{{learning_1}}"
+          }
+        ],
+        "process_improvements": "{{process_improvements_list}}"
+      }
+    },
+    {
+      "slide_number": 11,
+      "type": "next_quarter_roadmap",
+      "layout": "roadmap_timeline",
+      "content": {
+        "title": "Q{{next_quarter}} Roadmap",
+        "key_objectives": "{{next_quarter_objectives}}",
+        "major_milestones": "{{milestone_timeline}}",
+        "product_roadmap": "{{product_roadmap_visual}}",
+        "success_metrics": "{{success_criteria}}"
+      }
+    },
+    {
+      "slide_number": 12,
+      "type": "resource_requirements",
+      "layout": "resource_planning",
+      "content": {
+        "title": "Resource Requirements",
+        "headcount_needs": "{{headcount_plan}}",
+        "budget_request": "{{budget_breakdown}}",
+        "technology_investments": "{{tech_investments}}",
+        "timeline": "{{resource_timeline}}"
+      }
+    },
+    {
+      "slide_number": 13,
+      "type": "key_asks",
+      "layout": "action_items",
+      "content": {
+        "title": "Key Asks & Next Steps",
+        "executive_asks": [
+          "{{ask_1}}",
+          "{{ask_2}}",
+          "{{ask_3}}"
+        ],
+        "commitments": "{{team_commitments}}",
+        "follow_up": "{{follow_up_schedule}}"
+      }
+    },
+    {
+      "slide_number": 14,
+      "type": "appendix",
+      "layout": "section_divider",
+      "content": {
+        "title": "Appendix",
+        "subtitle": "Supporting Data & Analysis"
+      }
+    },
+    {
+      "slide_number": 15,
+      "type": "questions",
+      "layout": "thank_you",
+      "content": {
+        "title": "Thank You",
+        "subtitle": "Questions & Discussion",
+        "contact": "{{contact_information}}"
+      }
+    }
+  ],
+  "data_sources": [
+    "snowflake_quarterly_metrics",
+    "financial_systems",
+    "crm_data",
+    "product_analytics",
+    "market_research",
+    "competitive_intelligence"
+  ],
+  "styling": {
+    "theme": "executive",
+    "color_scheme": {
+      "primary": "#0F172A",
+      "secondary": "#1E40AF",
+      "accent": "#059669",
+      "warning": "#DC2626",
+      "background": "#FFFFFF",
+      "text": "#111827"
+    },
+    "fonts": {
+      "heading": "Helvetica Neue",
+      "body": "Arial",
+      "data": "Consolas"
+    },
+    "chart_styles": {
+      "type": "modern",
+      "animation": true,
+      "grid": "minimal"
+    }
+  },
+  "automation_config": {
+    "data_refresh_schedule": "0 6 * * MON",
+    "quality_checks": [
+      "data_completeness",
+      "metric_validation",
+      "trend_analysis",
+      "anomaly_detection"
+    ],
+    "approval_workflow": {
+      "reviewers": ["pm_lead", "finance", "executive"],
+      "deadline_days_before": 3
+    }
+  }
+}
