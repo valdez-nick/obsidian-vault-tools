@@ -139,7 +139,8 @@ class EventBus:
         self.subscribers["*"].append(handler)
         if event_filter:
             self.filters[handler] = event_filter
-        logger.info(f"Subscribed handler {handler.__name__}")
+        handler_name = getattr(handler, '__name__', str(handler))
+        logger.info(f"Subscribed handler {handler_name}")
         
     def unsubscribe(self, handler: Callable):
         """
