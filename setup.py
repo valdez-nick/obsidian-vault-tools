@@ -114,6 +114,7 @@ setup(
         "console_scripts": [
             "obsidian-tools=obsidian_vault_tools.cli:main",
             "ovt=obsidian_vault_tools.cli:main",  # Short alias
+            "ovt-pm=obsidian_vault_tools.pm_cli:pm",  # PM Automation CLI
         ],
     },
     package_data={

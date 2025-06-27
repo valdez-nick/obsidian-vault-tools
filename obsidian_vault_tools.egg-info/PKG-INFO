@@ -2,8 +2,8 @@ Metadata-Version: 2.4
 Name: obsidian-vault-tools
 Version: 1.0.0
 Summary: Comprehensive toolkit for managing Obsidian vaults
-Home-page: https://github.com/yourusername/obsidian-vault-tools
-Author: Your Name
+Home-page: https://github.com/valdez-nick/obsidian-vault-tools
+Author: Nick Valdez
 Author-email: Your Name <your.email@example.com>
 License: MIT
 Project-URL: Homepage, https://github.com/yourusername/obsidian-vault-tools
@@ -57,7 +57,32 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-v2.3.0-brightgreen)
 ![Status](https://img.shields.io/badge/status-beta-yellow)
+
+## 🎉 What's New in v2.3.0
+
+**PM Automation Suite** - Transform your PM workflows with AI-powered automation:
+- 🤖 **WBR/QBR Automation**: Auto-generate business reviews with insights from Jira, Snowflake, and more
+- 📝 **Feature Pipeline**: Convert PRDs to Jira stories in seconds with AI assistance
+- 📊 **Analytics Hub**: ML-powered dashboards for tracking PM performance and predicting trends
+- 🔐 **OAuth Integration**: Secure authentication for Google Workspace, Atlassian, and more
+- 🚨 **Real-time Monitoring**: Get alerts on anomalies and critical PM metrics
+
+## 🚀 Quick Start - Unified Manager
+
+**NEW!** All tools are now available through one unified interface:
+
+```bash
+# Launch the unified interactive manager
+./obsidian_manager_unified
+
+# Or via the package CLI
+ovt              # Launches unified manager
+obsidian-tools   # Alternative command
+```
+
+The Unified Manager combines ALL features into one cohesive menu system. See [UNIFIED_MANAGER_README.md](UNIFIED_MANAGER_README.md) for details.
 
 ## ✨ Features
 
@@ -88,14 +113,34 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 - **Incremental Backups**: Efficient backup system
 - **File Organization**: Organize files by content, date, or custom rules
 - **Intelligent Cleanup**: AI-powered file cleanup suggestions
+- **Persistent Configuration**: Automatically remembers vault paths and settings
+- **Smart Path Resolution**: Handles common path input issues automatically
+
+### 💼 PM Tools (Product Manager Burnout Prevention)
+- **WSJF Task Prioritizer**: Weighted Shortest Job First scoring for all tasks
+- **Eisenhower Matrix Classifier**: Automatic urgent/important categorization
+- **Burnout Detection System**: Early warning system for overwhelm patterns
+- **Content Quality Engine**: Standardize naming and fix incomplete notes
+- **Daily Template Generator**: PM-optimized daily planning templates
+
+### 🚀 PM Automation Suite (NEW in v2.3.0)
+- **WBR/QBR Automation**: Generate weekly/quarterly business reviews with AI insights
+- **Feature Development Pipeline**: Convert PRDs to Jira stories with AI assistance
+- **Analytics Hub**: ML-powered PM performance tracking and predictions
+- **Real-time Monitoring**: Anomaly detection and alerting for PM metrics
+- **Multi-Source Integration**: Connect Jira, Confluence, Google Suite, Snowflake
+- **OAuth Authentication**: Secure authentication for all external services
 
 ### 🌐 MCP Integration (Model Context Protocol)
 - **Dynamic Tool Discovery**: Automatically discover and integrate MCP tools
 - **Multi-Server Support**: Connect to multiple MCP servers simultaneously
 - **Interactive Tool Execution**: Execute tools with guided parameter input
+- **Interactive Configuration**: Configure MCP servers through the unified manager interface
 - **Server Management**: Start, stop, and manage MCP servers
 - **Tool Categorization**: Organize tools by function and server
 - **Execution History**: Track tool usage and performance statistics
+- **System Requirements Check**: Verify all dependencies for MCP servers are installed
+- **Enhanced Atlassian Setup**: Guided Docker-based setup for Confluence/Jira integration
 
 Supported MCP Servers:
 - 🧠 **Obsidian PM Intelligence**: Custom vault intelligence and analysis
@@ -135,6 +180,13 @@ pip install obsidian-vault-tools[ai]
 pip install obsidian-vault-tools[mcp]
 # or install manually
 pip install mcp cryptography
+```
+
+### With PM Automation Suite (NEW in v2.3.0)
+```bash
+pip install obsidian-vault-tools[pm-automation]
+# or install all features
+pip install obsidian-vault-tools[all]
 ```
 
 ## 🚀 Quick Start
@@ -205,6 +257,7 @@ ovt ascii gallery             # View ASCII art gallery
 
 ### MCP Integration
 ```bash
+ovt                           # Launch unified manager → Settings → MCP Server Configuration
 ovt interactive               # Access MCP tools via interactive menu
 ovt mcp start server-name     # Start MCP server
 ovt mcp stop server-name      # Stop MCP server
@@ -220,30 +273,88 @@ ovt clean --safe              # Safe cleanup
 ovt version                   # File versioning
 ```
 
+### PM Tools
+```bash
+ovt pm quality                # Run content quality analysis
+ovt pm template               # Generate daily PM template
+ovt pm burnout                # Check burnout risk score
+ovt pm prioritize             # Run WSJF prioritization
+ovt pm eisenhower             # Classify tasks by urgency/importance
+
+# PM Automation Suite (NEW in v2.3.0)
+ovt                           # Launch unified manager → PM Tools → PM Automation Suite
+ovt pm wbr                    # Generate weekly business review
+ovt pm features               # Convert PRD to Jira stories
+ovt pm analytics              # View PM performance dashboard
+ovt pm monitor                # Real-time metric monitoring
+```
+
 ## ⚙️ Configuration
 
 ### Initial Setup
 ```bash
-ovt config init               # Interactive setup
-ovt config set-vault PATH     # Set default vault
-ovt config show               # Show configuration
+ovt config set-vault PATH     # Set default vault path
+ovt config show               # Show current configuration
+ovt config reset              # Reset to defaults
+
+# MCP System Requirements
+ovt mcp check-requirements    # Check Docker, Node.js, etc.
 ```
 
 ### Configuration File
-Configuration is stored in `~/.obsidian-tools/config.yaml`:
+Configuration is stored in `~/.obsidian_vault_tools.json`:
 
-```yaml
-vault_path: ~/Documents/MyVault
-theme: dungeon  # Audio theme
-ai_model: gpt-3.5-turbo
-backup_location: ~/Backups/obsidian
-output_dirs:
-  ascii: ./ascii-output
-  analysis: ./analysis-output
+```json
+{
+  "vault_path": "/Users/username/Documents/MyVault",
+  "output_directory": "",
+  "backup_settings": {
+    "auto_backup": false,
+    "backup_count": 5
+  },
+  "ui_settings": {
+    "use_colors": true,
+    "show_progress": true
+  }
+}
+```
+
+### PM Automation Suite Configuration (NEW in v2.3.0)
+Configure through the unified manager:
+```
+Settings & Configuration → PM Suite Configuration
+```
+
+Or set environment variables:
+```bash
+# Required for PM Automation
+export JIRA_URL="https://company.atlassian.net"
+export JIRA_EMAIL="your-email@company.com"
+export JIRA_API_TOKEN="your-token"
+export OPENAI_API_KEY="sk-..."
+
+# Optional integrations
+export GOOGLE_CLIENT_ID="your-client-id"
+export GOOGLE_CLIENT_SECRET="your-secret"
+export SNOWFLAKE_ACCOUNT="your-account"
 ```
 
 ### MCP Configuration
-MCP servers are configured in `~/.obsidian-tools/mcp_config.json`:
+
+#### Method 1: Interactive Configuration (Recommended)
+Launch the unified manager and navigate to:
+```
+Settings & Configuration → MCP Server Configuration
+```
+
+Features:
+- Add/edit/remove servers through guided interface
+- Test connections before saving
+- Secure credential management with masking
+- Real-time validation and status indicators
+
+#### Method 2: Manual Configuration
+MCP servers can also be configured manually in `~/.obsidian-tools/mcp_config.json`:
 
 ```json
 {
@@ -336,6 +447,26 @@ from obsidian_vault_tools import VaultManager
 vault = VaultManager("~/Documents/MyVault")
 vault.analyze()
 results = vault.query("machine learning notes")
+```
+
+### PM Automation Examples (NEW in v2.3.0)
+```python
+from pm_automation_suite.wbr import WBROrchestrator
+from pm_automation_suite.feature_dev import FeaturePipeline
+
+# Generate weekly business review
+orchestrator = WBROrchestrator()
+await orchestrator.generate_weekly_review(
+    project="PROD",
+    output_format="slides"
+)
+
+# Convert PRD to Jira stories
+pipeline = FeaturePipeline()
+stories = await pipeline.prd_to_stories(
+    prd_file="requirements.pdf",
+    project_key="FEAT"
+)
 ```
 
 ## 🐛 Troubleshooting
