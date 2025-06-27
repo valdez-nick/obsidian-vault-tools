@@ -23,7 +23,20 @@ logger = logging.getLogger(__name__)
 @click.option('--debug', '-d', is_flag=True, help='Enable debug logging')
 @click.pass_context
 def pm(ctx, vault: Optional[str], debug: bool):
-    """PM Automation Suite CLI commands."""
+    """
+    PM Automation Suite CLI commands.
+    
+    This CLI provides direct command-line access to all PM Automation Suite features,
+    allowing Product Managers to automate workflows without using the interactive UI.
+    
+    Commands support both one-time execution and integration into scripts/workflows.
+    All commands respect the configured vault path or can override it with --vault.
+    
+    Examples:
+        ovt-pm --vault /path/to/vault quality
+        ovt-pm wbr --project MYPROJ --format slides
+        ovt-pm features requirements.pdf --project FEAT --dry-run
+    """
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
     
@@ -56,7 +69,25 @@ def pm(ctx, vault: Optional[str], debug: bool):
 @click.option('--output', '-o', help='Output file path')
 @click.pass_context
 def wbr(ctx, project: str, format: str, output: Optional[str]):
-    """Generate Weekly Business Review."""
+    """
+    Generate Weekly Business Review with AI-powered insights.
+    
+    This command orchestrates the complete WBR generation process:
+    1. Extracts data from configured sources (Jira, Snowflake, etc.)
+    2. Performs AI analysis to generate insights and trends
+    3. Creates formatted output (PowerPoint slides, Markdown, or JSON)
+    4. Optionally saves to specified output file
+    
+    The WBR includes:
+    - Sprint progress and velocity metrics
+    - Key performance indicators and trends
+    - Risk analysis and recommendations
+    - Executive summary with actionable insights
+    
+    Examples:
+        ovt-pm wbr --project PROD --format slides --output weekly_review.pptx
+        ovt-pm wbr --project ALL --format markdown
+    """
     click.echo("🤖 Generating Weekly Business Review...")
     
     try:

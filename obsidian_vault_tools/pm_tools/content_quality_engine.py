@@ -45,11 +45,23 @@ class ContentQualityEngine:
     """
     Analyzes and improves content quality in Obsidian vaults for PM workflows.
     
+    This engine performs comprehensive analysis of markdown content to ensure
+    consistency and completeness across PM documentation. It's designed to help
+    Product Managers maintain high-quality, standardized documentation.
+    
     Features:
-    - Naming consistency analysis
-    - Incomplete content detection
-    - Standardization suggestions
-    - Quality scoring
+    - Naming consistency analysis: Detects inconsistent terminology usage
+    - Incomplete content detection: Finds TODOs, placeholders, and incomplete thoughts
+    - Standardization suggestions: Provides actionable recommendations
+    - Quality scoring: Quantifies overall documentation quality (0-100 scale)
+    - Batch processing: Analyzes entire vaults efficiently
+    - Automated fixing: Can automatically standardize terminology
+    
+    Example:
+        >>> engine = ContentQualityEngine("/path/to/vault")
+        >>> report = engine.analyze_vault()
+        >>> print(f"Quality score: {report.overall_score}")
+        >>> engine.fix_naming_inconsistencies("file.md", dry_run=False)
     """
     
     def __init__(self, vault_path: str):
@@ -111,8 +123,34 @@ class ContentQualityEngine:
         """
         Analyze the entire vault for content quality issues.
         
+        This method performs a comprehensive analysis of all markdown files in the vault,
+        checking for various quality issues that commonly affect PM documentation:
+        
+        Analysis includes:
+        1. Naming consistency: Detects inconsistent terminology usage across files
+        2. Incomplete content: Finds TODOs, placeholders, and unfinished thoughts
+        3. Formatting issues: Identifies problems with line length, spacing, headers
+        4. Content structure: Validates proper markdown structure and organization
+        
+        The analysis is designed to be thorough but efficient, processing large vaults
+        (500+ files) in reasonable time while providing actionable insights for improvement.
+        
+        Quality scoring algorithm:
+        - Starts at 100 points
+        - Deducts 5 points per high-severity issue
+        - Deducts 2 points per medium-severity issue  
+        - Deducts 0.5 points per low-severity issue
+        - Minimum score is 0
+        
         Returns:
-            QualityReport containing analysis results
+            QualityReport containing:
+            - overall_score: Quality score (0-100)
+            - total_files: Number of files analyzed
+            - issues_found: List of all quality issues discovered
+            - naming_inconsistencies: Dictionary of terminology conflicts
+            - incomplete_content: List of files with incomplete content
+            - standardization_suggestions: Actionable recommendations
+            - metrics: Detailed analysis metrics
         """
         logger.info(f"Starting content quality analysis of {self.vault_path}")
         

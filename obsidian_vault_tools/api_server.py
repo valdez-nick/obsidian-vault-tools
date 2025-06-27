@@ -2,8 +2,31 @@
 """
 FastAPI Server for PM Automation Suite External Integrations
 
-Provides REST API endpoints for external tools to integrate with
-the PM Automation Suite.
+This module provides a comprehensive REST API server that enables external tools,
+services, and applications to integrate with the PM Automation Suite. The API
+follows RESTful principles and provides both synchronous and asynchronous endpoints.
+
+Key Features:
+- Health monitoring and status endpoints
+- WBR/QBR generation with background processing
+- Feature pipeline automation (PRD to Jira stories)
+- Content quality analysis endpoints
+- Real-time analytics dashboards
+- Monitoring system integration
+- Configuration management
+- CORS support for web applications
+- Interactive API documentation (Swagger/ReDoc)
+
+The server is designed to be lightweight, scalable, and easy to deploy in
+various environments from development to production.
+
+Usage:
+    python -m obsidian_vault_tools.api_server
+    python -m obsidian_vault_tools.api_server --host 0.0.0.0 --port 8080
+
+API Documentation:
+    http://localhost:8000/docs (Swagger UI)
+    http://localhost:8000/redoc (ReDoc)
 """
 
 import logging
@@ -178,7 +201,34 @@ if FASTAPI_AVAILABLE:
         background_tasks: BackgroundTasks,
         vault: Path = Depends(get_vault_path)
     ):
-        """Generate a Weekly Business Review."""
+        """
+        Generate a Weekly Business Review with AI-powered analysis.
+        
+        This endpoint creates comprehensive WBR reports by:
+        1. Extracting data from multiple sources (Jira, Snowflake, Google Sheets)
+        2. Performing AI analysis to identify trends and insights
+        3. Generating formatted output (slides, markdown, or JSON)
+        4. Optionally distributing via email to stakeholders
+        
+        For slide generation, the process runs in background to handle long execution times.
+        For other formats, processing is synchronous for immediate results.
+        
+        The generated WBR includes:
+        - Executive summary with key insights
+        - Sprint velocity and progress metrics
+        - Risk analysis and mitigation recommendations
+        - Trend analysis with predictive elements
+        - Action items and next steps
+        
+        Request Body:
+        - project: Jira project key (default: "ALL")
+        - format: Output format ("slides", "markdown", "json")
+        - email_recipients: Optional list of email addresses for distribution
+        
+        Returns:
+        - For slides: Task status and processing information
+        - For other formats: Complete generated content
+        """
         try:
             from pm_automation_suite.wbr import WBRWorkflow
             
