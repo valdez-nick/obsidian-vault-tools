@@ -359,6 +359,177 @@ Template includes:
 
 Both tools integrate seamlessly with the existing PM burnout prevention suite, working alongside the WSJF prioritizer, Eisenhower matrix, and burnout detection system.
 
+## v2.3.0 - PM Automation Suite Integration
+
+### Overview
+The PM Automation Suite is a comprehensive enterprise-grade automation platform for Product Management workflows. It provides end-to-end automation from data extraction to insight generation, feature development, and real-time monitoring.
+
+### Architecture
+
+#### Core Infrastructure
+- **OAuth 2.0 Authentication**: Multi-provider support (Google, Microsoft, Atlassian)
+- **Secure Credential Management**: Keyring integration with encryption at rest
+- **Event-Driven Orchestration**: Pub/sub event bus for workflow coordination
+- **Resilient Connectors**: Rate limiting, retry logic, and connection pooling
+
+#### Major Components
+
+1. **WBR/QBR Automation**
+   ```python
+   from wbr import WBRWorkflow
+   
+   workflow = WBRWorkflow(config)
+   await workflow.run_complete_workflow()
+   ```
+   - Extracts data from Jira, Snowflake, Google Sheets
+   - Generates AI-powered insights with statistical analysis
+   - Creates PowerPoint presentations automatically
+   - Schedules and distributes reports
+
+2. **Feature Development Pipeline**
+   ```python
+   from feature_pipeline import FeaturePipeline
+   
+   pipeline = FeaturePipeline(config)
+   await pipeline.process_prd("path/to/prd.pdf")
+   ```
+   - Parses PRD documents (PDF, Word, Markdown)
+   - Extracts requirements and acceptance criteria
+   - Generates user stories with AI assistance
+   - Bulk creates Jira issues with proper linking
+
+3. **Analytics Hub**
+   ```python
+   from analytics_hub import ETLPipeline, PMPerformancePredictor
+   
+   # Run ETL
+   pipeline = ETLPipeline(config)
+   await pipeline.execute_pipeline()
+   
+   # ML predictions
+   predictor = PMPerformancePredictor({'metric': 'velocity'})
+   prediction = predictor.predict(data)
+   ```
+   - ETL pipelines with multiple data sources
+   - ML models for performance prediction
+   - Burnout risk detection algorithms
+   - Interactive dashboard generation
+
+4. **Real-time Monitoring**
+   ```python
+   from analytics_hub import MonitoringSystem
+   
+   monitoring = MonitoringSystem(config)
+   monitoring.create_default_pm_monitoring()
+   await monitoring.start_monitoring()
+   ```
+   - Real-time metric collection
+   - Anomaly detection (statistical, threshold, trend)
+   - Alert management with severity levels
+   - Prometheus integration support
+
+### UI Integration
+
+The PM Automation Suite is fully integrated into the Unified Vault Manager:
+
+```
+PM Tools & Task Management
+├── Extract Tasks from Vault
+├── WSJF Priority Analysis
+├── Eisenhower Matrix Classification
+├── Burnout Detection Analysis
+├── Combined PM Dashboard
+├── Export PM Reports
+└── ──── PM Automation Suite ────
+    ├── 🤖 WBR/QBR Automation
+    ├── 📝 Feature Development Pipeline
+    ├── 📊 Analytics Hub & ML Insights
+    ├── 🚨 Real-time Monitoring
+    └── ⚙️ PM Suite Configuration
+```
+
+### Testing & Quality
+
+- **Test Coverage**: 158 tests with 80+ passing
+- **Unit Tests**: Core functionality validation
+- **Integration Tests**: API and service integration
+- **Performance Tests**: Response time and scalability
+- **Security Tests**: Input validation and credential handling
+
+### Configuration
+
+Configuration is managed through environment variables and secure credential storage:
+
+```bash
+# Jira Configuration
+JIRA_URL=https://your-domain.atlassian.net
+JIRA_EMAIL=your-email@company.com
+
+# Snowflake Configuration
+SNOWFLAKE_ACCOUNT=your-account
+SNOWFLAKE_WAREHOUSE=your-warehouse
+
+# AI Providers
+OPENAI_API_KEY=your-key
+ANTHROPIC_API_KEY=your-key
+```
+
+### Dependencies
+
+Core dependencies:
+- `aiohttp`: Async HTTP client
+- `pandas`: Data manipulation
+- `scikit-learn`: ML models
+- `plotly`: Interactive visualizations
+- `python-pptx`: PowerPoint generation
+- `tenacity`: Retry logic
+- `pydantic`: Data validation
+
+Optional dependencies:
+- `tensorflow`: Deep learning models
+- `prometheus-client`: Metrics export
+- `snowflake-connector-python`: Snowflake integration
+
+### Future Enhancements
+
+1. **Enhanced AI Integration**
+   - Custom fine-tuned models for PM tasks
+   - Multi-modal analysis (images, diagrams)
+   - Real-time collaboration features
+
+2. **Extended Integrations**
+   - Slack/Teams notifications
+   - GitHub/GitLab integration
+   - Additional data warehouses
+
+3. **Advanced Analytics**
+   - Predictive sprint planning
+   - Resource optimization algorithms
+   - Team performance analytics
+
+### Migration Guide
+
+For users upgrading from v2.2.x:
+
+1. Install new dependencies:
+   ```bash
+   pip install -e ".[pm-automation]"
+   ```
+
+2. Configure credentials:
+   ```bash
+   ovt
+   # Navigate to: Settings → PM Suite Configuration
+   ```
+
+3. Test connections:
+   ```bash
+   # In the PM Suite menu
+   # Select: Test All Connections
+   ```
+
+The PM Automation Suite represents a major advancement in PM tooling, providing enterprise-ready automation while maintaining the simplicity and elegance of the Obsidian Vault Tools ecosystem.
+
 ---
 
-*Last updated: After v2.2.0 PM Burnout Prevention Suite*
+*Last updated: After v2.3.0 PM Automation Suite Integration*

@@ -1,0 +1,502 @@
+{
+  "template_name": "Product Requirements Document",
+  "version": "2.0.0",
+  "description": "Standard PRD template for feature development",
+  "sections": [
+    {
+      "section_id": "header",
+      "title": "Document Header",
+      "required": true,
+      "fields": [
+        {
+          "field": "title",
+          "type": "text",
+          "required": true,
+          "description": "Feature or product name"
+        },
+        {
+          "field": "document_version",
+          "type": "text",
+          "required": true,
+          "default": "1.0"
+        },
+        {
+          "field": "author",
+          "type": "text",
+          "required": true
+        },
+        {
+          "field": "created_date",
+          "type": "date",
+          "required": true,
+          "auto_populate": true
+        },
+        {
+          "field": "last_updated",
+          "type": "date",
+          "required": true,
+          "auto_populate": true
+        },
+        {
+          "field": "status",
+          "type": "select",
+          "required": true,
+          "options": ["Draft", "In Review", "Approved", "In Development", "Launched"],
+          "default": "Draft"
+        },
+        {
+          "field": "stakeholders",
+          "type": "list",
+          "required": true,
+          "items": {
+            "name": "text",
+            "role": "text",
+            "email": "email"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "executive_summary",
+      "title": "Executive Summary",
+      "required": true,
+      "fields": [
+        {
+          "field": "problem_statement",
+          "type": "textarea",
+          "required": true,
+          "prompt": "What problem are we solving?",
+          "max_length": 500
+        },
+        {
+          "field": "solution_overview",
+          "type": "textarea",
+          "required": true,
+          "prompt": "How does this feature/product solve the problem?",
+          "max_length": 500
+        },
+        {
+          "field": "expected_impact",
+          "type": "textarea",
+          "required": true,
+          "prompt": "What is the expected business impact?",
+          "max_length": 300
+        },
+        {
+          "field": "success_metrics",
+          "type": "list",
+          "required": true,
+          "items": {
+            "metric": "text",
+            "target": "text",
+            "measurement_method": "text"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "background",
+      "title": "Background & Context",
+      "required": true,
+      "fields": [
+        {
+          "field": "market_research",
+          "type": "textarea",
+          "required": false,
+          "prompt": "Relevant market research and competitive analysis"
+        },
+        {
+          "field": "user_research",
+          "type": "textarea",
+          "required": true,
+          "prompt": "User research findings and insights"
+        },
+        {
+          "field": "technical_context",
+          "type": "textarea",
+          "required": false,
+          "prompt": "Technical constraints and considerations"
+        },
+        {
+          "field": "business_context",
+          "type": "textarea",
+          "required": true,
+          "prompt": "Business goals and strategic alignment"
+        }
+      ]
+    },
+    {
+      "section_id": "goals_and_objectives",
+      "title": "Goals & Objectives",
+      "required": true,
+      "fields": [
+        {
+          "field": "primary_goals",
+          "type": "list",
+          "required": true,
+          "max_items": 3,
+          "items": {
+            "goal": "text",
+            "success_criteria": "text"
+          }
+        },
+        {
+          "field": "secondary_goals",
+          "type": "list",
+          "required": false,
+          "items": {
+            "goal": "text",
+            "success_criteria": "text"
+          }
+        },
+        {
+          "field": "non_goals",
+          "type": "list",
+          "required": true,
+          "description": "What this project will NOT address",
+          "items": "text"
+        }
+      ]
+    },
+    {
+      "section_id": "user_stories",
+      "title": "User Stories & Use Cases",
+      "required": true,
+      "fields": [
+        {
+          "field": "personas",
+          "type": "list",
+          "required": true,
+          "items": {
+            "persona_name": "text",
+            "description": "textarea",
+            "needs": "list[text]",
+            "pain_points": "list[text]"
+          }
+        },
+        {
+          "field": "user_stories",
+          "type": "list",
+          "required": true,
+          "items": {
+            "story_id": "auto_increment",
+            "persona": "reference[personas]",
+            "story": "text",
+            "acceptance_criteria": "list[text]",
+            "priority": "select[P0,P1,P2,P3]"
+          }
+        },
+        {
+          "field": "user_journey",
+          "type": "diagram",
+          "required": false,
+          "description": "Visual representation of user flow"
+        }
+      ]
+    },
+    {
+      "section_id": "functional_requirements",
+      "title": "Functional Requirements",
+      "required": true,
+      "fields": [
+        {
+          "field": "features",
+          "type": "list",
+          "required": true,
+          "items": {
+            "feature_id": "auto_increment",
+            "name": "text",
+            "description": "textarea",
+            "requirements": "list[text]",
+            "priority": "select[Must Have,Should Have,Nice to Have]",
+            "effort": "select[XS,S,M,L,XL]"
+          }
+        },
+        {
+          "field": "interactions",
+          "type": "textarea",
+          "required": true,
+          "prompt": "How do features interact with each other?"
+        },
+        {
+          "field": "edge_cases",
+          "type": "list",
+          "required": true,
+          "items": {
+            "scenario": "text",
+            "expected_behavior": "text"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "technical_requirements",
+      "title": "Technical Requirements",
+      "required": true,
+      "fields": [
+        {
+          "field": "architecture_overview",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "field": "api_specifications",
+          "type": "list",
+          "required": false,
+          "items": {
+            "endpoint": "text",
+            "method": "select[GET,POST,PUT,DELETE,PATCH]",
+            "description": "text",
+            "request_schema": "json",
+            "response_schema": "json"
+          }
+        },
+        {
+          "field": "data_requirements",
+          "type": "textarea",
+          "required": true,
+          "prompt": "Data models, storage, and processing needs"
+        },
+        {
+          "field": "integrations",
+          "type": "list",
+          "required": false,
+          "items": {
+            "system": "text",
+            "type": "select[API,Database,Service,Library]",
+            "purpose": "text"
+          }
+        },
+        {
+          "field": "performance_requirements",
+          "type": "list",
+          "required": true,
+          "items": {
+            "metric": "text",
+            "requirement": "text",
+            "measurement": "text"
+          }
+        },
+        {
+          "field": "security_requirements",
+          "type": "list",
+          "required": true,
+          "items": "text"
+        }
+      ]
+    },
+    {
+      "section_id": "ux_requirements",
+      "title": "UX/UI Requirements",
+      "required": true,
+      "fields": [
+        {
+          "field": "design_principles",
+          "type": "list",
+          "required": true,
+          "items": "text"
+        },
+        {
+          "field": "mockups",
+          "type": "file_references",
+          "required": false,
+          "accepted_formats": ["png", "jpg", "pdf", "figma"]
+        },
+        {
+          "field": "interaction_patterns",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "field": "accessibility_requirements",
+          "type": "list",
+          "required": true,
+          "items": "text",
+          "default": ["WCAG 2.1 AA compliance", "Keyboard navigation", "Screen reader support"]
+        },
+        {
+          "field": "responsive_design",
+          "type": "list",
+          "required": true,
+          "items": {
+            "breakpoint": "text",
+            "behavior": "text"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "dependencies",
+      "title": "Dependencies & Risks",
+      "required": true,
+      "fields": [
+        {
+          "field": "dependencies",
+          "type": "list",
+          "required": true,
+          "items": {
+            "dependency": "text",
+            "type": "select[Technical,Resource,External,Legal]",
+            "owner": "text",
+            "status": "select[Resolved,In Progress,Blocked]"
+          }
+        },
+        {
+          "field": "risks",
+          "type": "list",
+          "required": true,
+          "items": {
+            "risk": "text",
+            "probability": "select[Low,Medium,High]",
+            "impact": "select[Low,Medium,High]",
+            "mitigation": "text"
+          }
+        },
+        {
+          "field": "assumptions",
+          "type": "list",
+          "required": true,
+          "items": "text"
+        }
+      ]
+    },
+    {
+      "section_id": "timeline",
+      "title": "Timeline & Milestones",
+      "required": true,
+      "fields": [
+        {
+          "field": "estimated_effort",
+          "type": "object",
+          "required": true,
+          "properties": {
+            "design": "text",
+            "development": "text",
+            "testing": "text",
+            "total": "text"
+          }
+        },
+        {
+          "field": "milestones",
+          "type": "list",
+          "required": true,
+          "items": {
+            "milestone": "text",
+            "deliverables": "list[text]",
+            "target_date": "date",
+            "status": "select[Not Started,In Progress,Completed,Delayed]"
+          }
+        },
+        {
+          "field": "launch_plan",
+          "type": "textarea",
+          "required": true,
+          "prompt": "Phased rollout, feature flags, etc."
+        }
+      ]
+    },
+    {
+      "section_id": "success_criteria",
+      "title": "Success Criteria & Metrics",
+      "required": true,
+      "fields": [
+        {
+          "field": "kpis",
+          "type": "list",
+          "required": true,
+          "items": {
+            "metric": "text",
+            "current_value": "text",
+            "target_value": "text",
+            "measurement_plan": "text"
+          }
+        },
+        {
+          "field": "monitoring_plan",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "field": "rollback_criteria",
+          "type": "list",
+          "required": true,
+          "items": "text"
+        }
+      ]
+    },
+    {
+      "section_id": "appendix",
+      "title": "Appendix",
+      "required": false,
+      "fields": [
+        {
+          "field": "references",
+          "type": "list",
+          "required": false,
+          "items": {
+            "title": "text",
+            "url": "url",
+            "description": "text"
+          }
+        },
+        {
+          "field": "glossary",
+          "type": "list",
+          "required": false,
+          "items": {
+            "term": "text",
+            "definition": "text"
+          }
+        },
+        {
+          "field": "revision_history",
+          "type": "list",
+          "required": true,
+          "auto_populate": true,
+          "items": {
+            "version": "text",
+            "date": "date",
+            "author": "text",
+            "changes": "text"
+          }
+        }
+      ]
+    }
+  ],
+  "validation_rules": [
+    {
+      "rule": "completeness_check",
+      "description": "All required fields must be filled"
+    },
+    {
+      "rule": "stakeholder_approval",
+      "description": "All listed stakeholders must approve before status change to 'Approved'"
+    },
+    {
+      "rule": "dependency_resolution",
+      "description": "All dependencies must be 'Resolved' or have mitigation plans"
+    },
+    {
+      "rule": "metric_definition",
+      "description": "All KPIs must have measurement plans"
+    }
+  ],
+  "automation_features": [
+    {
+      "feature": "auto_story_generation",
+      "description": "Generate user stories from requirements"
+    },
+    {
+      "feature": "jira_sync",
+      "description": "Sync approved requirements to Jira"
+    },
+    {
+      "feature": "stakeholder_notifications",
+      "description": "Notify stakeholders of changes"
+    },
+    {
+      "feature": "version_control",
+      "description": "Track all changes with diffs"
+    }
+  ]
+}
