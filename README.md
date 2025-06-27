@@ -4,7 +4,17 @@ A comprehensive, modern toolkit for managing Obsidian vaults with AI-powered fea
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-v2.3.0-brightgreen)
 ![Status](https://img.shields.io/badge/status-beta-yellow)
+
+## 🎉 What's New in v2.3.0
+
+**PM Automation Suite** - Transform your PM workflows with AI-powered automation:
+- 🤖 **WBR/QBR Automation**: Auto-generate business reviews with insights from Jira, Snowflake, and more
+- 📝 **Feature Pipeline**: Convert PRDs to Jira stories in seconds with AI assistance
+- 📊 **Analytics Hub**: ML-powered dashboards for tracking PM performance and predicting trends
+- 🔐 **OAuth Integration**: Secure authentication for Google Workspace, Atlassian, and more
+- 🚨 **Real-time Monitoring**: Get alerts on anomalies and critical PM metrics
 
 ## 🚀 Quick Start - Unified Manager
 
@@ -60,6 +70,14 @@ The Unified Manager combines ALL features into one cohesive menu system. See [UN
 - **Content Quality Engine**: Standardize naming and fix incomplete notes
 - **Daily Template Generator**: PM-optimized daily planning templates
 
+### 🚀 PM Automation Suite (NEW in v2.3.0)
+- **WBR/QBR Automation**: Generate weekly/quarterly business reviews with AI insights
+- **Feature Development Pipeline**: Convert PRDs to Jira stories with AI assistance
+- **Analytics Hub**: ML-powered PM performance tracking and predictions
+- **Real-time Monitoring**: Anomaly detection and alerting for PM metrics
+- **Multi-Source Integration**: Connect Jira, Confluence, Google Suite, Snowflake
+- **OAuth Authentication**: Secure authentication for all external services
+
 ### 🌐 MCP Integration (Model Context Protocol)
 - **Dynamic Tool Discovery**: Automatically discover and integrate MCP tools
 - **Multi-Server Support**: Connect to multiple MCP servers simultaneously
@@ -109,6 +127,13 @@ pip install obsidian-vault-tools[ai]
 pip install obsidian-vault-tools[mcp]
 # or install manually
 pip install mcp cryptography
+```
+
+### With PM Automation Suite (NEW in v2.3.0)
+```bash
+pip install obsidian-vault-tools[pm-automation]
+# or install all features
+pip install obsidian-vault-tools[all]
 ```
 
 ## 🚀 Quick Start
@@ -202,6 +227,13 @@ ovt pm template               # Generate daily PM template
 ovt pm burnout                # Check burnout risk score
 ovt pm prioritize             # Run WSJF prioritization
 ovt pm eisenhower             # Classify tasks by urgency/importance
+
+# PM Automation Suite (NEW in v2.3.0)
+ovt                           # Launch unified manager → PM Tools → PM Automation Suite
+ovt pm wbr                    # Generate weekly business review
+ovt pm features               # Convert PRD to Jira stories
+ovt pm analytics              # View PM performance dashboard
+ovt pm monitor                # Real-time metric monitoring
 ```
 
 ## ⚙️ Configuration
@@ -232,6 +264,26 @@ Configuration is stored in `~/.obsidian_vault_tools.json`:
     "show_progress": true
   }
 }
+```
+
+### PM Automation Suite Configuration (NEW in v2.3.0)
+Configure through the unified manager:
+```
+Settings & Configuration → PM Suite Configuration
+```
+
+Or set environment variables:
+```bash
+# Required for PM Automation
+export JIRA_URL="https://company.atlassian.net"
+export JIRA_EMAIL="your-email@company.com"
+export JIRA_API_TOKEN="your-token"
+export OPENAI_API_KEY="sk-..."
+
+# Optional integrations
+export GOOGLE_CLIENT_ID="your-client-id"
+export GOOGLE_CLIENT_SECRET="your-secret"
+export SNOWFLAKE_ACCOUNT="your-account"
 ```
 
 ### MCP Configuration
@@ -342,6 +394,26 @@ from obsidian_vault_tools import VaultManager
 vault = VaultManager("~/Documents/MyVault")
 vault.analyze()
 results = vault.query("machine learning notes")
+```
+
+### PM Automation Examples (NEW in v2.3.0)
+```python
+from pm_automation_suite.wbr import WBROrchestrator
+from pm_automation_suite.feature_dev import FeaturePipeline
+
+# Generate weekly business review
+orchestrator = WBROrchestrator()
+await orchestrator.generate_weekly_review(
+    project="PROD",
+    output_format="slides"
+)
+
+# Convert PRD to Jira stories
+pipeline = FeaturePipeline()
+stories = await pipeline.prd_to_stories(
+    prd_file="requirements.pdf",
+    project_key="FEAT"
+)
 ```
 
 ## 🐛 Troubleshooting
