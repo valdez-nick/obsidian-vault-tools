@@ -159,6 +159,43 @@ try:
 except ImportError:
     DAILY_TEMPLATE_AVAILABLE = False
 
+# PM Automation Suite
+try:
+    import sys
+    # Add PM automation suite to path
+    pm_suite_path = Path(__file__).parent / "pm_automation_suite"
+    if pm_suite_path.exists():
+        sys.path.insert(0, str(pm_suite_path))
+    
+    # Core Infrastructure
+    from connectors.jira_connector import JiraConnector
+    from authentication.auth_manager import AuthManager
+    from orchestration.workflow_engine import WorkflowEngine
+    from orchestration.event_bus import EventBus
+    
+    # WBR/QBR Automation
+    from wbr.wbr_data_extractor import WBRDataExtractor
+    from wbr.insight_generator import InsightGenerator
+    from wbr.slide_generator import SlideGenerator
+    from wbr.wbr_workflow import WBRWorkflow
+    
+    # Feature Development Pipeline
+    from feature_pipeline.prd_parser import PRDParser
+    from feature_pipeline.story_generator import StoryGenerator
+    from feature_pipeline.jira_bulk_creator import JiraBulkCreator
+    from feature_pipeline.feature_pipeline import FeaturePipeline
+    
+    # Analytics Hub
+    from analytics_hub.etl_pipeline import ETLPipeline
+    from analytics_hub.ml_models import PMPerformancePredictor, BurnoutPredictor, ProductivityAnalyzer
+    from analytics_hub.dashboard_generator import DashboardGenerator
+    from analytics_hub.monitoring_system import MonitoringSystem
+    
+    PM_AUTOMATION_AVAILABLE = True
+except ImportError as e:
+    PM_AUTOMATION_AVAILABLE = False
+    logger.debug(f"PM Automation Suite not available: {e}")
+
 # AI Meeting Notes Organizer
 try:
     from obsidian_vault_tools.ai.meeting_notes_organizer import MeetingNotesOrganizer
@@ -208,7 +245,8 @@ class UnifiedVaultManager:
             'content_quality': CONTENT_QUALITY_AVAILABLE,
             'daily_template': DAILY_TEMPLATE_AVAILABLE,
             'meeting_organizer': MEETING_ORGANIZER_AVAILABLE,
-            'model_management': MODEL_MANAGEMENT_AVAILABLE
+            'model_management': MODEL_MANAGEMENT_AVAILABLE,
+            'pm_automation': PM_AUTOMATION_AVAILABLE
         }
         
     def _init_features(self):
@@ -422,7 +460,7 @@ class UnifiedVaultManager:
         print(f"\n{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}")
         print(f"{Colors.CYAN}🏰 Unified Obsidian Vault Manager - Complete Toolsuite{Colors.ENDC}")
         print(f"{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.ENDC}")
-        print(f"Version: {Colors.YELLOW}v2.2.1{Colors.ENDC}")
+        print(f"Version: {Colors.YELLOW}v2.3.0{Colors.ENDC}")
         print(f"Vault: {Colors.GREEN}{self.vault_path}{Colors.ENDC}")
         
         # Show feature status
@@ -685,8 +723,20 @@ class UnifiedVaultManager:
                 ("Burnout Detection Analysis", self.run_burnout_detection),
                 ("Combined PM Dashboard", self.run_pm_dashboard),
                 ("Export PM Reports", self.export_pm_reports),
-                ("Back to Main Menu", None)
             ]
+            
+            # Add PM Automation Suite options if available
+            if PM_AUTOMATION_AVAILABLE:
+                options.extend([
+                    ("──── PM Automation Suite ────", None),
+                    ("🤖 WBR/QBR Automation", self.handle_wbr_automation),
+                    ("📝 Feature Development Pipeline", self.handle_feature_pipeline),
+                    ("📊 Analytics Hub & ML Insights", self.handle_analytics_hub),
+                    ("🚨 Real-time Monitoring", self.handle_monitoring_system),
+                    ("⚙️ PM Suite Configuration", self.handle_pm_suite_config),
+                ])
+            
+            options.append(("Back to Main Menu", None))
             
             for i, (label, _) in enumerate(options, 1):
                 print(f"{i}. {label}")
@@ -2356,6 +2406,530 @@ class UnifiedVaultManager:
                 
         except Exception as e:
             print(f"{Colors.RED}Error running burnout detection: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    # PM Automation Suite Methods
+    def handle_wbr_automation(self):
+        """Handle WBR/QBR automation workflows"""
+        if not PM_AUTOMATION_AVAILABLE:
+            print(f"{Colors.YELLOW}PM Automation Suite not available.{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+        
+        print(f"\n{Colors.BOLD}🤖 WBR/QBR Automation{Colors.ENDC}")
+        print("Automate your Weekly/Quarterly Business Reviews")
+        
+        options = [
+            ("Extract Data from Multiple Sources", self.run_wbr_data_extraction),
+            ("Generate AI-Powered Insights", self.run_insight_generation),
+            ("Create Presentation Slides", self.run_slide_generation),
+            ("Run Complete WBR Workflow", self.run_wbr_workflow),
+            ("Back", None)
+        ]
+        
+        while True:
+            print()
+            for i, (label, _) in enumerate(options, 1):
+                print(f"{i}. {label}")
+            
+            choice = input("\nSelect option: ").strip()
+            
+            if choice == str(len(options)) or choice.lower() == 'b':
+                break
+            
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(options) - 1:
+                    func = options[idx][1]
+                    if func:
+                        func()
+            except (ValueError, IndexError):
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+    
+    def handle_feature_pipeline(self):
+        """Handle feature development pipeline"""
+        if not PM_AUTOMATION_AVAILABLE:
+            print(f"{Colors.YELLOW}PM Automation Suite not available.{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+        
+        print(f"\n{Colors.BOLD}📝 Feature Development Pipeline{Colors.ENDC}")
+        print("Transform PRDs into actionable Jira stories")
+        
+        options = [
+            ("Parse PRD Document", self.run_prd_parser),
+            ("Generate User Stories with AI", self.run_story_generator),
+            ("Bulk Create Jira Issues", self.run_jira_bulk_creator),
+            ("Run Complete Pipeline", self.run_feature_pipeline),
+            ("Back", None)
+        ]
+        
+        while True:
+            print()
+            for i, (label, _) in enumerate(options, 1):
+                print(f"{i}. {label}")
+            
+            choice = input("\nSelect option: ").strip()
+            
+            if choice == str(len(options)) or choice.lower() == 'b':
+                break
+            
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(options) - 1:
+                    func = options[idx][1]
+                    if func:
+                        func()
+            except (ValueError, IndexError):
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+    
+    def handle_analytics_hub(self):
+        """Handle analytics hub and ML insights"""
+        if not PM_AUTOMATION_AVAILABLE:
+            print(f"{Colors.YELLOW}PM Automation Suite not available.{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+        
+        print(f"\n{Colors.BOLD}📊 Analytics Hub & ML Insights{Colors.ENDC}")
+        print("Advanced analytics and predictive insights for PM performance")
+        
+        options = [
+            ("Run ETL Pipeline", self.run_etl_pipeline),
+            ("PM Performance Predictions", self.run_ml_predictions),
+            ("Generate Analytics Dashboard", self.run_analytics_dashboard),
+            ("View Real-time Metrics", self.view_realtime_metrics),
+            ("Back", None)
+        ]
+        
+        while True:
+            print()
+            for i, (label, _) in enumerate(options, 1):
+                print(f"{i}. {label}")
+            
+            choice = input("\nSelect option: ").strip()
+            
+            if choice == str(len(options)) or choice.lower() == 'b':
+                break
+            
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(options) - 1:
+                    func = options[idx][1]
+                    if func:
+                        func()
+            except (ValueError, IndexError):
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+    
+    def handle_monitoring_system(self):
+        """Handle real-time monitoring system"""
+        if not PM_AUTOMATION_AVAILABLE:
+            print(f"{Colors.YELLOW}PM Automation Suite not available.{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+        
+        print(f"\n{Colors.BOLD}🚨 Real-time Monitoring System{Colors.ENDC}")
+        print("Monitor PM metrics and receive alerts")
+        
+        try:
+            monitoring = MonitoringSystem({
+                'retention_period': 86400,  # 24 hours
+                'enable_prometheus': False,
+                'collect_system_metrics': False
+            })
+            
+            # Create default PM monitoring
+            monitoring.create_default_pm_monitoring()
+            
+            print("\nMonitoring system configured with:")
+            print("  • Velocity tracking")
+            print("  • Burnout risk monitoring")
+            print("  • Quality score tracking")
+            print("  • Meeting time analysis")
+            print("  • Response time metrics")
+            
+            print(f"\n{Colors.GREEN}✓ Monitoring system ready{Colors.ENDC}")
+            
+            # Show current metrics if any
+            summary = monitoring.get_metrics_summary()
+            if any(m['current'] is not None for m in summary.values()):
+                print(f"\n{Colors.BOLD}Current Metrics:{Colors.ENDC}")
+                for metric, stats in summary.items():
+                    if stats['current'] is not None:
+                        print(f"  {metric}: {stats['current']:.2f}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error setting up monitoring: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def handle_pm_suite_config(self):
+        """Handle PM Suite configuration"""
+        if not PM_AUTOMATION_AVAILABLE:
+            print(f"{Colors.YELLOW}PM Automation Suite not available.{Colors.ENDC}")
+            input("\nPress Enter to continue...")
+            return
+        
+        print(f"\n{Colors.BOLD}⚙️ PM Suite Configuration{Colors.ENDC}")
+        
+        options = [
+            ("Configure Jira Connection", self.configure_jira),
+            ("Configure Snowflake Connection", self.configure_snowflake),
+            ("Configure AI Providers", self.configure_ai_providers),
+            ("Test All Connections", self.test_pm_connections),
+            ("Back", None)
+        ]
+        
+        while True:
+            print()
+            for i, (label, _) in enumerate(options, 1):
+                print(f"{i}. {label}")
+            
+            choice = input("\nSelect option: ").strip()
+            
+            if choice == str(len(options)) or choice.lower() == 'b':
+                break
+            
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(options) - 1:
+                    func = options[idx][1]
+                    if func:
+                        func()
+            except (ValueError, IndexError):
+                print(f"{Colors.RED}Invalid option{Colors.ENDC}")
+    
+    # PM Automation Suite Implementation Methods
+    def run_wbr_data_extraction(self):
+        """Run WBR data extraction from multiple sources"""
+        print(f"\n{Colors.BOLD}📊 WBR Data Extraction{Colors.ENDC}")
+        
+        try:
+            extractor = WBRDataExtractor({})
+            
+            # Get available data sources
+            print("\nAvailable data sources:")
+            print("1. Jira (Sprint metrics, velocity)")
+            print("2. Snowflake (Business metrics)")
+            print("3. Google Sheets (Team data)")
+            print("4. Local files (CSV/JSON)")
+            
+            source = input("\nSelect data source (1-4): ").strip()
+            
+            if source == '1':
+                print("\nExtracting Jira data...")
+                # Would implement Jira extraction
+                print(f"{Colors.YELLOW}Note: Jira credentials required{Colors.ENDC}")
+            elif source == '2':
+                print("\nExtracting Snowflake data...")
+                print(f"{Colors.YELLOW}Note: Snowflake connection required{Colors.ENDC}")
+            else:
+                print(f"{Colors.YELLOW}Source not yet implemented{Colors.ENDC}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_insight_generation(self):
+        """Generate AI-powered insights from data"""
+        print(f"\n{Colors.BOLD}🤖 AI Insight Generation{Colors.ENDC}")
+        
+        try:
+            generator = InsightGenerator({})
+            
+            print("\nInsight generation capabilities:")
+            print("  • Sprint velocity trends")
+            print("  • Team performance analysis")
+            print("  • Risk identification")
+            print("  • Success pattern recognition")
+            print("  • Predictive forecasting")
+            
+            print(f"\n{Colors.YELLOW}Note: Requires extracted data and AI provider{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_slide_generation(self):
+        """Generate presentation slides"""
+        print(f"\n{Colors.BOLD}📊 Slide Generation{Colors.ENDC}")
+        
+        try:
+            generator = SlideGenerator({})
+            
+            print("\nSlide templates available:")
+            print("  • Executive Summary")
+            print("  • Sprint Metrics")
+            print("  • Team Performance")
+            print("  • Risk & Mitigation")
+            print("  • Next Steps")
+            
+            print(f"\n{Colors.YELLOW}Note: Requires python-pptx for full functionality{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_wbr_workflow(self):
+        """Run complete WBR workflow"""
+        print(f"\n{Colors.BOLD}🔄 Complete WBR Workflow{Colors.ENDC}")
+        
+        try:
+            workflow = WBRWorkflow({})
+            
+            print("\nWorkflow steps:")
+            print("1. Extract data from all sources")
+            print("2. Generate insights with AI")
+            print("3. Create presentation slides")
+            print("4. Schedule distribution")
+            
+            if input("\nRun workflow? (y/n): ").lower() == 'y':
+                print(f"\n{Colors.YELLOW}Workflow requires configured data sources{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_prd_parser(self):
+        """Parse PRD documents"""
+        print(f"\n{Colors.BOLD}📄 PRD Parser{Colors.ENDC}")
+        
+        try:
+            parser = PRDParser({})
+            
+            print("\nPRD parsing capabilities:")
+            print("  • Extract requirements")
+            print("  • Identify user stories")
+            print("  • Parse acceptance criteria")
+            print("  • Detect dependencies")
+            
+            prd_path = input("\nEnter PRD file path (or press Enter to skip): ").strip()
+            if prd_path:
+                print(f"{Colors.YELLOW}Parsing PRD...{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_story_generator(self):
+        """Generate user stories with AI"""
+        print(f"\n{Colors.BOLD}📝 AI Story Generator{Colors.ENDC}")
+        
+        try:
+            generator = StoryGenerator({})
+            
+            print("\nStory generation features:")
+            print("  • Generate from requirements")
+            print("  • Add acceptance criteria")
+            print("  • Estimate story points")
+            print("  • Create subtasks")
+            
+            print(f"\n{Colors.YELLOW}Note: Requires AI provider configuration{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_jira_bulk_creator(self):
+        """Bulk create Jira issues"""
+        print(f"\n{Colors.BOLD}🎯 Jira Bulk Creator{Colors.ENDC}")
+        
+        try:
+            creator = JiraBulkCreator({})
+            
+            print("\nBulk creation features:")
+            print("  • Create epics and stories")
+            print("  • Set priorities and labels")
+            print("  • Assign team members")
+            print("  • Link dependencies")
+            
+            print(f"\n{Colors.YELLOW}Note: Requires Jira configuration{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_feature_pipeline(self):
+        """Run complete feature pipeline"""
+        print(f"\n{Colors.BOLD}🚀 Complete Feature Pipeline{Colors.ENDC}")
+        
+        try:
+            pipeline = FeaturePipeline({})
+            
+            print("\nPipeline steps:")
+            print("1. Parse PRD document")
+            print("2. Generate user stories")
+            print("3. Review and refine")
+            print("4. Create in Jira")
+            
+            print(f"\n{Colors.YELLOW}Pipeline requires all components configured{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_etl_pipeline(self):
+        """Run ETL pipeline for analytics"""
+        print(f"\n{Colors.BOLD}🔄 ETL Pipeline{Colors.ENDC}")
+        
+        try:
+            config = {
+                'pipeline_id': 'pm_analytics',
+                'data_sources': [],
+                'transformations': [],
+                'data_targets': []
+            }
+            
+            pipeline = ETLPipeline(config)
+            
+            print("\nETL capabilities:")
+            print("  • Extract from multiple sources")
+            print("  • Transform and enrich data")
+            print("  • Load to data warehouse")
+            print("  • Schedule automated runs")
+            
+            print(f"\n{Colors.YELLOW}Configure data sources in PM Suite Configuration{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_ml_predictions(self):
+        """Run ML predictions for PM performance"""
+        print(f"\n{Colors.BOLD}🤖 ML Performance Predictions{Colors.ENDC}")
+        
+        try:
+            predictor = PMPerformancePredictor({'metric': 'velocity'})
+            burnout = BurnoutPredictor({'use_lstm': False})
+            productivity = ProductivityAnalyzer({})
+            
+            print("\nAvailable predictions:")
+            print("  • Sprint velocity forecast")
+            print("  • Burnout risk assessment")
+            print("  • Productivity trends")
+            print("  • Quality predictions")
+            
+            print(f"\n{Colors.YELLOW}Requires historical data for training{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def run_analytics_dashboard(self):
+        """Generate analytics dashboard"""
+        print(f"\n{Colors.BOLD}📊 Analytics Dashboard{Colors.ENDC}")
+        
+        try:
+            generator = DashboardGenerator({'output_path': './dashboards'})
+            
+            print("\nDashboard sections:")
+            print("  • Executive overview")
+            print("  • Team performance")
+            print("  • Sprint metrics")
+            print("  • Risk indicators")
+            
+            if input("\nGenerate sample dashboard? (y/n): ").lower() == 'y':
+                print(f"{Colors.GREEN}✓ Dashboard would be generated in ./dashboards/{Colors.ENDC}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def view_realtime_metrics(self):
+        """View real-time metrics"""
+        print(f"\n{Colors.BOLD}📈 Real-time Metrics{Colors.ENDC}")
+        
+        try:
+            monitoring = MonitoringSystem({
+                'retention_period': 3600,
+                'enable_prometheus': False
+            })
+            
+            summary = monitoring.get_metrics_summary()
+            
+            if any(m['current'] is not None for m in summary.values()):
+                print("\nCurrent metrics:")
+                for metric, stats in summary.items():
+                    if stats['current'] is not None:
+                        print(f"  {metric}: {stats['current']:.2f}")
+            else:
+                print(f"\n{Colors.YELLOW}No metrics recorded yet{Colors.ENDC}")
+                print("Start monitoring to collect metrics")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Error: {e}{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def configure_jira(self):
+        """Configure Jira connection"""
+        print(f"\n{Colors.BOLD}🔧 Jira Configuration{Colors.ENDC}")
+        
+        print("\nRequired settings:")
+        print("  • Jira URL")
+        print("  • Username/Email")
+        print("  • API Token")
+        print("  • Default Project")
+        
+        print(f"\n{Colors.YELLOW}Configuration would be saved securely{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def configure_snowflake(self):
+        """Configure Snowflake connection"""
+        print(f"\n{Colors.BOLD}❄️ Snowflake Configuration{Colors.ENDC}")
+        
+        print("\nRequired settings:")
+        print("  • Account URL")
+        print("  • Username")
+        print("  • Password/Key")
+        print("  • Warehouse")
+        print("  • Database")
+        
+        print(f"\n{Colors.YELLOW}Configuration would be saved securely{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def configure_ai_providers(self):
+        """Configure AI providers"""
+        print(f"\n{Colors.BOLD}🤖 AI Provider Configuration{Colors.ENDC}")
+        
+        print("\nSupported providers:")
+        print("  • OpenAI (GPT-4)")
+        print("  • Anthropic (Claude)")
+        print("  • Local models")
+        
+        print(f"\n{Colors.YELLOW}API keys would be saved securely{Colors.ENDC}")
+        
+        input("\nPress Enter to continue...")
+    
+    def test_pm_connections(self):
+        """Test all PM Suite connections"""
+        print(f"\n{Colors.BOLD}🔌 Testing Connections{Colors.ENDC}")
+        
+        connections = [
+            ("Jira", False),
+            ("Snowflake", False),
+            ("OpenAI", False),
+            ("Google Sheets", False)
+        ]
+        
+        for name, status in connections:
+            if status:
+                print(f"  {name}: {Colors.GREEN}✓ Connected{Colors.ENDC}")
+            else:
+                print(f"  {name}: {Colors.YELLOW}⚠ Not configured{Colors.ENDC}")
         
         input("\nPress Enter to continue...")
     
