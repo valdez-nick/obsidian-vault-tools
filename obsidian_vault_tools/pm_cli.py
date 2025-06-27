@@ -39,6 +39,8 @@ def pm(ctx, vault: Optional[str], debug: bool):
         if not vault_path:
             vault_path = click.prompt("Enter vault path", type=click.Path(exists=True))
             vault_path = Path(vault_path)
+        else:
+            vault_path = Path(vault_path)
     
     ctx.obj['vault_path'] = vault_path
     

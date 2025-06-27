@@ -230,10 +230,13 @@ ovt pm eisenhower             # Classify tasks by urgency/importance
 
 # PM Automation Suite (NEW in v2.3.0)
 ovt                           # Launch unified manager → PM Tools → PM Automation Suite
-ovt pm wbr                    # Generate weekly business review
-ovt pm features               # Convert PRD to Jira stories
-ovt pm analytics              # View PM performance dashboard
-ovt pm monitor                # Real-time metric monitoring
+ovt-pm wbr --project PROJ     # Generate weekly business review
+ovt-pm features prd.pdf -p PROJ  # Convert PRD to Jira stories
+ovt-pm analytics --dashboard team  # View PM performance dashboard
+ovt-pm monitor --metric velocity   # Real-time metric monitoring
+ovt-pm quality                # Analyze content quality
+ovt-pm template               # Generate daily PM template
+ovt-pm burnout                # Check burnout risk score
 ```
 
 ## ⚙️ Configuration
@@ -415,6 +418,24 @@ stories = await pipeline.prd_to_stories(
     project_key="FEAT"
 )
 ```
+
+### API Server (NEW in v2.3.0)
+```bash
+# Start the REST API server
+python -m obsidian_vault_tools.api_server
+
+# Or with custom host/port
+python -m obsidian_vault_tools.api_server --host 0.0.0.0 --port 8080
+```
+
+API endpoints available at `http://localhost:8000`:
+- `GET /health` - Health check
+- `GET /vault/info` - Vault information
+- `POST /wbr/generate` - Generate WBR
+- `POST /features/pipeline` - Run feature pipeline
+- `GET /analytics/quality` - Content quality analysis
+- `GET /analytics/dashboard/{type}` - Get dashboard
+- `GET /docs` - Interactive API documentation
 
 ## 🐛 Troubleshooting
 
