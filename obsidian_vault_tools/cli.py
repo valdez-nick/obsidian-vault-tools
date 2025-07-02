@@ -598,9 +598,52 @@ def version():
     from . import __version__
     console.print(f"Obsidian Vault Tools version {__version__}")
 
+@cli.command(name='check-system')
+def check_system():
+    """Check system requirements and dependencies"""
+    from .system_requirements import SystemRequirementsChecker
+    
+    console.print("[bold]System Requirements Check for Obsidian Vault Tools[/bold]\n")
+    
+    checker = SystemRequirementsChecker()
+    results = checker.check_all()
+    
+    # If running on first launch or with missing deps, show detailed report
+    checker.print_report()
+    
+    # Return appropriate exit code
+    if results['missing_deps']:
+        sys.exit(1)
+    else:
+        sys.exit(0)
+
+def check_virtual_env():
+    """Check if running in virtual environment and show warning if not"""
+    import platform
+    
+    # Only show warning on Linux/Ubuntu
+    if platform.system() != 'Linux':
+        return
+    
+    # Check if in virtual environment
+    in_venv = (hasattr(sys, 'real_prefix') or 
+               (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) or
+               os.environ.get('VIRTUAL_ENV'))
+    
+    if not in_venv and not os.environ.get('OVT_SKIP_VENV_CHECK'):
+        console.print("[yellow]⚠️  Not running in a virtual environment[/yellow]")
+        console.print("[dim]This is recommended on Ubuntu to avoid conflicts with system packages[/dim]")
+        console.print("[dim]To create a virtual environment:[/dim]")
+        console.print("[dim]  python3 -m venv ~/ovt-env[/dim]")
+        console.print("[dim]  source ~/ovt-env/bin/activate[/dim]")
+        console.print("[dim]  pip install obsidian-vault-tools[all][/dim]")
+        console.print("[dim]Set OVT_SKIP_VENV_CHECK=1 to hide this message[/dim]\n")
+
 def main():
     """Main entry point"""
     try:
+        # Check virtual environment on startup
+        check_virtual_env()
         cli()
     except KeyboardInterrupt:
         console.print("\n[yellow]Interrupted by user[/yellow]")

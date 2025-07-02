@@ -220,6 +220,10 @@ class UnifiedVaultManager:
         """Initialize the unified vault manager"""
         self.vault_path = vault_path or self._get_vault_path()
         self.vault_manager = VaultManager()
+        
+        # Check system requirements on first run
+        self._check_system_requirements()
+        
         self.audio_manager = get_audio_manager() if AUDIO_AVAILABLE else None
         self.navigator = MenuNavigator() if MENU_NAVIGATOR_AVAILABLE else None
         
@@ -419,6 +423,57 @@ class UnifiedVaultManager:
         except Exception as e:
             print(f"{Colors.RED}Error: Invalid vault path: {e}{Colors.ENDC}")
             sys.exit(1)
+    
+    def _check_system_requirements(self):
+        """Check system requirements and show warnings if needed"""
+        try:
+            from obsidian_vault_tools.system_requirements import SystemRequirementsChecker
+            
+            # Only check on first run or if explicitly requested
+            config_file = Path.home() / '.obsidian_vault_tools' / '.system_checked'
+            
+            # Check if we've already shown system check this session
+            if hasattr(self, '_system_checked'):
+                return
+                
+            # Check if we've checked in the last 7 days
+            if config_file.exists():
+                last_check = config_file.stat().st_mtime
+                days_since_check = (time.time() - last_check) / 86400
+                if days_since_check < 7:
+                    return
+            
+            checker = SystemRequirementsChecker()
+            results = checker.check_all()
+            
+            # Only show warnings if there are issues
+            if results['missing_deps'] or results['warnings']:
+                print(f"\n{Colors.YELLOW}System Requirements Check:{Colors.ENDC}")
+                
+                if results['missing_deps']:
+                    print(f"{Colors.RED}Missing dependencies detected:{Colors.ENDC}")
+                    for dep in results['missing_deps']:
+                        print(f"  • {dep}")
+                
+                if results['warnings']:
+                    print(f"{Colors.YELLOW}Warnings:{Colors.ENDC}")
+                    for warning in results['warnings']:
+                        print(f"  • {warning}")
+                
+                print(f"\n{Colors.CYAN}Run 'ovt check-system' for detailed information and installation commands{Colors.ENDC}")
+                print(f"{Colors.CYAN}See UBUNTU_INSTALL.md for Ubuntu-specific instructions{Colors.ENDC}\n")
+                
+                # Brief pause to let user see the message
+                time.sleep(2)
+            
+            # Mark as checked
+            config_file.parent.mkdir(exist_ok=True)
+            config_file.touch()
+            self._system_checked = True
+            
+        except Exception:
+            # Silently fail - don't break the app if system check fails
+            pass
     
     def display_banner(self):
         """Display the welcome banner with custom ASCII art"""

@@ -151,17 +151,30 @@ class MCPSetupWizard:
     
     def _setup_confluence_server(self, server_name: str) -> bool:
         """Set up Confluence/Jira server"""
-        # Check if Docker is available
-        try:
-            import shutil
-            docker_available = shutil.which('docker') is not None
-        except:
-            docker_available = False
+        # Check if Docker is available and accessible
+        docker_status = self._check_docker_status()
         
-        if not docker_available:
+        if not docker_status['installed']:
             print("  ⚠️  Docker is required for Atlassian integration but not found!")
-            print("  Please install Docker from https://www.docker.com/get-started")
-            setup_anyway = input("  Set up anyway for later use? (y/N): ").lower().strip()
+            print("\n  📦 Ubuntu installation:")
+            print("    sudo apt update")
+            print("    sudo apt install -y docker.io docker-compose")
+            print("    sudo systemctl enable docker")
+            print("    sudo systemctl start docker")
+            print("    sudo usermod -aG docker $USER")
+            print("    # Then logout and login again")
+            print("\n  Or visit https://www.docker.com/get-started")
+            setup_anyway = input("\n  Set up anyway for later use? (y/N): ").lower().strip()
+            if setup_anyway not in ['y', 'yes']:
+                return False
+        elif not docker_status['accessible']:
+            print("  ⚠️  Docker is installed but not accessible!")
+            print("  This usually means you're not in the docker group.")
+            print("\n  🔧 To fix on Ubuntu:")
+            print("    sudo usermod -aG docker $USER")
+            print("    # Then logout and login again")
+            print("\n  Or run with sudo (not recommended)")
+            setup_anyway = input("\n  Set up anyway? (y/N): ").lower().strip()
             if setup_anyway not in ['y', 'yes']:
                 return False
         
@@ -267,6 +280,48 @@ class MCPSetupWizard:
             print(f"  💾 Memory: {memory_path}")
         
         return success
+    
+    def _check_docker_status(self) -> dict:
+        """Check Docker installation and accessibility"""
+        import shutil
+        import subprocess
+        
+        status = {
+            'installed': False,
+            'accessible': False,
+            'running': False
+        }
+        
+        # Check if Docker is installed
+        try:
+            status['installed'] = shutil.which('docker') is not None
+        except:
+            status['installed'] = False
+        
+        if not status['installed']:
+            return status
+        
+        # Check if Docker is accessible (user has permissions)
+        try:
+            result = subprocess.run(['docker', 'ps'], 
+                                  capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                status['accessible'] = True
+                status['running'] = True
+            elif 'permission denied' in result.stderr.lower():
+                status['accessible'] = False
+                status['running'] = True  # Daemon is running, just no permission
+            else:
+                status['accessible'] = False
+                status['running'] = False
+        except subprocess.TimeoutExpired:
+            status['accessible'] = False
+            status['running'] = False
+        except Exception:
+            status['accessible'] = False
+            status['running'] = False
+        
+        return status
     
     def check_first_run(self) -> bool:
         """Check if this is the first run and should show setup wizard"""

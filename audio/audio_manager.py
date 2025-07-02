@@ -56,16 +56,45 @@ class AudioManager:
     def _initialize_pygame(self) -> bool:
         """Initialize pygame mixer for audio playback"""
         try:
-            pygame.mixer.pre_init(
-                frequency=22050,    # Lower frequency for retro feel
-                size=-16,           # 16-bit signed samples
-                channels=2,         # Stereo
-                buffer=512          # Small buffer for responsiveness
-            )
-            pygame.mixer.init()
-            pygame.mixer.set_num_channels(8)  # Classic 8-channel mixing
-            self.initialized = True
-            return True
+            # Ubuntu/Linux specific: Set audio driver before init
+            import platform
+            if platform.system() == 'Linux':
+                # Try PulseAudio first, then ALSA
+                import os
+                audio_drivers = ['pulse', 'alsa', 'sdl']
+                for driver in audio_drivers:
+                    os.environ['SDL_AUDIODRIVER'] = driver
+                    try:
+                        pygame.mixer.pre_init(
+                            frequency=22050,    # Lower frequency for retro feel
+                            size=-16,           # 16-bit signed samples
+                            channels=2,         # Stereo
+                            buffer=512          # Small buffer for responsiveness
+                        )
+                        pygame.mixer.init()
+                        pygame.mixer.set_num_channels(8)  # Classic 8-channel mixing
+                        self.initialized = True
+                        return True
+                    except pygame.error:
+                        # Try next driver
+                        pygame.mixer.quit()
+                        continue
+                
+                # If all drivers fail, disable audio
+                raise pygame.error("No suitable audio driver found")
+            else:
+                # Non-Linux systems: Use default initialization
+                pygame.mixer.pre_init(
+                    frequency=22050,    # Lower frequency for retro feel
+                    size=-16,           # 16-bit signed samples
+                    channels=2,         # Stereo
+                    buffer=512          # Small buffer for responsiveness
+                )
+                pygame.mixer.init()
+                pygame.mixer.set_num_channels(8)  # Classic 8-channel mixing
+                self.initialized = True
+                return True
+                
         except Exception as e:
             print(f"Audio initialization failed: {e}")
             self.enabled = False

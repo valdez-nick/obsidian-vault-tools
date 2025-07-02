@@ -99,6 +99,11 @@ Supported MCP Servers:
 
 ## 📦 Installation
 
+### Platform-Specific Guides
+- **Ubuntu/Debian**: See [UBUNTU_INSTALL.md](UBUNTU_INSTALL.md) for comprehensive Ubuntu 24.04 LTS instructions with all system dependencies
+- **macOS**: Use Homebrew or pip (see below)
+- **Windows**: Use pip in PowerShell or WSL
+
 ### Via pip (Recommended)
 ```bash
 pip install obsidian-vault-tools
@@ -116,6 +121,8 @@ git clone https://github.com/yourusername/obsidian-vault-tools.git
 cd obsidian-vault-tools
 pip install -e .
 ```
+
+**Note**: Linux users may need to install system dependencies first. See [UBUNTU_INSTALL.md](UBUNTU_INSTALL.md) for details.
 
 ### With AI Features
 ```bash
@@ -440,6 +447,13 @@ API endpoints available at `http://localhost:8000`:
 ## 🐛 Troubleshooting
 
 ### Common Issues
+
+**Ubuntu/Linux Issues**:
+See [UBUNTU_INSTALL.md](UBUNTU_INSTALL.md#troubleshooting) for Ubuntu-specific troubleshooting including:
+- Audio device errors
+- Docker permissions
+- Missing system dependencies
+- Virtual environment setup
 
 **No audio on macOS**:
 ```bash
